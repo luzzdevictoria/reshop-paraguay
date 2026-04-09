@@ -110,12 +110,15 @@ const response = await fetch(`${API_URL}/api/products/${productId}`);
             const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
             
             const conditionText = {
-                'new_with_tags': 'Nuevo con etiqueta',
-                'new_without_tags': 'Nuevo sin etiqueta',
-                'very_good': 'Muy bueno',
-                'good': 'Bueno',
-                'acceptable': 'Aceptable'
-            }[product.condition] || product.condition;
+    'new_with_tags': 'Nuevo con etiqueta',
+    'new_without_tags': 'Nuevo sin etiqueta',
+    'very_good': 'Muy bueno',
+    'good': 'Bueno',
+    'acceptable': 'Aceptable',
+    'new': 'Nuevo',
+    'used': 'Usado',
+    'like_new': 'Como nuevo'
+}[product.condition] || product.condition;
 
             const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
             const sellerRating = product.seller?.rating || 0;
