@@ -10,26 +10,31 @@
         .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
         .header a { color: white; text-decoration: none; margin: 0 10px; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
         .btn-primary { background: #2A5C6E; color: white; }
         .btn-primary:hover { background: #1e4452; }
         .btn-danger { background: #D95A41; color: white; }
         .btn-danger:hover { background: #c04a33; }
         .btn-secondary { background: #E8B86B; color: #333; }
-        .products-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .products-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .products-table th, .products-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         .products-table th { background: #2A5C6E; color: white; }
         .products-table tr:hover { background: #f9f9f9; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .product-image { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
+        .image-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .image-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
         .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+        .loading { text-align: center; padding: 50px; color: #666; }
+        @media (max-width: 768px) { .products-table { font-size: 0.8rem; } .btn { padding: 6px 12px; } }
     </style>
 </head>
 <body>
@@ -56,7 +61,7 @@
     <div id="productModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">Nuevo Producto</h3>
-            <form id="productForm">
+            <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId">
                 <div class="form-group">
                     <label>Título *</label>
@@ -104,6 +109,11 @@
                     <label>Color</label>
                     <input type="text" id="color">
                 </div>
+                <div class="form-group">
+                    <label>Imágenes del producto</label>
+                    <input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp">
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
                 <div id="modalMessage" class="message"></div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -122,12 +132,25 @@
         const API_URL = 'https://reshop-backend.vercel.app';
         let token = localStorage.getItem('token');
 
-        // Verificar autenticación
         if (!token) {
             window.location.href = 'login.html';
         }
 
-        // Cargar productos del vendedor
+        // Previsualización de imágenes
+        document.getElementById('images').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            for (const file of e.target.files) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         async function loadProducts() {
             const container = document.getElementById('productsContainer');
             container.innerHTML = '<div class="loading">Cargando productos...</div>';
@@ -140,29 +163,24 @@
                 const data = await response.json();
                 
                 if (data.success && data.products && data.products.length > 0) {
-                    let html = `
-                        <table class="products-table">
-                            <thead>
-                                <tr><th>ID</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr>
-                            </thead>
-                            <tbody>
-                    `;
+                    let html = `<div style="overflow-x:auto;"><table class="products-table">
+                            <thead><tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
+                            <tbody>`;
                     for (const p of data.products) {
-                        html += `
-                            <tr>
-                                <td>${p.id}</td>
-                                <td>${escapeHtml(p.title)}</td>
-                                <td>${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
-                                <td>${p.category}</td>
-                                <td>${p.status}</td>
-                                <td>
-                                    <button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})">✏️ Editar</button>
-                                    <button class="btn btn-danger" onclick="deleteProduct(${p.id})">🗑️ Eliminar</button>
-                                </td>
-                            </tr>
-                        `;
+                        const firstImage = p.images_urls && p.images_urls[0] ? p.images_urls[0] : '';
+                        html += `<tr>
+                            <td>${firstImage ? `<img src="${firstImage}" class="product-image">` : '📷'}</td>
+                            <td>${escapeHtml(p.title)}</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
+                            <td>${p.category}</td>
+                            <td>${p.status}</td>
+                            <td>
+                                <button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})">✏️ Editar</button>
+                                <button class="btn btn-danger" onclick="deleteProduct(${p.id})">🗑️ Eliminar</button>
+                            </td>
+                        </tr>`;
                     }
-                    html += '</tbody></table>';
+                    html += '</tbody></table></div>';
                     container.innerHTML = html;
                 } else {
                     container.innerHTML = '<div class="loading">No tienes productos aún. ¡Crea tu primer producto!</div>';
@@ -172,15 +190,14 @@
             }
         }
 
-        // Mostrar modal para crear producto
         function showCreateModal() {
             document.getElementById('modalTitle').innerText = 'Nuevo Producto';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('productModal').style.display = 'flex';
         }
 
-        // Editar producto
         async function editProduct(id) {
             try {
                 const response = await fetch(`${API_URL}/api/products/${id}`, {
@@ -200,6 +217,15 @@
                     document.getElementById('condition').value = p.condition || 'good';
                     document.getElementById('brand').value = p.brand || '';
                     document.getElementById('color').value = p.color || '';
+                    document.getElementById('imagePreview').innerHTML = '';
+                    if (p.images_urls && p.images_urls.length) {
+                        const preview = document.getElementById('imagePreview');
+                        p.images_urls.forEach(url => {
+                            const img = document.createElement('img');
+                            img.src = url;
+                            preview.appendChild(img);
+                        });
+                    }
                     document.getElementById('productModal').style.display = 'flex';
                 }
             } catch (error) {
@@ -207,7 +233,6 @@
             }
         }
 
-        // Eliminar producto
         async function deleteProduct(id) {
             if (!confirm('¿Estás seguro de eliminar este producto?')) return;
             
@@ -229,21 +254,24 @@
             }
         }
 
-        // Guardar producto (crear o editar)
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const productId = document.getElementById('productId').value;
-            const product = {
-                title: document.getElementById('title').value.trim(),
-                description: document.getElementById('description').value.trim(),
-                price: parseInt(document.getElementById('price').value),
-                category: document.getElementById('category').value,
-                size: document.getElementById('size').value.trim(),
-                condition: document.getElementById('condition').value,
-                brand: document.getElementById('brand').value.trim(),
-                color: document.getElementById('color').value.trim()
-            };
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value.trim());
+            formData.append('description', document.getElementById('description').value.trim());
+            formData.append('price', parseInt(document.getElementById('price').value));
+            formData.append('category', document.getElementById('category').value);
+            formData.append('size', document.getElementById('size').value.trim());
+            formData.append('condition', document.getElementById('condition').value);
+            formData.append('brand', document.getElementById('brand').value.trim());
+            formData.append('color', document.getElementById('color').value.trim());
+            
+            const images = document.getElementById('images').files;
+            for (let i = 0; i < images.length; i++) {
+                formData.append('images', images[i]);
+            }
             
             const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
             const method = productId ? 'PUT' : 'POST';
@@ -251,11 +279,8 @@
             try {
                 const response = await fetch(url, {
                     method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(product)
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
                 const data = await response.json();
                 
@@ -283,7 +308,6 @@
             return div.innerHTML;
         }
 
-        // Logout
         document.getElementById('logoutBtn').addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('token');
@@ -291,7 +315,6 @@
             window.location.href = 'index.html';
         });
 
-        // Inicializar
         loadProducts();
     </script>
 </body>
