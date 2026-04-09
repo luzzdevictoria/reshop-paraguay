@@ -14,6 +14,7 @@
 * 2026-04-09 - Creacion inicial del controlador
 */
 
+const { uploadImageToSupabase, deleteImageFromSupabase } = require('../middleware/upload');
 const { supabaseAdmin } = require('../../database');
 
 // Crear nuevo producto
@@ -21,6 +22,7 @@ async function createProduct(req, res) {
     try {
         const sellerId = req.user.sub;
         const { title, description, price, category, size, condition, brand, color, material } = req.body;
+        const files = req.files || [];
 
         // Validaciones
         if (!title || !price || !category) {
@@ -37,6 +39,7 @@ async function createProduct(req, res) {
             });
         }
 
+        // Crear producto
         const newProduct = {
             seller_id: sellerId,
             title,
@@ -49,6 +52,7 @@ async function createProduct(req, res) {
             color: color || null,
             material: material || null,
             status: 'active',
+            images_urls: [],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -65,6 +69,22 @@ async function createProduct(req, res) {
                 success: false,
                 error: 'Error al crear el producto'
             });
+        }
+
+        // Subir imagenes
+        if (files && files.length > 0) {
+            const imageUrls = [];
+            for (const file of files) {
+                const imageUrl = await uploadImageToSupabase(file, product.id);
+                if (imageUrl) imageUrls.push(imageUrl);
+            }
+            
+            await supabaseAdmin
+                .from('products')
+                .update({ images_urls: imageUrls })
+                .eq('id', product.id);
+            
+            product.images_urls = imageUrls;
         }
 
         res.status(201).json({
@@ -235,11 +255,12 @@ async function updateProduct(req, res) {
         const { id } = req.params;
         const sellerId = req.user.sub;
         const { title, description, price, category, size, condition, brand, color, material, status } = req.body;
+        const files = req.files || [];
 
         // Verificar que el producto pertenece al vendedor
         const { data: existingProduct, error: findError } = await supabaseAdmin
             .from('products')
-            .select('seller_id')
+            .select('seller_id, images_urls')
             .eq('id', id)
             .single();
 
@@ -269,6 +290,18 @@ async function updateProduct(req, res) {
         if (material) updateData.material = material;
         if (status) updateData.status = status;
         updateData.updated_at = new Date().toISOString();
+
+        // Mantener imagenes existentes
+        let imageUrls = existingProduct.images_urls || [];
+        
+        // Agregar nuevas imagenes
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const imageUrl = await uploadImageToSupabase(file, id);
+                if (imageUrl) imageUrls.push(imageUrl);
+            }
+        }
+        updateData.images_urls = imageUrls;
 
         const { data: product, error } = await supabaseAdmin
             .from('products')
