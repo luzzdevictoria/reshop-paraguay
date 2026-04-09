@@ -89,7 +89,8 @@ HISTORIAL DE MODIFICACIONES:
 
             try {
                 console.log(`🔍 Cargando producto ID: ${productId}`);
-                const response = await fetch(`http://localhost:3000/api/products/${productId}`);
+                const API_URL = 'https://reshop-backend.vercel.app';
+const response = await fetch(`${API_URL}/api/products/${productId}`);
                 const data = await response.json();
                 console.log('📦 Producto:', data);
 
