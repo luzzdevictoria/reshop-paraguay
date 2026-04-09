@@ -45,6 +45,7 @@ HISTORIAL DE MODIFICACIONES:
     <div class="header">
         <h1>🛍️ ReShop Paraguay</h1>
         <p>Shopping Virtual de Ropa de Segunda Mano</p>
+		<a href="register.html">📝 Registrarse</a>
     </div>
     
     <div class="container">
@@ -63,7 +64,7 @@ HISTORIAL DE MODIFICACIONES:
             const grid = document.getElementById('productsGrid');
             try {
                 console.log('🔍 Cargando productos...');
-                const API_URL = 'https://reshop-backend.vercel.app';
+                  API_URL = 'https://reshop-backend.vercel.app';
 const response = await fetch(`${API_URL}/api/products`);
                 const data = await response.json();
                 console.log('📦 Datos recibidos:', data);
