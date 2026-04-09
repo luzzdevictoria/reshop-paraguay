@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Vendedor - ReShop Paraguay</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary { background: #2A5C6E; color: white; }
+        .btn-primary:hover { background: #1e4452; }
+        .btn-danger { background: #D95A41; color: white; }
+        .btn-danger:hover { background: #c04a33; }
+        .btn-secondary { background: #E8B86B; color: #333; }
+        .products-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .products-table th, .products-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .products-table th { background: #2A5C6E; color: white; }
+        .products-table tr:hover { background: #f9f9f9; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
+        .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ ReShop Paraguay</h1>
+        <p>Panel del Vendedor</p>
+        <div style="margin-top: 10px;">
+            <a href="index.html">🏠 Inicio</a>
+            <a href="cart.html">🛒 Carrito</a>
+            <a href="#" id="logoutBtn">🚪 Cerrar Sesión</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="panel-header">
+            <h2>Mis Productos</h2>
+            <button class="btn btn-primary" onclick="showCreateModal()">+ Nuevo Producto</button>
+        </div>
+        <div id="productsContainer">
+            <div class="loading">Cargando productos...</div>
+        </div>
+    </div>
+
+    <!-- Modal para crear/editar producto -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Nuevo Producto</h3>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-group">
+                    <label>Título *</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Precio (Gs) *</label>
+                    <input type="number" id="price" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría *</label>
+                    <select id="category" required>
+                        <option value="">Seleccionar</option>
+                        <option value="pantalones">Pantalones</option>
+                        <option value="camisas">Camisas</option>
+                        <option value="vestidos">Vestidos</option>
+                        <option value="chaquetas">Chaquetas</option>
+                        <option value="calzado">Calzado</option>
+                        <option value="accesorios">Accesorios</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Talla</label>
+                    <input type="text" id="size" placeholder="XS, S, M, L, XL, 32, 34...">
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="condition">
+                        <option value="new_with_tags">Nuevo con etiqueta</option>
+                        <option value="new_without_tags">Nuevo sin etiqueta</option>
+                        <option value="very_good">Muy bueno</option>
+                        <option value="good">Bueno</option>
+                        <option value="acceptable">Aceptable</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Marca</label>
+                    <input type="text" id="brand">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="text" id="color">
+                </div>
+                <div id="modalMessage" class="message"></div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://reshop-backend.vercel.app';
+        let token = localStorage.getItem('token');
+
+        // Verificar autenticación
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Cargar productos del vendedor
+        async function loadProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '<div class="loading">Cargando productos...</div>';
+            
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const response = await fetch(`${API_URL}/api/products/seller/${user.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.products && data.products.length > 0) {
+                    let html = `
+                        <table class="products-table">
+                            <thead>
+                                <tr><th>ID</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    for (const p of data.products) {
+                        html += `
+                            <tr>
+                                <td>${p.id}</td>
+                                <td>${escapeHtml(p.title)}</td>
+                                <td>${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
+                                <td>${p.category}</td>
+                                <td>${p.status}</td>
+                                <td>
+                                    <button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})">✏️ Editar</button>
+                                    <button class="btn btn-danger" onclick="deleteProduct(${p.id})">🗑️ Eliminar</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="loading">No tienes productos aún. ¡Crea tu primer producto!</div>';
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">Error al cargar productos: ${error.message}</div>`;
+            }
+        }
+
+        // Mostrar modal para crear producto
+        function showCreateModal() {
+            document.getElementById('modalTitle').innerText = 'Nuevo Producto';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productModal').style.display = 'flex';
+        }
+
+        // Editar producto
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`${API_URL}/api/products/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.product) {
+                    const p = data.product;
+                    document.getElementById('modalTitle').innerText = 'Editar Producto';
+                    document.getElementById('productId').value = p.id;
+                    document.getElementById('title').value = p.title;
+                    document.getElementById('description').value = p.description || '';
+                    document.getElementById('price').value = p.price;
+                    document.getElementById('category').value = p.category;
+                    document.getElementById('size').value = p.size || '';
+                    document.getElementById('condition').value = p.condition || 'good';
+                    document.getElementById('brand').value = p.brand || '';
+                    document.getElementById('color').value = p.color || '';
+                    document.getElementById('productModal').style.display = 'flex';
+                }
+            } catch (error) {
+                alert('Error al cargar el producto: ' + error.message);
+            }
+        }
+
+        // Eliminar producto
+        async function deleteProduct(id) {
+            if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Producto eliminado exitosamente');
+                    loadProducts();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Guardar producto (crear o editar)
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const productId = document.getElementById('productId').value;
+            const product = {
+                title: document.getElementById('title').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                price: parseInt(document.getElementById('price').value),
+                category: document.getElementById('category').value,
+                size: document.getElementById('size').value.trim(),
+                condition: document.getElementById('condition').value,
+                brand: document.getElementById('brand').value.trim(),
+                color: document.getElementById('color').value.trim()
+            };
+            
+            const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
+            const method = productId ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(product)
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeModal();
+                    loadProducts();
+                } else {
+                    const msgDiv = document.getElementById('modalMessage');
+                    msgDiv.className = 'message error';
+                    msgDiv.innerHTML = '❌ ' + data.error;
+                    setTimeout(() => { msgDiv.className = 'message'; }, 3000);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        // Inicializar
+        loadProducts();
+    </script>
+</body>
+</html>
