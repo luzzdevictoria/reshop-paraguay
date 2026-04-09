@@ -1,0 +1,13 @@
+cd C:\Users\pirov\ReShop
+echo { > vercel.json
+echo   "headers": [ >> vercel.json
+echo     { >> vercel.json
+echo       "source": "/(.*)", >> vercel.json
+echo       "headers": [ >> vercel.json
+echo         { "key": "Access-Control-Allow-Origin", "value": "*" }, >> vercel.json
+echo         { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" }, >> vercel.json
+echo         { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" } >> vercel.json
+echo       ] >> vercel.json
+echo     } >> vercel.json
+echo   ] >> vercel.json
+echo } >> vercel.json
