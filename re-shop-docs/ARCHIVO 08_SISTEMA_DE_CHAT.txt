@@ -1,0 +1,123 @@
+================================================================================
+ARCHIVO: 08_SISTEMA_DE_CHAT.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Definición de chat interno     | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Sistema de mensajería entre comprador y vendedor dentro del contexto de una orden.
+
+================================================================================
+1. POR QUÉ CHAT INTERNO Y NO WHATSAPP
+-------------------------------------------------------------------------------
+- Evita que las conversaciones salgan de la plataforma (pérdida de trazabilidad)
+- Previene fraudes (vendedor pidiendo pago por fuera)
+- Mantiene evidencia para disputas
+- No expone números de teléfono personales hasta después de la venta
+
+================================================================================
+2. ESTRUCTURA DE DATOS (ver 02_Modelo_de_Datos - tabla chat_messages)
+-------------------------------------------------------------------------------
+- Cada mensaje pertenece a una order_id
+- sender_id (UUID) identifica quién escribió
+- is_read para notificaciones de "visto"
+- created_at timestamp
+
+================================================================================
+3. FLUJO DE CHAT
+-------------------------------------------------------------------------------
+1. Comprador compra un producto (crea orden)
+2. Automáticamente se habilita un chat vinculado a esa orden
+3. Ambos pueden enviar mensajes (texto plano, sin imágenes al inicio)
+4. El comprador puede preguntar: "¿Cuándo envías?"
+5. El vendedor responde: "Mañana lo despacho"
+6. Al finalizar la orden, el chat queda en modo solo lectura (historial)
+
+================================================================================
+4. IMPLEMENTACIÓN TÉCNICA (Polling simple)
+-------------------------------------------------------------------------------
+Para evitar WebSockets complejos al inicio, usamos Polling:
+
+Frontend (chat.js):
+async function startPolling(orderId) {
+    setInterval(async () => {
+        const messages = await apiRequest(`/chat/orders/${orderId}`);
+        renderMessages(messages);
+        checkForNewMessages(messages);
+    }, 10000); // cada 10 segundos
+}
+
+Backend endpoint GET /chat/orders/:orderId:
+app.get('/api/chat/orders/:orderId', authenticateToken, async (req, res) => {
+    const { orderId } = req.params;
+    // Verificar que el usuario sea comprador o vendedor de esa orden
+    const messages = await db.query(
+        'SELECT * FROM chat_messages WHERE order_id = $1 ORDER BY created_at ASC',
+        [orderId]
+    );
+    res.json(messages.rows);
+});
+
+================================================================================
+5. MENSAJES AUTOMÁTICOS (Sistema)
+-------------------------------------------------------------------------------
+El sistema envía mensajes automáticos para eventos clave:
+
+| Evento                     | Mensaje automático                              |
+|----------------------------|-------------------------------------------------|
+| Orden creada               | "¡Hola! Esta conversación es sobre tu orden #RS-001" |
+| Pago confirmado            | "✅ El pago fue confirmado. El vendedor preparará el envío." |
+| Producto enviado           | "📦 El producto fue enviado. Código de tracking: XYZ123" |
+| Entrega confirmada         | "🎉 El comprador confirmó la recepción. ¡Gracias por usar ReShop!" |
+
+================================================================================
+6. NOTIFICACIONES DE NUEVOS MENSAJES
+-------------------------------------------------------------------------------
+- En la interfaz: un badge con el contador de no leídos
+- Notificación push (OneSignal) si el usuario no está en la página
+- Email opcional: "Tienes un nuevo mensaje en ReShop"
+
+================================================================================
+7. POLÍTICAS DEL CHAT
+-------------------------------------------------------------------------------
+- Prohibido: insultos, spam, compartir números de teléfono o cuentas bancarias
+- Si se detecta número de teléfono, el mensaje se oculta automáticamente
+- Usuarios pueden reportar mensajes ofensivos
+- Historial de chat se guarda por 2 años (para disputas legales)
+
+================================================================================
+8. CÓDIGO DE EJEMPLO: ENVIAR MENSAJE
+-------------------------------------------------------------------------------
+app.post('/api/chat/orders/:orderId', authenticateToken, async (req, res) => {
+    const { orderId } = req.params;
+    const { message } = req.body;
+    const userId = req.user.sub;
+
+    // Validar que no esté vacío
+    if (!message || message.trim().length === 0) {
+        return res.status(400).json({ error: 'Mensaje vacío' });
+    }
+
+    // Sanitizar (prevenir XSS)
+    const cleanMessage = message.replace(/[<>]/g, '');
+
+    // Guardar en BD
+    const newMessage = await db.query(
+        'INSERT INTO chat_messages (order_id, sender_id, message) VALUES ($1, $2, $3) RETURNING *',
+        [orderId, userId, cleanMessage]
+    );
+
+    // Notificar al otro usuario (push/email)
+    await notifyOtherParty(orderId, userId, cleanMessage);
+
+    res.json(newMessage.rows[0]);
+});
+================================================================================

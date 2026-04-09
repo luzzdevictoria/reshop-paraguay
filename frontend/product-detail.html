@@ -1,0 +1,229 @@
+<!--
+================================================================================
+ARCHIVO: product-detail.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 1.0.0
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-09
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Pagina de detalle de producto. Muestra informacion completa
+             de un producto especifico, permite agregar al carrito y
+             comprar directamente.
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creacion inicial con estructura HTML5
+2026-04-09 - Implementacion de fetch para obtener producto por ID
+2026-04-09 - Funciones addToCart y buyNow con localStorage
+2026-04-09 - Mensajes de confirmacion y redireccion a carrito
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Producto - ReShop Paraguay</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+        .product-detail { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .product-title { color: #2A5C6E; font-size: 2rem; margin-bottom: 20px; }
+        .product-price { color: #D95A41; font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
+        .product-info { margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .product-info label { font-weight: bold; width: 120px; display: inline-block; color: #555; }
+        .product-info span { color: #333; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; margin-right: 10px; }
+        .btn-primary { background: #2A5C6E; color: white; }
+        .btn-primary:hover { background: #1e4452; }
+        .btn-secondary { background: #E8B86B; color: #333; }
+        .btn-secondary:hover { background: #d4a050; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
+        .error { text-align: center; padding: 50px; font-size: 1.2rem; color: #D95A41; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #2A5C6E; text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+        .badge { display: inline-block; background: #E8B86B; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-left: 10px; }
+        .quantity-selector { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
+        .quantity-selector input { width: 60px; padding: 8px; font-size: 1rem; text-align: center; border: 1px solid #ddd; border-radius: 5px; }
+        .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ ReShop Paraguay</h1>
+        <p>Shopping Virtual de Ropa de Segunda Mano</p>
+        <div style="margin-top: 10px;">
+            <a href="index.html">🏠 Inicio</a>
+            <a href="cart.html">🛒 Carrito</a>
+        </div>
+    </div>
+    <div class="container">
+        <a href="index.html" class="back-link">← Volver a la tienda</a>
+        <div id="productDetail" class="product-detail">
+            <div class="loading">Cargando detalle del producto...</div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+    </div>
+
+    <script>
+        // Obtener ID del producto de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        async function loadProductDetail() {
+            const container = document.getElementById('productDetail');
+            
+            if (!productId) {
+                container.innerHTML = '<div class="error">❌ No se especificó ningún producto</div>';
+                return;
+            }
+
+            try {
+                console.log(`🔍 Cargando producto ID: ${productId}`);
+                const response = await fetch(`http://localhost:3000/api/products/${productId}`);
+                const data = await response.json();
+                console.log('📦 Producto:', data);
+
+                if (data.success && data.product) {
+                    renderProduct(data.product);
+                } else {
+                    container.innerHTML = '<div class="error">❌ Producto no encontrado</div>';
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                container.innerHTML = `<div class="error">❌ Error al cargar el producto: ${error.message}</div>`;
+            }
+        }
+
+        function renderProduct(product) {
+            const container = document.getElementById('productDetail');
+            const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
+            
+            const conditionText = {
+                'new_with_tags': 'Nuevo con etiqueta',
+                'new_without_tags': 'Nuevo sin etiqueta',
+                'very_good': 'Muy bueno',
+                'good': 'Bueno',
+                'acceptable': 'Aceptable'
+            }[product.condition] || product.condition;
+
+            const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
+            const sellerRating = product.seller?.rating || 0;
+
+            container.innerHTML = `
+                <h1 class="product-title">${escapeHtml(product.title)}</h1>
+                <div class="product-price">${priceFormatted} Gs</div>
+                
+                <div class="product-info">
+                    <label>📝 Descripción:</label>
+                    <span>${escapeHtml(product.description || 'Sin descripción')}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>👕 Categoría:</label>
+                    <span>${product.category}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>📏 Talla:</label>
+                    <span>${product.size || 'Talla única'}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>✨ Estado:</label>
+                    <span>${conditionText} <span class="badge">${product.condition}</span></span>
+                </div>
+                
+                <div class="product-info">
+                    <label>🏷️ Marca:</label>
+                    <span>${product.brand || 'No especificada'}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>🎨 Color:</label>
+                    <span>${product.color || 'No especificado'}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>👤 Vendedor:</label>
+                    <span>${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>📅 Publicado:</label>
+                    <span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span>
+                </div>
+                
+                <div class="product-info">
+                    <label>👁️ Vistas:</label>
+                    <span>${product.views || 0}</span>
+                </div>
+                
+                <div class="quantity-selector">
+                    <label>Cantidad:</label>
+                    <input type="number" id="quantity" min="1" max="10" value="1">
+                </div>
+                
+                <div>
+                    <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
+                        🛒 Agregar al Carrito
+                    </button>
+                    <button class="btn btn-secondary" onclick="buyNow(${product.id})">
+                        💳 Comprar Ahora
+                    </button>
+                </div>
+                
+                <div id="message" class="message"></div>
+            `;
+        }
+
+        function addToCart(id, title, price) {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            
+            let cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
+            const existingIndex = cart.findIndex(item => item.id === id);
+            
+            if (existingIndex !== -1) {
+                cart[existingIndex].quantity += quantity;
+            } else {
+                cart.push({ id: id, title: title, price: price, quantity: quantity });
+            }
+            
+            localStorage.setItem('reshop_cart', JSON.stringify(cart));
+            
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = 'message success';
+            messageDiv.innerHTML = `✅ ${quantity}x "${title}" agregado al carrito! <a href="cart.html" style="color:#155724;">Ver carrito →</a>`;
+            
+            setTimeout(() => {
+                messageDiv.className = 'message';
+                messageDiv.innerHTML = '';
+            }, 3000);
+            
+            console.log('🛒 Carrito actual:', cart);
+        }
+
+        function buyNow(productId) {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            window.location.href = `checkout.html?product=${productId}&quantity=${quantity}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadProductDetail();
+    </script>
+</body>
+</html>

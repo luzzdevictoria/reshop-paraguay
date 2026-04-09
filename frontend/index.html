@@ -1,0 +1,110 @@
+<!--
+================================================================================
+ARCHIVO: index.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 1.0.0
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-09
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Pagina principal de la tienda. Obtiene productos desde la API
+             del backend y los renderiza dinamicamente en un grid responsivo.
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creacion inicial con estructura HTML5, CSS inline y JS vanilla
+2026-04-09 - Implementacion de fetch a http://localhost:3000/api/products
+2026-04-09 - Agregada funcion escapeHtml para prevenir inyeccion XSS
+2026-04-09 - Estilos de tarjeta, badges de estado y grid responsivo
+2026-04-09 - Manejo de errores y estados vacios/cargando
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReShop Paraguay - Ropa de Segunda Mano</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-card h3 { color: #2A5C6E; margin-bottom: 10px; }
+        .product-card p { color: #666; margin-bottom: 10px; }
+        .price { color: #D95A41; font-size: 1.5rem; font-weight: bold; }
+        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
+        .error { text-align: center; padding: 50px; font-size: 1.2rem; color: #D95A41; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+        .badge { display: inline-block; background: #E8B86B; color: #333; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ ReShop Paraguay</h1>
+        <p>Shopping Virtual de Ropa de Segunda Mano</p>
+    </div>
+    
+    <div class="container">
+        <div class="products-grid" id="productsGrid">
+            <div class="loading">Cargando productos...</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+    </div>
+
+    <script>
+        (async function() {
+            const grid = document.getElementById('productsGrid');
+            try {
+                console.log('🔍 Cargando productos...');
+                const response = await fetch('http://localhost:3000/api/products');
+                const data = await response.json();
+                console.log('📦 Datos recibidos:', data);
+                
+                if (data.success && data.products && data.products.length > 0) {
+                    let html = '';
+                    for (const product of data.products) {
+                        const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
+                        const conditionText = {
+                            'new_with_tags': 'Nuevo con etiqueta',
+                            'new_without_tags': 'Nuevo sin etiqueta',
+                            'very_good': 'Muy bueno',
+                            'good': 'Bueno',
+                            'acceptable': 'Aceptable'
+                        }[product.condition] || product.condition;
+                        
+                        html += `
+                        <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'" style="cursor:pointer;">
+                            <h3>${escapeHtml(product.title)}</h3>
+                            <p>${escapeHtml(product.description || 'Sin descripción')}</p>
+                            <div class="price">${priceFormatted} Gs</div>
+                            <div class="badge">${conditionText}</div>
+                            <div style="font-size:0.8rem; color:#888; margin-top:8px;">👕 ${product.category} | 📏 ${product.size || 'Talla única'}</div>
+                        </div>
+                        `;
+                    }
+                    grid.innerHTML = html;
+                    console.log('✅ Productos renderizados correctamente');
+                } else {
+                    grid.innerHTML = '<div class="loading">📭 No hay productos disponibles</div>';
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                grid.innerHTML = `<div class="error">❌ Error al cargar productos: ${error.message}</div>`;
+            }
+        })();
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+================================================================================
+ARCHIVO: 03_API_ENDPOINTS.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Definición de endpoints REST   | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Lista completa de endpoints de la API REST, métodos, autenticación requerida,
+parámetros y respuestas esperadas.
+
+BASE URL: http://localhost:3000/api (desarrollo) / https://api.reshop.com.py (producción)
+
+================================================================================
+1. AUTENTICACIÓN Y USUARIOS (/auth, /users)
+================================================================================
+
+| Método | Endpoint               | Auth | Descripción                          |
+|--------|------------------------|------|--------------------------------------|
+| POST   | /auth/register         | No   | Registrar nuevo usuario              |
+| POST   | /auth/login            | No   | Iniciar sesión (devuelve JWT)        |
+| POST   | /auth/logout           | Sí   | Cerrar sesión (invalida token)       |
+| GET    | /auth/verify-email/:token | No | Verificar email                      |
+| POST   | /auth/forgot-password  | No   | Enviar email de recuperación         |
+| POST   | /auth/reset-password   | No   | Resetear contraseña                  |
+| GET    | /users/me              | Sí   | Obtener perfil del usuario logueado  |
+| PUT    | /users/me              | Sí   | Actualizar perfil                    |
+| GET    | /users/:id             | Sí   | Ver perfil público de otro usuario   |
+| GET    | /users/:id/products    | No   | Ver productos de un vendedor         |
+
+Ejemplo POST /auth/register:
+Request:
+{
+    "email": "juan@example.com",
+    "password": "secure123",
+    "full_name": "Juan Pérez",
+    "phone": "0981123456",
+    "role": "seller",
+    "store_name": "Juan's Vintage"
+}
+Response:
+{
+    "success": true,
+    "user": { "id": "uuid", "email": "juan@example.com", "role": "seller" },
+    "token": "eyJhbGciOiJIUzI1NiIs..."
+}
+
+================================================================================
+2. PRODUCTOS (/products)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| GET    | /products                    | No        | Listar productos (paginado + filtros)|
+| GET    | /products/:id                | No        | Obtener detalle de un producto       |
+| POST   | /products                    | Sí (seller)| Crear nuevo producto                 |
+| PUT    | /products/:id                | Sí (owner) | Actualizar producto                  |
+| DELETE | /products/:id                | Sí (owner) | Eliminar producto (soft delete)      |
+| POST   | /products/:id/toggle-status  | Sí (owner) | Activar/desactivar producto          |
+
+Parámetros GET /products (query string):
+- page: 1 (default)
+- limit: 20 (default)
+- category: pantalones, camisas, etc.
+- min_price: 10000
+- max_price: 200000
+- size: M, L, XL
+- condition: very_good, good
+- city: Asunción
+- sort: newest, price_asc, price_desc, most_viewed
+- search: texto libre
+
+Ejemplo GET /products?category=vestidos&min_price=50000&sort=price_asc
+
+================================================================================
+3. ÓRDENES Y COMPRAS (/orders)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| POST   | /orders                      | Sí (buyer)| Crear nueva orden (carrito -> orden) |
+| GET    | /orders                      | Sí        | Listar mis órdenes (compras/ventas)  |
+| GET    | /orders/:id                  | Sí (party)| Ver detalle de una orden             |
+| PUT    | /orders/:id/cancel           | Sí (party)| Cancelar orden (antes de pagar)      |
+| POST   | /orders/:id/payment-qr       | Sí (buyer)| Generar QR de pago                   |
+| POST   | /orders/:id/confirm-payment  | Sí (admin)| Webhook para confirmar pago bancario |
+| PUT    | /orders/:id/mark-shipped     | Sí (seller)| Marcar como enviado + tracking       |
+| PUT    | /orders/:id/confirm-delivery | Sí (buyer)| Confirmar recepción (libera pago)    |
+
+Ejemplo POST /orders (crear orden):
+Request:
+{
+    "items": [
+        { "product_id": 123, "quantity": 1 },
+        { "product_id": 456, "quantity": 2 }
+    ],
+    "shipping_address": "Av. España 123, Asunción",
+    "payment_method": "transferencia"
+}
+Response:
+{
+    "order_id": 7890,
+    "order_number": "RS-20260409-0001",
+    "total_amount": 150000,
+    "payment_qr": "https://api.banco.com.py/qr/abc123",
+    "expires_at": "2026-04-09T23:59:59Z"
+}
+
+================================================================================
+4. CHAT (/chat)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| GET    | /chat/orders/:order_id       | Sí (party)| Obtener historial de chat de una orden|
+| POST   | /chat/orders/:order_id       | Sí (party)| Enviar mensaje en una orden          |
+| PUT    | /chat/messages/:id/read      | Sí        | Marcar mensaje como leído            |
+| GET    | /chat/unread-count           | Sí        | Obtener cantidad de mensajes no leídos|
+
+Ejemplo POST /chat/orders/7890:
+Request:
+{
+    "message": "Hola, ¿la camisa tiene alguna mancha?"
+}
+Response:
+{
+    "id": 999,
+    "sender_id": "uuid_comprador",
+    "message": "Hola, ¿la camisa tiene alguna mancha?",
+    "created_at": "2026-04-09T15:30:00Z"
+}
+
+================================================================================
+5. FAVORITOS (/favorites)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| GET    | /favorites                   | Sí        | Listar productos favoritos del usuario|
+| POST   | /favorites/:product_id       | Sí        | Agregar a favoritos                  |
+| DELETE | /favorites/:product_id       | Sí        | Quitar de favoritos                  |
+
+================================================================================
+6. REVIEWS (/reviews)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| POST   | /reviews/order/:order_id     | Sí (buyer)| Calificar vendedor después de compra |
+| GET    | /reviews/user/:user_id       | No        | Ver calificaciones de un usuario     |
+
+Ejemplo POST /reviews/order/7890:
+Request:
+{
+    "rating": 5,
+    "comment": "Excelente vendedor, producto impecable"
+}
+
+================================================================================
+7. REPORTES (/reports)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| POST   | /reports/product/:product_id | Sí        | Reportar un producto                 |
+| POST   | /reports/user/:user_id       | Sí        | Reportar un usuario                  |
+| GET    | /reports                     | Sí (admin)| Listar reportes pendientes           |
+| PUT    | /reports/:id/resolve         | Sí (admin)| Resolver reporte (con sanción)       |
+
+================================================================================
+8. ADMIN (/admin)
+================================================================================
+
+| Método | Endpoint                     | Auth      | Descripción                          |
+|--------|------------------------------|-----------|--------------------------------------|
+| GET    | /admin/dashboard/stats       | Sí (admin)| Estadísticas globales                |
+| GET    | /admin/users                 | Sí (admin)| Listar todos los usuarios            |
+| PUT    | /admin/users/:id/suspend     | Sí (admin)| Suspender usuario                    |
+| GET    | /admin/products/pending      | Sí (admin)| Productos reportados                 |
+| PUT    | /admin/products/:id/hide     | Sí (admin)| Ocultar producto (moderación)        |
+
+================================================================================
+CÓDIGOS DE RESPUESTA HTTP:
+-------------------------------------------------------------------------------
+200 OK - Éxito
+201 Created - Recurso creado
+400 Bad Request - Error en la petición (validación)
+401 Unauthorized - No autenticado
+403 Forbidden - Autenticado pero sin permiso
+404 Not Found - Recurso no existe
+409 Conflict - Conflicto (ej. email ya registrado)
+500 Internal Server Error - Error del servidor
+
+FORMATO DE ERROR ESTÁNDAR:
+{
+    "success": false,
+    "error": "Mensaje descriptivo",
+    "code": "ERROR_CODE"
+}
+================================================================================

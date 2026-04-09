@@ -1,0 +1,148 @@
+================================================================================
+ARCHIVO: 15_ROADMAP_POR_FASES.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Roadmap base por fases         | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Plan de desarrollo por fases desde el MVP hasta la versión final.
+
+FASE 0: PREPARACIÓN (Semana 1)
+-------------------------------------------------------------------------------
+OBJETIVO: Entorno listo para codificar
+TAREAS:
+  [ ] Instalar Node.js, PostgreSQL (local o Supabase gratuito)
+  [ ] Crear repositorio Git (GitHub privado)
+  [ ] Configurar ESLint + Prettier
+  [ ] Diseñar mockups básicos en papel o Figma
+  [ ] Registrar dominio reshopy.com.py (verificar disponibilidad)
+ENTREGABLE: Script de base de datos inicial (schema.sql)
+
+FASE 1: AUTENTICACIÓN Y USUARIOS (Semana 2-3)
+-------------------------------------------------------------------------------
+OBJETIVO: Registro, login y perfiles
+TAREAS:
+  [ ] Backend: endpoints /api/auth/register, /login, /profile
+  [ ] Frontend: formularios de registro (vendedor/comprador)
+  [ ] Integración con Supabase Auth (email + password)
+  [ ] Middleware de autenticación JWT
+  [ ] Roles: admin, seller, buyer
+  [ ] Perfil de vendedor con "tienda" (nombre, descripción, avatar)
+ENTREGABLE: Usuarios pueden registrarse y loguearse.
+
+FASE 2: PRODUCTOS Y ESCAPARATES (Semana 4-5)
+-------------------------------------------------------------------------------
+OBJETIVO: Vendedores publican productos
+TAREAS:
+  [ ] CRUD de productos (crear, leer, actualizar, eliminar)
+  [ ] Subida de imágenes (multer + Supabase Storage)
+  [ ] Frontend: formulario de publicación (título, precio, talla, estado)
+  [ ] Listado de productos en grid (paginado)
+  [ ] Página individual del producto
+  [ ] Página "Mi tienda" para vendedor
+ENTREGABLE: Vendedores pueden publicar 5 productos de prueba.
+
+FASE 3: BÚSQUEDA Y FILTROS (Semana 6)
+-------------------------------------------------------------------------------
+OBJETIVO: Compradores encuentran productos
+TAREAS:
+  [ ] Barra de búsqueda por título/descripción
+  [ ] Filtros: categoría, talla, rango de precio, ciudad
+  [ ] Ordenar: más reciente, menor precio, mayor precio
+  [ ] Frontend: resultados en tiempo real (fetch sin recargar)
+ENTREGABLE: Búsqueda funcional con filtros básicos.
+
+FASE 4: CARRITO Y PROCESO DE COMPRA (Semana 7-8)
+-------------------------------------------------------------------------------
+OBJETIVO: Completar ciclo de compra
+TAREAS:
+  [ ] Carrito de compras (localStorage o estado en front)
+  [ ] Creación de órdenes (endpoint POST /api/orders)
+  [ ] Generación de QR de pago (simulado o con API real)
+  [ ] Simulación de confirmación de pago (webhook local)
+  [ ] Cambio de estado: pending -> paid -> shipped -> completed
+  [ ] Frontend: historial de compras y ventas
+ENTREGABLE: Comprador puede comprar, vendedor recibe notificación.
+
+FASE 5: SISTEMA DE PAGOS REAL (Paraguay) (Semana 9-10)
+-------------------------------------------------------------------------------
+OBJETIVO: Integrar pagos reales con bancos locales
+TAREAS:
+  [ ] Elegir banco: UENO, Familiar, Visión (el que tenga API)
+  [ ] Solicitar credenciales de desarrollador
+  [ ] Implementar generación de QR dinámico
+  [ ] Webhook para escuchar pagos confirmados
+  [ ] Retención automática de comisión (10%)
+  [ ] Liberación de pago al vendedor (transferencia automática)
+ENTREGABLE: Pagos reales en guaraníes.
+
+FASE 6: CHAT Y NOTIFICACIONES (Semana 11)
+-------------------------------------------------------------------------------
+OBJETIVO: Comunicación fluida
+TAREAS:
+  [ ] Chat simple entre comprador y vendedor (polling cada 10s)
+  [ ] Notificaciones por email (Resend o Nodemailer)
+  [ ] Notificaciones push (OneSignal)
+  [ ] Mensajes automáticos: "Tu producto fue vendido"
+ENTREGABLE: Usuarios pueden hablar y recibir alertas.
+
+FASE 7: MODERACIÓN Y REPORTES (Semana 12)
+-------------------------------------------------------------------------------
+OBJETIVO: Seguridad y cumplimiento
+TAREAS:
+  [ ] Botón "Reportar publicación"
+  [ ] Panel de admin para ver reportes
+  [ ] Moderación: ocultar producto, suspender usuario
+  [ ] Sistema de calificaciones (estrellas 1-5)
+  [ ] Detección automática de palabras prohibidas
+ENTREGABLE: Admin puede moderar contenido.
+
+FASE 8: ENVÍOS (Semana 13)
+-------------------------------------------------------------------------------
+OBJETIVO: Logística integrada
+TAREAS:
+  [ ] Integración con API de Kañy Pro o SendBox
+  [ ] Vendedor genera guía desde el panel
+  [ ] Comprador ve tracking number
+  [ ] Cálculo de costo de envío por ciudad
+ENTREGABLE: Envíos con seguimiento.
+
+FASE 9: LANZAMIENTO BETA (Semana 14)
+-------------------------------------------------------------------------------
+OBJETIVO: Primeros usuarios reales
+TAREAS:
+  [ ] Desplegar en producción (Railway + Vercel + Supabase)
+  [ ] Configurar HTTPS (dominio .com.py)
+  [ ] Invitar a 20 vendedores amigos/familiares
+  [ ] Bug hunting y correcciones
+  [ ] Redactar términos legales finales
+ENTREGABLE: Plataforma online con 50 productos.
+
+FASE 10: MARKETING Y CRECIMIENTO (Semana 15 en adelante)
+-------------------------------------------------------------------------------
+OBJETIVO: Atraer masa crítica
+TAREAS:
+  [ ] Campaña en Facebook/Instagram "Comisión 0% por 1 mes"
+  [ ] Alianzas con ferias de pulgas locales
+  [ ] Programa de referidos (ganá 10mil Gs por amigo que venda)
+  [ ] SEO local (contenido: "dónde vender ropa usada en Asunción")
+ENTREGABLE: 100 vendedores activos en 3 meses.
+
+FASE 11: EXPANSIÓN (Post-lanzamiento, mes 6+)
+-------------------------------------------------------------------------------
+OBJETIVO: Nuevas funcionalidades y rubros
+TAREAS:
+  [ ] App móvil con PWA (Progressive Web App)
+  [ ] Modo oscuro
+  [ ] Subastas en vivo
+  [ ] Segundo rubro: libros usados (según demanda)
+ENTREGABLE: App instalable en celulares.
+================================================================================

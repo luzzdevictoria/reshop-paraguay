@@ -1,0 +1,108 @@
+================================================================================
+ARCHIVO: 11_ADMIN_PANEL.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Panel de administración        | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define las funcionalidades del panel de control para administradores y moderadores.
+
+================================================================================
+1. ACCESO AL PANEL
+================================================================================
+- URL: /admin/dashboard
+- Solo usuarios con role = 'admin' pueden acceder
+- Protección: middleware requireRole(['admin'])
+- Diseño: sidebar + área de contenido principal
+
+================================================================================
+2. MÓDULOS DEL PANEL DE ADMIN
+================================================================================
+
+2.1 Dashboard (Resumen)
+-------------------------------------------------------------------------------
+Tarjetas con KPIs:
+- Total de usuarios (vendedores vs compradores)
+- Total de productos activos
+- Ventas del día/semana/mes (en Gs)
+- Comisiones generadas
+- Reportes pendientes
+- Gráfico simple (Chart.js) de ventas últimos 7 días
+
+2.2 Gestión de Usuarios
+-------------------------------------------------------------------------------
+- Listado de todos los usuarios (paginado, búsqueda por email/nombre)
+- Columnas: ID, Nombre, Email, Rol, Fecha registro, Estado (activo/suspendido)
+- Acciones: Ver perfil, Suspender/Restaurar, Cambiar rol (a vendedor o admin)
+- Botón "Exportar a CSV" (para respaldos)
+
+2.3 Moderación de Productos
+-------------------------------------------------------------------------------
+- Productos reportados (status='reported')
+- Productos ocultos (status='inactive' por moderación)
+- Acciones: Aprobar, Ocultar, Eliminar permanentemente
+- Filtros: por motivo de reporte, por vendedor
+
+2.4 Gestión de Reportes
+-------------------------------------------------------------------------------
+- Lista de reportes (tabla reports)
+- Estado: pending, reviewed, resolved, dismissed
+- Al hacer clic, ver detalles y tomar decisión
+- Historial de resoluciones
+
+2.5 Órdenes y Disputas
+-------------------------------------------------------------------------------
+- Órdenes con problemas (comprador no confirmó, vendedor no envió)
+- Disputas abiertas (comprador reclama)
+- Admin puede: Forzar confirmación, Forzar reembolso, Mediar
+
+2.6 Comisiones y Pagos
+-------------------------------------------------------------------------------
+- Resumen de comisiones retenidas
+- Transferencias pendientes a vendedores
+- Botón "Procesar pagos masivos" (enviar transferencias bancarias)
+
+2.7 Configuración General
+-------------------------------------------------------------------------------
+- Comisión global (%) (default 10)
+- Límite de productos por vendedor (default 50)
+- Tiempo máximo para enviar (días)
+- Palabras prohibidas (editar lista negra)
+- Mantenimiento: activar "modo mantenimiento"
+
+================================================================================
+3. CÓDIGO DE EJEMPLO: ENDPOINT DE ESTADÍSTICAS
+================================================================================
+app.get('/api/admin/dashboard/stats', authenticateToken, requireRole(['admin']), async (req, res) => {
+    const totalUsers = await db.query('SELECT COUNT(*) FROM users');
+    const totalProducts = await db.query("SELECT COUNT(*) FROM products WHERE status = 'active'");
+    const salesToday = await db.query(
+        "SELECT SUM(total_amount) FROM orders WHERE DATE(created_at) = CURRENT_DATE AND order_status = 'completed'"
+    );
+    const pendingReports = await db.query("SELECT COUNT(*) FROM reports WHERE status = 'pending'");
+
+    res.json({
+        total_users: totalUsers.rows[0].count,
+        total_products: totalProducts.rows[0].count,
+        sales_today_gs: salesToday.rows[0].sum || 0,
+        pending_reports: pendingReports.rows[0].count
+    });
+});
+
+================================================================================
+4. INTERFAZ SUGERIDA (HTML simple)
+================================================================================
+- Usar mismo header/footer que el frontend principal
+- Sidebar con íconos (FontAwesome o Bootstrap Icons)
+- Tablas responsivas (overflow-x: auto)
+- Botones de acción con colores consistentes (verde para aprobar, rojo para eliminar)
+- Confirmación modal antes de acciones destructivas
+================================================================================

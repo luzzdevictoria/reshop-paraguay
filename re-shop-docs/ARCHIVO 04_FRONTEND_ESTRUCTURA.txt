@@ -1,0 +1,161 @@
+================================================================================
+ARCHIVO: 04_FRONTEND_ESTRUCTURA.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Estructura frontend inicial    | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define la organización de carpetas, archivos HTML, CSS, JS y componentes
+reutilizables para el frontend de ReShop.
+
+ESTRUCTURA DE CARPETAS:
+-------------------------------------------------------------------------------
+/re-shop-frontend/
+│
+├── index.html                 # Homepage (listado de productos)
+├── login.html                 # Inicio de sesión
+├── register.html              # Registro (comprador/vendedor)
+├── product-detail.html        # Detalle de un producto
+├── seller-store.html          # Escaparate de un vendedor
+├── cart.html                  # Carrito de compras
+├── checkout.html              # Confirmación y pago
+├── profile.html               # Perfil de usuario (tabs: mis datos, mis compras, mis ventas)
+├── new-product.html           # Formulario para publicar (solo vendedores)
+├── edit-product.html          # Editar producto
+├── orders.html                # Listado de órdenes (compras/ventas)
+├── order-detail.html          # Detalle de una orden + chat
+├── favorites.html             # Productos guardados
+├── admin-dashboard.html       # Panel de administración (solo admin)
+│
+├── /css
+│   ├── main.css               # Estilos globales (variables, reset, tipografía)
+│   ├── components.css         # Botones, tarjetas, modales, formularios
+│   ├── responsive.css         # Media queries (mobile/tablet/desktop)
+│   └── themes.css             # Modo claro/oscuro (opcional)
+│
+├── /js
+│   ├── app.js                 # Inicialización global, navegación SPA-like
+│   ├── auth.js                # Registro, login, logout, manejo de JWT
+│   ├── api.js                 # Cliente HTTP (fetch wrapper con token)
+│   ├── products.js            # Listado, filtros, búsqueda
+│   ├── cart.js                # Manejo del carrito (localStorage + sync)
+│   ├── checkout.js            # Proceso de pago, generación de QR
+│   ├── profile.js             # Cargar/editar perfil
+│   ├── seller-products.js     # CRUD de productos para vendedores
+│   ├── orders.js              # Listar órdenes, cambiar estados
+│   ├── chat.js                # Cargar mensajes, enviar, polling
+│   ├── favorites.js           # Favoritos (agregar/quitar/listar)
+│   ├── admin.js               # Panel de admin (moderación, stats)
+│   └── utils.js               # Funciones helper (formatear precio, fechas, validar)
+│
+├── /assets
+│   ├── /images                # Logo, íconos, placeholders
+│   ├── /icons                 # SVG (carrito, favorito, etc.)
+│   └── /uploads               # (solo en desarrollo) imágenes subidas
+│
+└── /partials                  # (opcional) fragmentos HTML reutilizables
+    ├── header.html
+    ├── footer.html
+    ├── product-card.html
+    └── sidebar-filters.html
+
+================================================================================
+COMPONENTES PRINCIPALES (explicación de cada archivo JS)
+================================================================================
+
+1. app.js:
+   - Escuchar cambios de hash/ruta (si usas SPA ligera)
+   - Cargar header/footer dinámicamente
+   - Inicializar tooltips, dropdowns
+   - Verificar token JWT y redirigir si expiró
+
+2. auth.js:
+   - register(): enviar POST /auth/register
+   - login(): enviar POST /auth/login, guardar token en localStorage
+   - logout(): limpiar token, redirigir a login
+   - getCurrentUser(): decodificar JWT para obtener rol/email
+   - isAuthenticated(): validar token (check expiration)
+
+3. api.js:
+   - apiRequest(endpoint, method, body): fetch automático con headers
+   - Manejo centralizado de errores (401 -> logout, 500 -> mostrar alerta)
+
+4. products.js:
+   - loadProducts(filters, page): GET /products con query params
+   - renderProductGrid(products): pintar tarjetas en index.html
+   - setupFilters(): escuchar cambios en selects/checkboxes y recargar
+   - setupSearch(): debounce en barra de búsqueda
+
+5. cart.js:
+   - addToCart(productId, quantity): guardar en localStorage
+   - removeFromCart(productId)
+   - getCart(): devolver array de {productId, quantity}
+   - syncCart(): al hacer login, fusionar carrito anónimo con usuario
+   - renderCartItems(): en cart.html
+
+6. checkout.js:
+   - createOrder(): POST /orders con items del carrito
+   - displayPaymentQR(qrUrl): mostrar modal con QR
+   - pollPaymentStatus(orderId): cada 5 segundos consultar si se pagó
+   - redirectToSuccess(): al confirmar pago
+
+7. profile.js:
+   - loadProfile(): GET /users/me, rellenar formulario
+   - updateProfile(): PUT /users/me
+   - changePassword(): endpoint separado
+   - showMyProducts(): listar productos del vendedor (si aplica)
+
+8. seller-products.js:
+   - createProduct(): POST /products con FormData (imágenes)
+   - updateProduct(productId): PUT /products/:id
+   - deleteProduct(productId): DELETE
+   - toggleStatus(productId): activar/desactivar
+
+9. orders.js:
+   - loadOrders(role): GET /orders, filtrar por buyer/seller
+   - renderOrderList(orders): tabla o cards
+   - markShipped(orderId, trackingNumber): para vendedores
+   - confirmDelivery(orderId): para compradores
+   - cancelOrder(orderId): antes de pagar
+
+10. chat.js:
+    - loadMessages(orderId): GET /chat/orders/:order_id
+    - sendMessage(orderId, message): POST
+    - startPolling(orderId): cada 10 segundos traer nuevos mensajes
+    - scrollToBottom(): mantener chat al fondo
+
+================================================================================
+ESTILOS CSS (buenas prácticas):
+-------------------------------------------------------------------------------
+- Usar CSS Grid para layout principal (header, main, footer)
+- Flexbox para componentes internos (product cards, filters)
+- Variables CSS en :root para colores (--primary, --secondary, etc.)
+- Clases BEM (Block__Element--Modifier) para componentes reutilizables
+- Mobile First: estilos base para móvil, luego media queries min-width
+
+Ejemplo de product-card BEM:
+<div class="product-card">
+    <img class="product-card__image" src="...">
+    <h3 class="product-card__title">...</h3>
+    <span class="product-card__price">...</span>
+    <button class="product-card__button product-card__button--favorite">...</button>
+</div>
+
+================================================================================
+INTEGRACIÓN CON BACKEND (Local):
+-------------------------------------------------------------------------------
+En desarrollo, el frontend corre en Live Server (puerto 5500) y el backend
+en puerto 3000. Para evitar CORS, en backend instalar cors():
+const cors = require('cors');
+app.use(cors({ origin: 'http://127.0.0.1:5500' }));
+
+En producción, ambos en el mismo dominio o usar proxy inverso.
+================================================================================

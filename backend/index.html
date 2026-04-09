@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header__logo">
+                <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo" onerror="this.style.display='none'">
+                <h1 class="logo-text">ReShop</h1>
+            </div>
+            <div class="header__search">
+                <input type="text" id="searchInput" placeholder="Buscar ropa, marcas, tallas..." class="search-input">
+                <button id="searchBtn" class="btn btn-primary">Buscar</button>
+            </div>
+            <div class="header__actions">
+                <a href="cart.html" class="header__cart">Carrito</a>
+                <a href="login.html" id="loginLink" class="header__login">Iniciar Sesion</a>
+                <a href="profile.html" id="profileLink" class="header__profile" style="display:none;">Mi Perfil</a>
+                <a href="#" id="logoutBtn" class="header__logout" style="display:none;">Cerrar Sesion</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <div class="layout">
+                <!-- Sidebar de filtros -->
+                <aside class="sidebar">
+                    <h3>Filtros</h3>
+                    <div class="filter-group">
+                        <label>Categoria</label>
+                        <select id="filterCategory" class="filter-select">
+                            <option value="">Todas</option>
+                            <option value="pantalones">Pantalones</option>
+                            <option value="camisas">Camisas</option>
+                            <option value="vestidos">Vestidos</option>
+                            <option value="chaquetas">Chaquetas</option>
+                            <option value="calzado">Calzado</option>
+                            <option value="accesorios">Accesorios</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Talla</label>
+                        <select id="filterSize" class="filter-select">
+                            <option value="">Todas</option>
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Estado</label>
+                        <select id="filterCondition" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="new_with_tags">Nuevo con etiqueta</option>
+                            <option value="new_without_tags">Nuevo sin etiqueta</option>
+                            <option value="very_good">Muy bueno</option>
+                            <option value="good">Bueno</option>
+                            <option value="acceptable">Aceptable</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Precio minimo</label>
+                        <input type="number" id="filterMinPrice" placeholder="0" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label>Precio maximo</label>
+                        <input type="number" id="filterMaxPrice" placeholder="500000" class="filter-input">
+                    </div>
+                    <button id="applyFilters" class="btn btn-secondary">Aplicar Filtros</button>
+                    <button id="clearFilters" class="btn btn-outline">Limpiar</button>
+                </aside>
+
+                <!-- Grid de productos -->
+                <div class="products-grid" id="productsGrid">
+                    <div class="loading">Cargando productos...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano</p>
+            <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        </div>
+    </footer>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+================================================================================
+ARCHIVO: 06_SISTEMA_DE_PAGOS.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Integración de pagos Paraguay  | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define la integración con sistemas de pago locales (bancos paraguayos),
+flujo de pagos, retención de comisión y liberación a vendedores.
+
+================================================================================
+1. MEDIOS DE PAGO SOPORTADOS (Paraguay)
+================================================================================
+| Medio                     | Implementación                          | Comisión alianza |
+|---------------------------|-----------------------------------------|------------------|
+| Transferencia bancaria SPI| Generar QR o Alias + referencia única   | 0% (sin costo)   |
+| QR de Banco Familiar      | API de Banco Familiar (requiere convenio)| 0.5% - 1%       |
+| QR de UENO                | API de UENO para desarrolladores         | 0.5% - 1%       |
+| QR de Visión Banco        | API Visión Banco (e-commerce)            | 0.5% - 1%       |
+| Efectivo (contraentrega)  | Comprador paga al recibir (moderado riesgo)| 0% (pero riesgo) |
+
+Estrategia inicial: Usar TRANSFERENCIA SPI con verificación manual o webhook.
+No requiere convenio bancario previo.
+
+================================================================================
+2. FLUJO DE PAGO COMPLETO
+================================================================================
+Paso 1: Comprador confirma compra (POST /orders)
+Paso 2: Backend crea orden con status 'pending_payment'
+Paso 3: Genera número de orden único (RS-20260409-0001)
+Paso 4: Devuelve al frontend:
+   - Alias del vendedor O cuenta de la plataforma
+   - Número de factura (monto exacto)
+   - QR opcional (si hay API bancaria)
+Paso 5: Comprador realiza transferencia desde su app bancaria
+Paso 6: Webhook del banco (o script cron) confirma pago
+Paso 7: Backend cambia status a 'paid'
+Paso 8: Notifica al vendedor: "¡Vendiste! Prepara el envío"
+
+================================================================================
+3. MODELO DE COMISIÓN (10%)
+================================================================================
+- ReShop retiene 10% del total de cada venta automáticamente
+- El vendedor recibe el 90% restante
+- La comisión se resta ANTES de liberar el pago al vendedor
+
+Ejemplo:
+Producto: 100,000 Gs
+Envío: 20,000 Gs
+Total: 120,000 Gs
+Comisión (10%): 12,000 Gs
+Vendedor recibe: 108,000 Gs
+
+Implementación: Campo GENERATED ALWAYS en tabla orders (ver 02_Modelo_de_Datos)
+
+================================================================================
+4. VERIFICACIÓN DE PAGOS (sin API bancaria)
+================================================================================
+Opción A: Webhook bancario (ideal)
+- El banco llama a tu endpoint POST /api/payment-webhook con:
+  {
+    "amount": 120000,
+    "reference": "RS-20260409-0001",
+    "payer_document": "12345678",
+    "timestamp": "2026-04-09T15:30:00Z"
+  }
+- Tu backend verifica que reference coincida con una orden pendiente
+- Marca como paid
+
+Opción B: Script Cron (fallback)
+- Cada 5 minutos, ejecutar función que consulta API del banco (si provee)
+- O simulación: vendedor confirma manualmente (riesgo de fraude)
+
+Opción C: Transferencia a cuenta de ReShop (recomendado inicial)
+- El comprador transfiere a la cuenta bancaria de ReShop
+- ReShop recibe, retiene comisión y envía el resto al vendedor
+- Requiere: cuenta bancaria empresarial y hacer transferencias programáticas
+
+================================================================================
+5. LIBERACIÓN DE PAGO AL VENDEDOR
+================================================================================
+Condiciones para liberar:
+1. Comprador confirmó recepción del producto (confirm-delivery)
+2. O pasaron 7 días desde que se marcó como "enviado" sin queja
+3. No hay disputa activa
+
+Métodos de pago al vendedor:
+- Transferencia bancaria a su cuenta (usar API bancaria)
+- Retiro manual (admin procesa cada semana)
+- Billetera virtual dentro de ReShop (crédito para comprar)
+
+================================================================================
+6. MANEJO DE REEMBOLSOS Y DISPUTAS
+================================================================================
+Si el producto no llega o está en mal estado:
+1. Comprador abre disputa en la orden
+2. Admin revisa evidencias (fotos, chat)
+3. Si falla a favor del comprador: reembolso total
+4. Reembolso se descuenta del próximo pago al vendedor o se cobra de su saldo
+
+================================================================================
+7. CÓDIGO DE EJEMPLO: GENERAR QR DE PAGO (simulado)
+================================================================================
+// En backend
+app.post('/api/orders/:id/payment-qr', authenticateToken, async (req, res) => {
+    const orderId = req.params.id;
+    const order = await db.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+
+    // Datos bancarios de ReShop (cuenta comisionista)
+    const bankData = {
+        account_name: "ReShop Paraguay SAS",
+        account_number: "123456789",
+        bank: "Banco Familiar",
+        alias: "reshop.py",
+        amount: order.total_amount,
+        concept: `Orden ${order.order_number}`
+    };
+
+    // Generar QR usando librería 'qrcode'
+    const QRCode = require('qrcode');
+    const qrText = `Transferencia a ${bankData.alias} monto ${bankData.amount} concepto ${bankData.concept}`;
+    const qrImage = await QRCode.toDataURL(qrText);
+
+    res.json({
+        qr_code: qrImage,
+        alias: bankData.alias,
+        amount: order.total_amount,
+        concept: bankData.concept
+    });
+});
+================================================================================

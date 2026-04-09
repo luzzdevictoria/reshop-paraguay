@@ -1,0 +1,107 @@
+================================================================================
+ARCHIVO: 14_ESCALABILIDAD.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Plan de escalabilidad base     | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Estrategias para que la aplicación crezca sin reescribir todo el código.
+
+PRINCIPIOS DE ESCALABILIDAD (desde el día 1):
+-------------------------------------------------------------------------------
+1. Stateless en backend (no guardar sesiones en memoria)
+2. Separación clara de capas (frontend, backend, db, storage)
+3. Uso de índices en PostgreSQL desde el inicio
+4. Paginación en todas las listas (LIMIT/OFFSET)
+5. Cache con Redis para consultas repetitivas
+
+NIVELES DE ESCALABILIDAD PREVISTOS:
+-------------------------------------------------------------------------------
+
+NIVEL 1 (MVP - 0 a 500 usuarios activos):
+   - Single instance de Node.js en Railway
+   - Supabase plan gratuito o pro
+   - Sin caché, sin workers
+   - Máx 1000 productos
+
+NIVEL 2 (Crecimiento - 500 a 5,000 usuarios):
+   - Backend con PM2 (clustering, usar todos los CPUs)
+   - Supabase Pro + índices optimizados
+   - Redis básico para sesiones (Upstash gratuito)
+   - CDN de imágenes (Cloudinary)
+   - Cola de tareas (Bull) para emails y notificaciones
+
+NIVEL 3 (Expansión - 5,000 a 50,000 usuarios):
+   - Backend con balanceador de carga (NGINX + 3 instancias)
+   - Base de datos con réplicas de lectura (Supabase Replicas)
+   - Elasticsearch para búsquedas rápidas (productos)
+   - WebSockets para chat (Socket.io con Redis adapter)
+   - Microservicios: pagos, envíos, notificaciones separados
+
+NIVEL 4 (Masivo - 50,000+ usuarios):
+   - Kubernetes en DigitalOcean o AWS ECS
+   - Base de datos particionada (por ciudad o por seller_id)
+   - Event sourcing para transacciones (Kafka o RabbitMQ)
+   - App nativa en React Native + Flutter (Play Store/App Store)
+
+ESTRATEGIA DE DATOS (evitar cuellos de botella):
+-------------------------------------------------------------------------------
+- Las fotos NUNCA se guardan en la base de datos, solo URLs.
+- Tablas de logs se archivan mensualmente.
+- Búsqueda de productos: migrar de SQL LIKE a PostgreSQL Full-Text Search o Elasticsearch.
+- Transacciones financieras en tabla separada con retention de 7 años.
+
+ESCALABILIDAD DE NEGOCIO (nuevos rubros):
+-------------------------------------------------------------------------------
+Para expandir más allá de ropa de segunda mano (fase 2 del proyecto):
+
+1. MUEBLES USADOS:
+   - Nueva tabla 'furniture_attributes' (medidas, material, peso)
+   - Logística: integración con fletes (API de CargaRapida)
+   - Comisión diferente: 15% (por mayor riesgo)
+
+2. ELECTRÓNICA:
+   - Nueva tabla 'electronics_attributes' (estado batería, garantía)
+   - Requisito: vendedores verificados (documento + factura de compra)
+   - Comisión: 12%
+
+3. LIBROS Y DISCOS:
+   - Nueva tabla 'media_attributes' (ISBN, edición, formato)
+   - Envío simple (correo certificado)
+
+IMPLEMENTACIÓN TÉCNICA PARA MULTI-RUBRO:
+-------------------------------------------------------------------------------
+Usar herencia de tablas en PostgreSQL:
+
+CREATE TABLE products (id serial, seller_id uuid, price numeric, ...);
+CREATE TABLE clothing_products (product_id int PRIMARY KEY REFERENCES products, size text, fabric text);
+CREATE TABLE furniture_products (product_id int PRIMARY KEY REFERENCES products, weight_kg numeric, requires_assembly boolean);
+
+Así evitas columnas nulas y mantienes normalización.
+
+ESCALABILIDAD GEOGRÁFICA (a otros países):
+-------------------------------------------------------------------------------
+Si quisieras expandir a Argentina, Brasil, etc:
+
+- Tabla 'currencies' con tipos de cambio diario
+- Tabla 'shipping_zones' con tarifas por país
+- Pasarelas de pago locales (MercadoPago para Arg, Pix para Brasil)
+- Traducciones con i18n (JSON files)
+
+ESTIMACIÓN DE COSTOS ESCALADOS (mensual):
+-------------------------------------------------------------------------------
+| Nivel | Usuarios | Costo aprox (USD) | Hosting                |
+|-------|----------|-------------------|------------------------|
+| 1     | 0-500    | 70                | Railway + Supabase     |
+| 2     | 500-5k   | 200               | + Redis, CDN           |
+| 3     | 5k-50k   | 800               | + Balanceador, réplicas|
+| 4     | 50k+     | 2500+             | Kubernetes dedicado    |
+================================================================================

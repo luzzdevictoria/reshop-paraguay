@@ -1,0 +1,43 @@
+================================================================================
+ARCHIVO: 00_INDICE_GENERAL.txt
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Creación inicial del índice    | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN GENERAL:
+Este documento centraliza la estructura completa de la aplicación ReShop Paraguay.
+ReShop es un marketplace (shopping virtual) especializado en ropa de segunda mano,
+donde vendedores independientes tienen su propio escaparate digital.
+
+OBJETIVO:
+Servir como mapa de navegación para desarrolladores, diseñadores y stakeholders.
+
+CONTENIDO DEL SISTEMA (Archivos asociados):
+-------------------------------------------------------------------------------
+01_ARQUITECTURA_DEL_SISTEMA.txt      - Estructura técnica general
+02_MODELO_DE_DATOS.txt               - Tablas y relaciones en BD
+03_API_ENDPOINTS.txt                 - Todos los endpoints REST
+04_FRONTEND_ESTRUCTURA.txt           - HTML/CSS/JS y componentes
+05_AUTENTICACION_Y_SEGURIDAD.txt     - JWT, roles, permisos
+06_SISTEMA_DE_PAGOS.txt              - Integración con QR, transferencias
+07_LOGISTICA_Y_ENVIOS.txt            - Envíos locales (Kañy, SendBox)
+08_SISTEMA_DE_CHAT.txt               - Comunicación vendedor-comprador
+09_MODERACION_Y_REPORTES.txt         - Filtros anti-fraude y denuncias
+10_NOTIFICACIONES.txt                - Email, SMS, push (OneSignal)
+11_ADMIN_PANEL.txt                   - Panel de control para moderadores
+12_NORMATIVA_INTERNA.txt             - Términos, condiciones y sanciones
+13_PLAN_DE_MARKETING.txt             - Estrategias de captación
+14_ESCALABILIDAD.txt                 - Plan de crecimiento futuro
+15_ROADMAP_POR_FASES.txt             - Hitos por fase de desarrollo
+================================================================================
+ESTADO ACTUAL: En planificación
+PRÓXIMA REVISIÓN: 2026-04-16
+================================================================================

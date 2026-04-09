@@ -1,0 +1,5 @@
+node_modules/
+.env
+backend/.env
+CREDENCIALES DE SUPABASE.txt
+datos_analizados/TOKEN_GITHUB.txt 

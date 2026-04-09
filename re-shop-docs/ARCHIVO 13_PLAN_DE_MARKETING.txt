@@ -1,0 +1,99 @@
+================================================================================
+ARCHIVO: 13_PLAN_DE_MARKETING.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Estrategia de marketing        | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Plan para atraer vendedores y compradores a la plataforma en sus primeras etapas.
+
+================================================================================
+1. OBJETIVOS DE MARKETING (primeros 3 meses)
+================================================================================
+- 100 vendedores registrados
+- 500 productos publicados
+- 50 ventas completadas
+- 1000 usuarios registrados (compradores)
+- 5 reseñas positivas
+
+================================================================================
+2. ESTRATEGIA PARA ATRAER VENDEDORES (Oferta "Pionero")
+================================================================================
+
+2.1 Beneficios exclusivos para primeros 100 vendedores:
+-------------------------------------------------------------------------------
+- Comisión 0% durante 3 meses (después 10%)
+- Escaparate destacado en la página principal (rotativo)
+- Badge "Vendedor Pionero" en su perfil
+- Acceso a estadísticas avanzadas (vistas, clics)
+- 1 publicación gratis en Instagram de ReShop (story)
+
+2.2 Canales de captación:
+-------------------------------------------------------------------------------
+- Grupos de Facebook: "Ventas de segunda mano Asunción", "Feria de pulgas Paraguay"
+- Instagram: buscar perfiles de personas que venden ropa usada (hashtags #ropausadaPy #vintagepy)
+- Contactar ferias locales: Feria ODS, Feria Mbarete, Feria de Usados de San Lorenzo
+- Flyers digitales para compartir en WhatsApp
+
+2.3 Script de mensaje para contactar vendedores:
+-------------------------------------------------------------------------------
+"Hola [nombre], vi que vendes ropa usada. Estoy lanzando ReShop, un shopping virtual
+exclusivo para ropa de segunda mano en Paraguay. Vas a tener tu propia tienda online,
+sin comisiones por 3 meses. ¿Te interesaría ser de los primeros? Te dejo más info:
+[link a landing page]"
+
+================================================================================
+3. ESTRATEGIA PARA ATRAER COMPRADORES
+================================================================================
+- Lanzamiento con descuento: "Primera compra: 10% OFF usando código RE10"
+- Sorteo: "Compartí ReShop y participá por 100mil Gs en crédito"
+- Alianza con microinfluencers de moda sostenible (pagado con ropa o crédito)
+- Contenido en TikTok: "El mejor hallazgo de ropa usada que encontré en ReShop"
+- Anuncios en Facebook/Instagram segmentados por interés "moda vintage", "ahorro"
+
+================================================================================
+4. PROGRAMA DE REFERIDOS
+================================================================================
+- Vendedor refiere a otro vendedor → ambos reciben 50mil Gs de crédito (cuando el nuevo publique 10 productos)
+- Comprador refiere a otro comprador → ambos reciben 20mil Gs de descuento en próxima compra
+- Código de referido único: RE-[nombre_usuario]
+
+================================================================================
+5. MARKETING DE CONTENIDO (SEO Local)
+================================================================================
+Crear blog en /blog de ReShop con artículos como:
+- "Dónde vender ropa usada en Asunción: guía 2026"
+- "Cómo tomar fotos a tu ropa para vender más rápido"
+- "Tendencias vintage que están volviendo en Paraguay"
+- "5 errores al comprar ropa de segunda mano online"
+
+Palabras clave objetivo: "vender ropa usada Paraguay", "ropa vintage Asunción", "comprar ropa segunda mano online"
+
+================================================================================
+6. PRESUPUESTO INICIAL (primer mes)
+================================================================================
+| Concepto                       | Costo estimado (Gs) |
+|--------------------------------|---------------------|
+| Anuncios Facebook/Instagram    | 300,000             |
+| Flyers digitales (diseño)      | 100,000             |
+| Sorteo inicial (premio)        | 100,000             |
+| Microinfluencer (1 publicación)| 150,000             |
+| TOTAL                          | 650,000 Gs (~85 USD)|
+
+================================================================================
+7. MÉTRICAS A SEGUIR
+================================================================================
+- CAC (Costo de Adquisición de Cliente): Gasto total / nuevos vendedores
+- Tasa de conversión: visitantes → registros
+- Productos por vendedor (promedio)
+- Tiempo promedio hasta primera venta
+- Net Promoter Score (encuesta: "¿Recomendarías ReShop?")
+================================================================================

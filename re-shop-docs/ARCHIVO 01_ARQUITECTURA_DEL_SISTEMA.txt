@@ -1,0 +1,110 @@
+================================================================================
+ARCHIVO: 01_ARQUITECTURA_DEL_SISTEMA.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Definición de arquitectura     | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define la estructura técnica de la aplicación, componentes y comunicación.
+
+ARQUITECTURA GENERAL (Cliente-Servidor):
+-------------------------------------------------------------------------------
+[Frontend (HTML/CSS/JS)] <--> [Node.js/Express] <--> [Supabase (PostgreSQL + Auth + Storage)]
+                                    |
+                                    v
+                          [Pasarelas de Pago Locales]
+                          [Servicios de Envío (Kañy/SendBox)]
+
+CAPAS DEL SISTEMA:
+-------------------------------------------------------------------------------
+1. CAPA DE PRESENTACIÓN (Frontend)
+   - HTML semántico + CSS Flex/Grid (responsive)
+   - JavaScript vanilla (modularizado en archivos separados)
+   - Alpine.js (para reactividad ligera sin React)
+   - Archivos estáticos alojados en Vercel o Netlify
+
+2. CAPA DE NEGOCIO (Backend - Node.js/Express)
+   - Rutas API: /api/auth, /api/products, /api/orders, /api/chat, /api/admin
+   - Middlewares: autenticación, subida de imágenes (multer), logging
+   - Controladores: lógica específica por entidad
+   - Servicios: Pagos, Envíos, Notificaciones, Moderación
+
+3. CAPA DE DATOS (Supabase - PostgreSQL)
+   - Tablas: users, products, orders, transactions, chat_messages, reports
+   - Row Level Security (RLS) para aislamiento entre vendedores
+   - Buckets de Storage para fotos de productos
+
+4. CAPA DE INTEGRACIONES (APIs Externas)
+   - Pagos: API de Banco Familiar/UENO (transferencia/QR)
+   - Envíos: API de Kañy Pro o SendBox
+   - Notificaciones: OneSignal (push) + Resend (emails)
+   - Geolocalización: API de Google Maps (para calcular envíos)
+
+FLUJO DE DATOS TÍPICO (Compra):
+-------------------------------------------------------------------------------
+1. Usuario busca productos -> GET /api/products?filters...
+2. Agrega al carrito (localStorage o estado en front)
+3. Confirma compra -> POST /api/orders (crea orden con status 'pending_payment')
+4. Backend genera QR de pago o datos de transferencia
+5. Usuario paga -> Webhook recibe confirmación bancaria
+6. Backend cambia status a 'paid' y notifica al vendedor
+7. Vendedor envía producto -> registra código de envío
+8. Usuario confirma recepción -> libera pago (menos comisión 10%)
+9. Finanzas: plataforma retiene comisión, resto al vendedor
+
+REQUISITOS TÉCNICOS MÍNIMOS:
+-------------------------------------------------------------------------------
+- Node.js 20.x o superior
+- PostgreSQL 15.x
+- 1GB RAM (entorno desarrollo) / 2GB RAM (producción inicial)
+- Conexión a Internet para APIs externas
+- HTTPS obligatorio (usar Let's Encrypt gratuito)
+
+VARIABLES DE ENTORNO (.env):
+-------------------------------------------------------------------------------
+PORT=3000
+SUPABASE_URL=tu_url
+SUPABASE_ANON_KEY=tu_key
+SUPABASE_SERVICE_ROLE_KEY=tu_service_key (solo backend)
+JWT_SECRET=clave_super_segura
+BANK_API_KEY=clave_del_banco
+BANK_API_URL=https://api.bancofamiliar.com.py/v1
+SEND_BOX_API_KEY=clave_sendbox
+ONESIGNAL_APP_ID=id_app
+ONESIGNAL_API_KEY=key_notificaciones
+ADMIN_EMAILS=admin@reshop.com,moderador@reshop.com
+
+ESTRATEGIA DE DESPLIEGUE (Local -> Producción):
+-------------------------------------------------------------------------------
+FASE 1 (Desarrollo Local):
+  - Node.js corriendo en localhost:3000
+  - Supabase proyecto gratuito (hasta 500MB)
+  - Frontend servido con Live Server
+
+FASE 2 (Staging - pruebas):
+  - Backend en Render.com (plan gratuito)
+  - Frontend en Vercel (plan gratuito)
+  - Base de datos en Supabase (plan pro - 25USD/mes)
+
+FASE 3 (Producción - lanzamiento):
+  - Backend en Railway.app (plan 20USD/mes)
+  - Frontend en Vercel (pro - 20USD/mes)
+  - Supabase (plan pro - 25USD/mes)
+  - CDN de imágenes: Cloudinary o Supabase Storage
+
+COSTO MENSUAL ESTIMADO (escalado inicial):
+-------------------------------------------------------------------------------
+- Supabase Pro: 25 USD
+- Railway Backend: 20 USD
+- Vercel Frontend: 20 USD
+- Dominio .com.py: 5 USD/mes (aprox 60mil Gs)
+- Total aprox: 70 USD/mes (350mil Gs aproximadamente)
+================================================================================

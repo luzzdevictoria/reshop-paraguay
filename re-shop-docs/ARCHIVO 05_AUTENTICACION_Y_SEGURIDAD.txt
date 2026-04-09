@@ -1,0 +1,170 @@
+================================================================================
+ARCHIVO: 05_AUTENTICACION_Y_SEGURIDAD.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Definición de auth y seguridad | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define el sistema de autenticación, autorización por roles, protección de datos,
+prevención de ataques y buenas prácticas de seguridad.
+
+================================================================================
+1. AUTENTICACIÓN (JWT)
+================================================================================
+- Uso: JSON Web Tokens (JWT) firmados con HMAC-SHA256
+- Almacenamiento: localStorage (frontend) o cookies HttpOnly (recomendado)
+- Expiración: 7 días para token de acceso
+- Refresh token: opcional, para mantener sesión por más tiempo
+
+Estructura del JWT:
+{
+    "sub": "uuid_del_usuario",
+    "email": "usuario@example.com",
+    "role": "seller",
+    "iat": 1744214400,
+    "exp": 1744819200
+}
+
+Middleware de autenticación (backend):
+-------------------------------------------------------------------------------
+const jwt = require('jsonwebtoken');
+
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    if (!token) return res.status(401).json({ error: 'Token requerido' });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Token inválido o expirado' });
+        req.user = user;
+        next();
+    });
+}
+
+Middleware de autorización por rol:
+-------------------------------------------------------------------------------
+function requireRole(roles) {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Acceso denegado' });
+        }
+        next();
+    };
+}
+// Uso: app.post('/products', authenticateToken, requireRole(['seller', 'admin']), createProduct);
+
+================================================================================
+2. PROTECCIÓN DE CONTRASEÑAS
+================================================================================
+- Hash: bcrypt (costo 10-12)
+- No almacenar contraseñas en texto plano NUNCA
+- Política de contraseñas: mínimo 8 caracteres, 1 número, 1 mayúscula
+
+Ejemplo en Node.js:
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const hashedPassword = await bcrypt.hash(password, saltRounds);
+const isValid = await bcrypt.compare(password, hashedPassword);
+
+================================================================================
+3. SEGURIDAD EN BASE DE DATOS
+================================================================================
+- Supabase RLS (Row Level Security) habilitado en todas las tablas
+- Encriptación de datos sensibles (CI, dirección exacta) con AES-256
+- Conexión a DB solo desde backend (no exponer credenciales en frontend)
+
+Ejemplo de encriptación (Node.js crypto):
+const crypto = require('crypto');
+const algorithm = 'aes-256-cbc';
+const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
+
+function encrypt(text) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+}
+
+================================================================================
+4. PREVENCIÓN DE ATAQUES COMUNES
+================================================================================
+| Ataque           | Mitigación                                        |
+|------------------|---------------------------------------------------|
+| SQL Injection    | Usar consultas parametrizadas (Supabase o pg pool)|
+| XSS              | Sanitizar salida de HTML (escape caracteres)     |
+| CSRF             | Usar tokens CSRF o SameSite cookies              |
+| Rate Limiting    | Implementar express-rate-limit (100 req/min)     |
+| Brute Force      | Limitar intentos de login (5 fallidos = bloqueo 15min)|
+| MITM             | Forzar HTTPS (HSTS header)                       |
+
+Ejemplo Rate Limiting:
+const rateLimit = require('express-rate-limit');
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // 5 intentos
+    message: { error: 'Demasiados intentos, espera 15 minutos' }
+});
+app.post('/auth/login', loginLimiter, loginHandler);
+
+================================================================================
+5. HEADERS DE SEGURIDAD (Helmet.js)
+================================================================================
+const helmet = require('helmet');
+app.use(helmet()); // Agrega:
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: DENY (evita clickjacking)
+- Strict-Transport-Security: max-age=31536000
+- X-XSS-Protection: 1; mode=block
+
+================================================================================
+6. VALIDACIÓN DE DATOS DE ENTRADA
+================================================================================
+Usar Joi o express-validator para validar todos los inputs del usuario:
+
+const { body, validationResult } = require('express-validator');
+
+app.post('/products',
+    body('title').notEmpty().isLength({ min: 3, max: 100 }),
+    body('price').isInt({ min: 1000, max: 1000000 }),
+    body('category').isIn(['pantalones', 'camisas', 'vestidos']),
+    (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+        // Continuar...
+    }
+);
+
+================================================================================
+7. LOGS Y MONITOREO
+================================================================================
+- Winston o Pino para logging estructurado
+- Niveles: error, warn, info, debug
+- No loguear contraseñas ni tokens
+
+Ejemplo Winston:
+const winston = require('winston');
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' })
+    ]
+});
+
+================================================================================
+8. POLÍTICA DE SESIONES Y CIERRE
+-------------------------------------------------------------------------------
+- Logout: eliminar token del cliente y opcionalmente agregar token a blacklist (Redis)
+- Cierre automático por inactividad: opcional después de 30 minutos
+- Sesiones simultáneas: permitidas por defecto (el mismo usuario puede loguearse en varios dispositivos)
+================================================================================

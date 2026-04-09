@@ -1,0 +1,264 @@
+================================================================================
+ARCHIVO: 02_MODELO_DE_DATOS.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Creación del modelo relacional | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define todas las tablas, relaciones, índices y políticas de seguridad (RLS)
+para la base de datos PostgreSQL en Supabase.
+
+================================================================================
+1. TABLA: users (usuarios del sistema)
+================================================================================
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL, -- Solo si no usamos Supabase Auth
+    full_name VARCHAR(100) NOT NULL,
+    document_id VARCHAR(20) UNIQUE, -- CI paraguayo (encriptado)
+    phone VARCHAR(20),
+    address TEXT,
+    city VARCHAR(50), -- 'Asunción', 'CDE', 'Encarnación', etc.
+    role VARCHAR(20) DEFAULT 'buyer' CHECK (role IN ('buyer', 'seller', 'admin')),
+    store_name VARCHAR(100), -- Solo si role='seller'
+    store_description TEXT,
+    store_logo_url TEXT,
+    rating DECIMAL(2,1) DEFAULT 0, -- Promedio 0.0 a 5.0
+    total_sales INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    last_login TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    email_verified BOOLEAN DEFAULT FALSE
+);
+
+-- Índices
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_city ON users(city);
+CREATE INDEX idx_users_role ON users(role);
+
+-- Row Level Security (RLS)
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+-- Política: cada usuario solo ve su propio perfil
+CREATE POLICY user_self_view ON users FOR SELECT USING (auth.uid() = id);
+-- Admin puede ver todo
+CREATE POLICY admin_all_view ON users FOR ALL USING (auth.role() = 'admin');
+
+================================================================================
+2. TABLA: products (productos publicados)
+================================================================================
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    seller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL, -- En guaraníes (sin decimales)
+    category VARCHAR(50) NOT NULL, -- 'pantalones', 'camisas', 'vestidos', 'chaquetas', 'calzado', 'accesorios'
+    size VARCHAR(10), -- 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'Único'
+    condition VARCHAR(20) CHECK (condition IN ('new_with_tags', 'new_without_tags', 'very_good', 'good', 'acceptable')),
+    brand VARCHAR(50),
+    color VARCHAR(30),
+    material VARCHAR(50),
+    images_urls TEXT[] DEFAULT '{}', -- Array de URLs de Supabase Storage
+    views INT DEFAULT 0,
+    likes INT DEFAULT 0,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'sold', 'inactive', 'reported')),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX idx_products_seller ON products(seller_id);
+CREATE INDEX idx_products_category ON products(category);
+CREATE INDEX idx_products_price ON products(price);
+CREATE INDEX idx_products_status ON products(status);
+CREATE INDEX idx_products_created ON products(created_at DESC);
+-- Búsqueda full-text
+CREATE INDEX idx_products_search ON products USING GIN(to_tsvector('spanish', title || ' ' || description));
+
+-- RLS
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+-- Cualquiera puede ver productos activos
+CREATE POLICY products_view ON products FOR SELECT USING (status = 'active');
+-- Vendedor puede CRUD sus productos
+CREATE POLICY products_seller_manage ON products FOR ALL USING (auth.uid() = seller_id);
+
+================================================================================
+3. TABLA: orders (órdenes de compra)
+================================================================================
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    buyer_id UUID NOT NULL REFERENCES users(id),
+    seller_id UUID NOT NULL REFERENCES users(id),
+    order_number VARCHAR(20) UNIQUE NOT NULL, -- Formato: RS-20260409-0001
+    total_amount INTEGER NOT NULL, -- Subtotal + envío
+    subtotal INTEGER NOT NULL, -- Suma de productos
+    shipping_cost INTEGER DEFAULT 0,
+    platform_fee INTEGER GENERATED ALWAYS AS (ROUND(total_amount * 0.10)) STORED, -- Comisión 10%
+    seller_payout INTEGER GENERATED ALWAYS AS (total_amount - platform_fee) STORED,
+    payment_method VARCHAR(30) CHECK (payment_method IN ('transferencia', 'qr', 'efectivo_contraentrega')),
+    payment_status VARCHAR(20) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
+    order_status VARCHAR(20) DEFAULT 'pending_payment' CHECK (order_status IN ('pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled', 'refunded')),
+    shipping_address TEXT NOT NULL,
+    shipping_tracking_number VARCHAR(100),
+    shipped_at TIMESTAMP,
+    delivered_at TIMESTAMP,
+    buyer_confirmed BOOLEAN DEFAULT FALSE, -- Confirma recepción
+    cancelled_by VARCHAR(10), -- 'buyer', 'seller', 'system'
+    cancellation_reason TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Índices
+CREATE INDEX idx_orders_buyer ON orders(buyer_id);
+CREATE INDEX idx_orders_seller ON orders(seller_id);
+CREATE INDEX idx_orders_status ON orders(order_status);
+CREATE INDEX idx_orders_payment ON orders(payment_status);
+CREATE INDEX idx_orders_number ON orders(order_number);
+
+-- RLS
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+-- Comprador y vendedor pueden ver sus órdenes
+CREATE POLICY orders_view ON orders FOR SELECT USING (auth.uid() = buyer_id OR auth.uid() = seller_id);
+
+================================================================================
+4. TABLA: order_items (ítems dentro de una orden)
+================================================================================
+CREATE TABLE order_items (
+    id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id),
+    product_name VARCHAR(150) NOT NULL, -- Snapshot al momento de compra
+    product_price INT NOT NULL, -- Precio al momento de compra
+    quantity INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+
+================================================================================
+5. TABLA: transactions (registro financiero)
+================================================================================
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES orders(id),
+    type VARCHAR(30) CHECK (type IN ('buyer_payment', 'platform_fee_collection', 'seller_payout', 'refund')),
+    amount INTEGER NOT NULL,
+    currency VARCHAR(3) DEFAULT 'PYG',
+    payment_reference VARCHAR(100), -- ID de transacción del banco
+    qr_code_url TEXT, -- Si aplica
+    bank_response JSONB, -- Guardar respuesta cruda del banco
+    status VARCHAR(20) DEFAULT 'pending',
+    processed_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_transactions_order ON transactions(order_id);
+
+================================================================================
+6. TABLA: chat_messages (mensajes entre comprador y vendedor)
+================================================================================
+CREATE TABLE chat_messages (
+    id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    sender_id UUID NOT NULL REFERENCES users(id),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_chat_order ON chat_messages(order_id);
+CREATE INDEX idx_chat_sender ON chat_messages(sender_id);
+
+================================================================================
+7. TABLA: reviews (calificaciones)
+================================================================================
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL REFERENCES orders(id) UNIQUE, -- Una review por orden
+    reviewer_id UUID NOT NULL REFERENCES users(id), -- Quien califica
+    reviewed_id UUID NOT NULL REFERENCES users(id), -- Quien recibe la calificación
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_reviews_reviewed ON reviews(reviewed_id);
+
+================================================================================
+8. TABLA: reports (denuncias de usuarios)
+================================================================================
+CREATE TABLE reports (
+    id SERIAL PRIMARY KEY,
+    reporter_id UUID NOT NULL REFERENCES users(id),
+    reported_product_id INT REFERENCES products(id),
+    reported_user_id UUID REFERENCES users(id),
+    reason VARCHAR(50) CHECK (reason IN ('producto_falso', 'producto_danado', 'vendedor_fraude', 'spam', 'contenido_inapropiado', 'otro')),
+    description TEXT,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'resolved', 'dismissed')),
+    resolution_notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    resolved_at TIMESTAMP
+);
+
+CREATE INDEX idx_reports_status ON reports(status);
+
+================================================================================
+9. TABLA: favorites (productos guardados por compradores)
+================================================================================
+CREATE TABLE favorites (
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (user_id, product_id)
+);
+
+================================================================================
+10. TABLA: notifications (notificaciones push/email)
+================================================================================
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(30) CHECK (type IN ('new_order', 'payment_confirmed', 'order_shipped', 'new_message', 'review_received', 'report_resolved')),
+    title VARCHAR(100),
+    body TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    metadata JSONB, -- Datos adicionales (order_id, product_id, etc.)
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_user ON notifications(user_id);
+
+================================================================================
+DIAGRAMA DE RELACIONES (textual):
+-------------------------------------------------------------------------------
+users 1---* products (un vendedor tiene muchos productos)
+users 1---* orders (comprador) y users 1---* orders (vendedor)
+orders 1---* order_items
+order_items *---1 products
+orders 1---1 transactions
+orders 1---* chat_messages
+orders 1---1 reviews
+users 1---* reports (reportador) y users 1---* reports (reportado)
+users *---* favorites (tabla puente)
+users 1---* notifications
+================================================================================
+BACKUP Y MIGRACIONES:
+-------------------------------------------------------------------------------
+- Usar Supabase Migrations (archivos .sql versionados)
+- Carpeta /migrations:
+    001_create_users.sql
+    002_create_products.sql
+    003_create_orders.sql
+    ...
+- Backup automático diario (configurar en Supabase)
+================================================================================

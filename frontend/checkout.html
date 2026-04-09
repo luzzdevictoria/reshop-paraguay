@@ -1,0 +1,58 @@
+<!--
+================================================================================
+ARCHIVO: order-confirmation.html
+PROYECTO: ReShop Paraguay
+DESCRIPCION: Pagina de confirmacion de pedido
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido Confirmado - ReShop Paraguay</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 30px 20px; }
+        .confirmation-card { background: white; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .checkmark { font-size: 5rem; color: #4CAF50; margin-bottom: 20px; }
+        .order-number { background: #2A5C6E; color: white; padding: 10px 20px; border-radius: 25px; display: inline-block; margin: 20px 0; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; margin: 10px; }
+        .btn-primary { background: #2A5C6E; color: white; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { background: #1e4452; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ ReShop Paraguay</h1>
+        <p>Shopping Virtual de Ropa de Segunda Mano</p>
+    </div>
+    <div class="container">
+        <div class="confirmation-card">
+            <div class="checkmark">✓</div>
+            <h2 style="color: #2A5C6E;">¡Pedido Confirmado!</h2>
+            <p>Gracias por tu compra. Hemos recibido tu pedido correctamente.</p>
+            <div class="order-number" id="orderNumber"></div>
+            <p>Te enviaremos un email con los detalles de seguimiento.</p>
+            <div style="margin-top: 30px;">
+                <a href="index.html" class="btn btn-primary">Seguir Comprando</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderNumber = urlParams.get('order');
+        document.getElementById('orderNumber').innerHTML = orderNumber || 'No disponible';
+    </script>
+</body>
+</html>

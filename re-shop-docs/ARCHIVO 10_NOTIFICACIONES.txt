@@ -1,0 +1,107 @@
+================================================================================
+ARCHIVO: 10_NOTIFICACIONES.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Sistema de notificaciones      | Pedro José Pirovani   |
+================================================================================
+
+DESCRIPCIÓN:
+Define cómo y cuándo se notifica a los usuarios (email, push, SMS) sobre eventos
+relevantes en la plataforma.
+
+================================================================================
+1. CANALES DE NOTIFICACIÓN
+================================================================================
+| Canal      | Implementación                  | Costo                   | Prioridad |
+|------------|---------------------------------|-------------------------|-----------|
+| Email      | Resend.com o Nodemailer (SMTP)  | 0 - 1000 emails gratis  | Alta      |
+| Push (Web) | OneSignal (gratis hasta 10k usuarios) | Gratis           | Media     |
+| SMS        | Twilio o Tigo SMS API           | ~200 Gs por SMS         | Baja      |
+| In-app     | Tabla notifications (ver modelo) | Gratis                  | Alta      |
+
+Estrategia inicial: Email + Notificaciones in-app. Push más adelante.
+
+================================================================================
+2. EVENTOS QUE DISPARAN NOTIFICACIONES
+================================================================================
+| Evento                     | A quién          | Canal           | Plantilla (email)              |
+|----------------------------|------------------|-----------------|--------------------------------|
+| Registro exitoso           | Usuario          | Email           | "Bienvenido a ReShop"          |
+| Venta realizada            | Vendedor         | Email + in-app  | "¡Vendiste {producto}!"        |
+| Pago confirmado            | Vendedor         | Email           | "Pago confirmado, prepara envío"|
+| Producto enviado           | Comprador        | Email + in-app  | "Tu pedido fue enviado"        |
+| Nuevo mensaje en chat      | Receptor         | Email + in-app  | "{usuario} te envió un mensaje"|
+| Reporte resuelto           | Reportero        | Email           | "Resultado de tu reporte"      |
+| Suspensión de cuenta       | Usuario          | Email + SMS     | "Tu cuenta ha sido suspendida" |
+
+================================================================================
+3. CONFIGURACIÓN DE EMAIL (Resend.com)
+================================================================================
+Instalación: npm install resend
+
+Código de ejemplo:
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+async function sendWelcomeEmail(email, name) {
+    await resend.emails.send({
+        from: 'ReShop <notificaciones@reshop.com.py>',
+        to: [email],
+        subject: 'Bienvenido a ReShop Paraguay',
+        html: `
+            <h1>¡Hola ${name}!</h1>
+            <p>Gracias por unirte a ReShop, el shopping virtual de ropa de segunda mano.</p>
+            <p>Empieza a vender o comprar hoy mismo.</p>
+            <a href="https://reshop.com.py">Ir a la tienda</a>
+        `
+    });
+}
+
+================================================================================
+4. NOTIFICACIONES IN-APP (Tabla notifications)
+================================================================================
+Cada vez que ocurre un evento, se inserta un registro en la tabla notifications.
+
+Ejemplo al crear una orden:
+await db.query(
+    `INSERT INTO notifications (user_id, type, title, body, metadata)
+     VALUES ($1, 'new_order', 'Nueva venta', 'Tu producto ${productTitle} fue vendido', $2)`,
+    [sellerId, JSON.stringify({ order_id: orderId })]
+);
+
+El frontend cada 30 segundos consulta GET /notifications/unread y muestra un badge.
+
+================================================================================
+5. PUSH NOTIFICATIONS (OneSignal - Web)
+================================================================================
+Configuración:
+1. Crear cuenta en OneSignal
+2. Registrar tu dominio
+3. Instalar SDK en frontend:
+   <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"></script>
+   <script>
+       window.OneSignal = window.OneSignal || [];
+       OneSignal.push(function() {
+           OneSignal.init({ appId: "TU_APP_ID" });
+       });
+   </script>
+
+4. Desde backend, enviar notificación push vía API de OneSignal.
+
+================================================================================
+6. PREFERENCIAS DEL USUARIO
+================================================================================
+En el perfil, el usuario puede configurar:
+- [x] Notificaciones por email
+- [ ] Notificaciones push
+- [x] Recordatorios de envío
+
+Guardar en tabla users: notification_preferences JSONB.
+================================================================================

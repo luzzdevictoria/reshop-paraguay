@@ -1,0 +1,122 @@
+================================================================================
+ARCHIVO: 09_MODERACION_Y_REPORTES.txt
+PROYECTO: ReShop Paraguay
+VERSIÓN: 1.0.0
+FECHA CREACIÓN: 2026-04-09
+AUTOR: Pedro José Pirovani
+================================================================================
+HISTORIAL DE CAMBIOS:
+-------------------------------------------------------------------------------
+| VERSIÓN | FECHA      | DESCRIPCIÓN                    | AUTOR         |
+|---------|------------|--------------------------------|---------------|
+| 1.0.0   | 2026-04-09 | Sistema de moderación y denuncias | Pedro José Pirovani |
+================================================================================
+
+DESCRIPCIÓN:
+Define cómo los usuarios reportan contenido inapropiado, cómo los administradores
+moderan y el sistema automatizado de detección de fraudes.
+
+================================================================================
+1. TIPOS DE REPORTES
+================================================================================
+| Código | Motivo                    | Afecta a                     |
+|--------|---------------------------|------------------------------|
+| R01    | Producto falso/fraude     | Producto                     |
+| R02    | Producto en mal estado    | Producto                     |
+| R03    | Vendedor fraudulento      | Usuario (vendedor)           |
+| R04    | Spam o publicidad         | Producto o usuario           |
+| R05    | Contenido inapropiado     | Producto o usuario           |
+| R06    | Disputa de entrega        | Orden                        |
+
+================================================================================
+2. FLUJO DE REPORTE (Usuario)
+================================================================================
+1. Usuario ve un producto sospechoso
+2. Hace clic en "Reportar" (ícono bandera)
+3. Selecciona motivo de la lista
+4. Opcional: escribe descripción adicional
+5. Envía reporte → se inserta en tabla reports
+6. Sistema envía notificación al admin
+
+================================================================================
+3. PANEL DE MODERACIÓN (Admin)
+================================================================================
+Endpoint GET /admin/reports (solo admin)
+Muestra:
+- Lista de reportes pendientes
+- Producto/usuario afectado
+- Motivo y descripción
+- Botones: "Revisar", "Ocultar producto", "Suspender usuario", "Desestimar"
+
+Acciones del admin:
+1. Ver producto denunciado
+2. Leer la descripción del reporte
+3. Decisión:
+   - Si es válido: ocultar producto O suspender usuario (según nivel)
+   - Si es falso: desestimar reporte
+4. Dejar resolución_notes (ej: "Producto eliminado por violar regla X")
+
+================================================================================
+4. DETECCIÓN AUTOMÁTICA (Pre-moderación)
+================================================================================
+Al publicar un producto, el backend ejecuta validaciones automáticas:
+
+Lista negra de palabras:
+const bannedWords = ['viagra', 'falso', 'réplica', 'imitation', 'nike falso'];
+
+function moderateProduct(title, description) {
+    for (let word of bannedWords) {
+        if (title.toLowerCase().includes(word) || description.toLowerCase().includes(word)) {
+            return { approved: false, reason: `Contiene palabra prohibida: ${word}` };
+        }
+    }
+
+    // Detectar números de teléfono (evitar contacto fuera de la plataforma)
+    const phoneRegex = /(09\d{8}|0\d{2,3}\d{6,7})/;
+    if (phoneRegex.test(description)) {
+        return { approved: false, reason: 'No compartas números de teléfono en la descripción' };
+    }
+
+    return { approved: true };
+}
+
+Si no pasa la moderación, el producto se guarda como "inactive" y se notifica al vendedor.
+
+================================================================================
+5. ESCALA DE SANCIONES (ver también 12_NORMATIVA_INTERNA)
+================================================================================
+| Infracción                              | Sanción                                |
+|-----------------------------------------|----------------------------------------|
+| 1 reporte falso (denunciante malicioso) | Advertencia                            |
+| 3 reportes falsos                       | Suspensión 7 días                      |
+| Producto falso confirmado               | Producto eliminado + multa 100k Gs     |
+| Vendedor fraudulento (estafa)           | Expulsión permanente + denuncia penal  |
+| Acoso en chat                           | Suspensión 30 días o expulsión         |
+
+================================================================================
+6. CÓDIGO DE EJEMPLO: CREAR REPORTE
+-------------------------------------------------------------------------------
+app.post('/api/reports/product/:productId', authenticateToken, async (req, res) => {
+    const { productId } = req.params;
+    const { reason, description } = req.body;
+    const reporterId = req.user.sub;
+
+    // Verificar que el producto existe
+    const product = await db.query('SELECT * FROM products WHERE id = $1', [productId]);
+    if (product.rows.length === 0) {
+        return res.status(404).json({ error: 'Producto no existe' });
+    }
+
+    // Insertar reporte
+    const report = await db.query(
+        `INSERT INTO reports (reporter_id, reported_product_id, reason, description, status)
+         VALUES ($1, $2, $3, $4, 'pending') RETURNING *`,
+        [reporterId, productId, reason, description]
+    );
+
+    // Notificar a admin
+    await notifyAdmins('Nuevo reporte de producto', `Producto ID: ${productId}`);
+
+    res.json({ success: true, report_id: report.rows[0].id });
+});
+================================================================================
