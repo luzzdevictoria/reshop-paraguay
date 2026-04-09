@@ -1,1 +1,113 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - ReShop Paraguay</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; }
+        .container { max-width: 500px; margin: 0 auto; padding: 50px 20px; }
+        .form-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; }
+        .btn-primary { background: #2A5C6E; color: white; }
+        .btn-primary:hover { background: #1e4452; }
+        .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
+        .message.success { background: #d4edda; color: #155724; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+        .register-link { text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛍️ ReShop Paraguay</h1>
+        <p>Shopping Virtual de Ropa de Segunda Mano</p>
+        <div style="margin-top: 10px;">
+            <a href="index.html">🏠 Inicio</a>
+            <a href="register.html">📝 Registrarse</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="form-card">
+            <h2 style="color: #2A5C6E; margin-bottom: 20px;">Iniciar Sesión</h2>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña *</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ingresar</button>
+                <div id="message" class="message"></div>
+            </form>
+            <div class="register-link">
+                ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
+        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://reshop-backend.vercel.app';
+
+        if (localStorage.getItem('token')) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            if (!email || !password) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = '❌ Complete todos los campos';
+                return;
+            }
+
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = '🔄 Iniciando sesión...';
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.className = 'message success';
+                    messageDiv.innerHTML = `✅ ¡Bienvenido ${data.user.full_name}! Redirigiendo...`;
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.innerHTML = `❌ ${data.error}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = `❌ Error de conexión: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
