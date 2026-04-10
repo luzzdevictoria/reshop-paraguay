@@ -111,7 +111,7 @@ HISTORIAL DE MODIFICACIONES:
                     <textarea id="notes" rows="3" placeholder="Ej: Dejar en portería, llamar antes de entregar, etc."></textarea>
                 </div>
                 <div class="form-group">
-                    <label><i class="fas fa-money-bill-wave"></i> Método de pago *</label>
+                    <label><i class="fas fa-tag"></i> Método de pago *</label>
                     <select id="paymentMethod" required>
     <option value="">Seleccionar...</option>
     <option value="transferencia">🏦 Transferencia Bancaria</option>
@@ -136,7 +136,7 @@ HISTORIAL DE MODIFICACIONES:
         
         // Verificar autenticacion
         if (!token) {
-            window.location.href = 'login.html?redirect=checkout.html';
+            window.location.href = 'login.html₲redirect=checkout.html';
         }
         
         // Cargar resumen del carrito
@@ -216,7 +216,7 @@ HISTORIAL DE MODIFICACIONES:
                     localStorage.removeItem('reshop_cart');
                     
                     // Redirigir a confirmación con número de orden
-                    window.location.href = `order-confirmation.html?order=${data.order.order_number}`;
+                    window.location.href = `order-confirmation.html₲order=${data.order.order_number}`;
                 } else {
                     showMessage(data.error || 'Error al procesar el pedido', 'error');
                 }

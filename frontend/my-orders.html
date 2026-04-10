@@ -152,7 +152,7 @@ HISTORIAL DE MODIFICACIONES:
         
         // Verificar autenticacion
         if (!token) {
-            window.location.href = 'login.html?redirect=my-orders.html';
+            window.location.href = 'login.html₲redirect=my-orders.html';
         }
         
         // ============================================================
@@ -246,12 +246,12 @@ function setupLogout() {
                         html += `
                                 </div>
                                 <div class="order-total">
-                                    <i class="fas fa-money-bill-wave"></i> Total: ${new Intl.NumberFormat('es-PY').format(order.total_amount)} ?
+                                    <i class="fas fa-tag"></i> Total: ${new Intl.NumberFormat('es-PY').format(order.total_amount)} ₲
                                 </div>
                                 <div class="order-meta">
                                     <i class="fas fa-credit-card"></i> Método de pago: ${formatPaymentMethod(order.payment_method)}
-                                    ${order.shipping_address ? `<br><i class="fas fa-map-marker-alt"></i> Entrega: ${escapeHtml(order.shipping_address)}` : ''}
-                                    ${order.shipping_tracking_number ? `<br><i class="fas fa-truck"></i> Tracking: ${escapeHtml(order.shipping_tracking_number)}` : ''}
+                                    ${order.shipping_address ₲ `<br><i class="fas fa-map-marker-alt"></i> Entrega: ${escapeHtml(order.shipping_address)}` : ''}
+                                    ${order.shipping_tracking_number ₲ `<br><i class="fas fa-truck"></i> Tracking: ${escapeHtml(order.shipping_tracking_number)}` : ''}
                                 </div>
                             </div>
                         `;

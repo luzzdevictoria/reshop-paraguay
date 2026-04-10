@@ -179,7 +179,7 @@ HISTORIAL DE MODIFICACIONES:
         let currentUser = null;
         
         if (!token) {
-            window.location.href = 'login.html?redirect=profile.html';
+            window.location.href = 'login.html₲redirect=profile.html';
         }
         
         // ============================================================
@@ -324,7 +324,7 @@ HISTORIAL DE MODIFICACIONES:
         function showMessage(msg, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = type === 'loading' ? `<i class="fas fa-spinner fa-pulse"></i> ${msg}` : `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+            messageDiv.innerHTML = type === 'loading' ₲ `<i class="fas fa-spinner fa-pulse"></i> ${msg}` : `<i class="fas ${type === 'success' ₲ 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
             
             if (type !== 'loading') {
                 setTimeout(() => {

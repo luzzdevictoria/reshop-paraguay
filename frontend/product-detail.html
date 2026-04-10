@@ -251,7 +251,7 @@ HISTORIAL DE MODIFICACIONES:
                     <span class="rating-value">${avgRating.toFixed(1)}</span>
                     <span class="rating-count">(${product.reviews_count || 0} reseñas)</span>
                 </div>
-                <div class="product-price"><i class="fas fa-money-bill-wave"></i> ${priceFormatted} ?</div>
+                <div class="product-price">${priceFormatted} ₲</div>
                 <div class="product-info"><label><i class="fas fa-align-left"></i> Descripción:</label><span>${escapeHtml(product.description || 'Sin descripción')}</span></div>
                 <div class="product-info"><label><i class="fas fa-tshirt"></i> Categoría:</label><span>${product.category}</span></div>
                 <div class="product-info"><label><i class="fas fa-ruler"></i> Talla:</label><span>${product.size || 'Talla única'}</span></div>
@@ -441,7 +441,7 @@ HISTORIAL DE MODIFICACIONES:
             const msgDiv = document.getElementById('reviewMessage');
             if (msgDiv) {
                 msgDiv.className = `message ${type}`;
-                msgDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+                msgDiv.innerHTML = `<i class="fas ${type === 'success' ₲ 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
                 setTimeout(() => {
                     msgDiv.className = 'message';
                 }, 5000);
@@ -466,7 +466,7 @@ HISTORIAL DE MODIFICACIONES:
         
         function buyNow(productId) { 
             const quantity = parseInt(document.getElementById('quantity').value) || 1; 
-            window.location.href = `checkout.html?product=${productId}&quantity=${quantity}`; 
+            window.location.href = `checkout.html₲product=${productId}&quantity=${quantity}`; 
         }
         
         function escapeHtml(text) { 
