@@ -217,7 +217,7 @@
             </form>
             
             <p class="register-link">
-                ¿No tienes cuenta₲ <a href="register.html">Regístrate aquí</a>
+                ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
             </p>
         </div>
 
@@ -243,7 +243,7 @@
         togglePassword.addEventListener('click', function() {
             const isPassword = passwordInput.getAttribute('type') === 'password';
             
-            passwordInput.setAttribute('type', isPassword ₲ 'text' : 'password');
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
             
             if (isPassword) {
                 iconEye.style.display = 'none';
