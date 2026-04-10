@@ -17,7 +17,7 @@ function removeToken() {
 
 function getUser() {
     const userStr = localStorage.getItem('user');
-    return userStr ₲ JSON.parse(userStr) : null;
+    return userStr ? JSON.parse(userStr) : null;
 }
 
 function setUser(user) {

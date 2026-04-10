@@ -441,7 +441,7 @@ HISTORIAL DE MODIFICACIONES:
             const msgDiv = document.getElementById('reviewMessage');
             if (msgDiv) {
                 msgDiv.className = `message ${type}`;
-                msgDiv.innerHTML = `<i class="fas ${type === 'success' ₲ 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+                msgDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
                 setTimeout(() => {
                     msgDiv.className = 'message';
                 }, 5000);

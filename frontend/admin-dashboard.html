@@ -227,15 +227,15 @@ HISTORIAL DE MODIFICACIONES:
                 if (data.success && data.users && data.users.length > 0) {
                     let html = '<table><thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Tienda</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
                     for (const user of data.users) {
-                        const roleClass = user.role === 'seller' ₲ 'badge-seller' : (user.role === 'admin' ₲ 'badge-admin' : 'badge-buyer');
-                        const statusText = user.is_active ₲ 'Activo' : 'Inactivo';
+                        const roleClass = user.role === 'seller' ? 'badge-seller' : (user.role === 'admin' ? 'badge-admin' : 'badge-buyer');
+                        const statusText = user.is_active ? 'Activo' : 'Inactivo';
                         html += `<tr>
                             <td>${escapeHtml(user.email)}</td>
                             <td>${escapeHtml(user.full_name)}</td>
                             <td><span class="badge ${roleClass}">${user.role}</span></td>
                             <td>${escapeHtml(user.store_name || '-')}</td>
                             <td>${statusText}</td>
-                            <td><button class="btn btn-warning" onclick="toggleUserStatus('${user.id}')">${user.is_active ₲ 'Desactivar' : 'Activar'}</button></td>
+                            <td><button class="btn btn-warning" onclick="toggleUserStatus('${user.id}')">${user.is_active ? 'Desactivar' : 'Activar'}</button></td>
                         </tr>`;
                     }
                     html += '</tbody></table>';
@@ -430,7 +430,7 @@ HISTORIAL DE MODIFICACIONES:
         }
         
         async function toggleProductStatus(productId, currentStatus) {
-            const newStatus = currentStatus === 'active' ₲ 'inactive' : 'active';
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
             try {
                 const response = await fetch(`${API_URL}/api/admin/products/${productId}/status`, {
                     method: 'PUT',

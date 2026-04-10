@@ -250,8 +250,8 @@ function setupLogout() {
                                 </div>
                                 <div class="order-meta">
                                     <i class="fas fa-credit-card"></i> Método de pago: ${formatPaymentMethod(order.payment_method)}
-                                    ${order.shipping_address ₲ `<br><i class="fas fa-map-marker-alt"></i> Entrega: ${escapeHtml(order.shipping_address)}` : ''}
-                                    ${order.shipping_tracking_number ₲ `<br><i class="fas fa-truck"></i> Tracking: ${escapeHtml(order.shipping_tracking_number)}` : ''}
+                                    ${order.shipping_address ? `<br><i class="fas fa-map-marker-alt"></i> Entrega: ${escapeHtml(order.shipping_address)}` : ''}
+                                    ${order.shipping_tracking_number ? `<br><i class="fas fa-truck"></i> Tracking: ${escapeHtml(order.shipping_tracking_number)}` : ''}
                                 </div>
                             </div>
                         `;

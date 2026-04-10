@@ -48,7 +48,7 @@ function renderProducts(products) {
     productsGrid.innerHTML = products.map(product => `
         <div class="product-card">
             <div class="product-card__image">
-                <img src="${product.images_urls && product.images_urls[0] ₲ product.images_urls[0] : 'https://placehold.co/300x200?text=Sin+Imagen'}" 
+                <img src="${product.images_urls && product.images_urls[0] ? product.images_urls[0] : 'https://placehold.co/300x200?text=Sin+Imagen'}" 
                      alt="${product.title}" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div class="product-card__content">
