@@ -1,12 +1,26 @@
 /**
-UBICACION: C:\Users\pirov\ReShop\server.js
-VERSION: 3.1.2 - CORS FIXED + JWT ADMIN MIDDLEWARE
-PROPIETARIA: Luciana Noelia Da Silva
+================================================================================
+ARCHIVO: server.js
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 3.2.0 - RLS FIXED + ADMIN MIDDLEWARE
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-10
 RESPONSABLE: Pedro José Pirovani
-CHANGELOG v3.1.2:
-[+] CORS configurado correctamente con origin '*'
-[+] verifyAdmin ahora usa JWT_SECRET en lugar de supabase.auth.getUser
-[+] Endpoint /api/admin/decode-token para debugging
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: API REST principal de ReShop Paraguay.
+             Inicializa Express, middlewares, rutas y endpoints de administración.
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creacion inicial del servidor
+2026-04-09 - Configuracion de middlewares de seguridad
+2026-04-10 - Implementacion de endpoints de administracion
+2026-04-10 - Agregado verifyAdmin con JWT_SECRET
+2026-04-10 - [FIX] CORS configurado correctamente
+2026-04-10 - [FIX] verifyAdmin ahora usa supabaseAdmin para bypass RLS
+2026-04-10 - [FIX] Busqueda por email en lugar de id
+2026-04-10 - [ADD] Endpoint /api/admin/orders
+2026-04-10 - [ADD] Endpoint /api/admin/decode-token para debugging
+================================================================================
 */
 
 const express = require('express');
@@ -20,23 +34,33 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Inicializar Supabase
+// ============================================================
+// INICIALIZAR SUPABASE
+// ============================================================
+
+// Cliente normal (respeta RLS)
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_ANON_KEY
 );
 
+// Cliente admin (bypassea RLS) - NECESARIO para consultas a tabla users
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
 // ============================================================
-// MIDDLEWARES
+// MIDDLEWARES GLOBALES
 // ============================================================
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================================
-// MIDDLEWARE DE AUTENTICACIÓN ADMIN (CON JWT)
+// MIDDLEWARE DE AUTENTICACIÓN ADMIN (CON supabaseAdmin)
 // ============================================================
 const verifyAdmin = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -50,28 +74,39 @@ const verifyAdmin = async (req, res, next) => {
     
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('✅ Token decodificado:', decoded);
+        console.log('✅ Token decodificado:', { email: decoded.email, role: decoded.role });
         
-        const { data: dbUser, error: dbError } = await supabase
+        // 🔧 CRÍTICO: Usar supabaseAdmin (bypassea RLS) en lugar de supabase
+        const { data: dbUser, error: dbError } = await supabaseAdmin
             .from('users')
-            .select('role, email, is_active, id, full_name')
-            .eq('id', decoded.sub)
+            .select('id, email, full_name, role, is_active, store_name')
+            .eq('email', decoded.email)
             .single();
         
-        console.log('📋 Usuario DB:', dbUser);
+        console.log('📋 Usuario DB encontrado:', dbUser ? 'Sí' : 'No');
         
         if (dbError || !dbUser) {
-            return res.status(403).json({ success: false, error: 'Usuario no encontrado en la base de datos' });
+            console.error('❌ Error en verifyAdmin:', dbError?.message || 'Usuario no encontrado');
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Usuario no encontrado en la base de datos' 
+            });
         }
         
-        if (!dbUser || dbUser.role !== 'admin') {
-            console.warn('⚠️ Acceso denegado: role =', dbUser?.role);
-            return res.status(403).json({ success: false, error: 'Acceso denegado - No eres administrador' });
+        if (dbUser.role !== 'admin') {
+            console.warn('⚠️ Acceso denegado: role =', dbUser.role);
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Acceso denegado - No eres administrador' 
+            });
         }
         
-        if (dbUser.is_active === false) {
+        if (!dbUser.is_active) {
             console.warn('⚠️ Cuenta desactivada:', dbUser.email);
-            return res.status(403).json({ success: false, error: 'Cuenta desactivada' });
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Cuenta desactivada' 
+            });
         }
         
         console.log('✅ Acceso concedido a admin:', dbUser.email);
@@ -86,28 +121,29 @@ const verifyAdmin = async (req, res, next) => {
 // ============================================================
 // RUTAS BASE
 // ============================================================
+
 app.get('/api/health', (req, res) => {
     res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.get('/', (req, res) => {
-    res.json({ name: 'ReShop Paraguay API', version: '3.1.2', status: 'active' });
-});
-
-// ============================================================
-// TEST CORS
-// ============================================================
-app.get('/api/admin/cors-test', (req, res) => {
     res.json({ 
-        success: true, 
-        message: 'CORS funciona correctamente',
-        timestamp: new Date().toISOString()
+        name: 'ReShop Paraguay API', 
+        version: '3.2.0', 
+        status: 'active',
+        endpoints: {
+            health: 'GET /api/health',
+            products: 'GET /api/products',
+            auth: 'POST /api/auth/register, POST /api/auth/login',
+            admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders'
+        }
     });
 });
 
 // ============================================================
 // RUTA DE PRODUCTOS (CONSULTA SUPABASE)
 // ============================================================
+
 app.get('/api/products', async (req, res) => {
     try {
         console.log('📦 Consultando productos en Supabase...');
@@ -118,10 +154,7 @@ app.get('/api/products', async (req, res) => {
             .eq('status', 'active')
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('❌ Error en consulta:', error);
-            throw error;
-        }
+        if (error) throw error;
 
         console.log(`✅ Encontrados ${products?.length || 0} productos`);
         
@@ -143,6 +176,7 @@ app.get('/api/products', async (req, res) => {
 // ============================================================
 // RUTA DE PRODUCTO POR ID
 // ============================================================
+
 app.get('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -170,45 +204,37 @@ app.get('/api/products/:id', async (req, res) => {
 // ENDPOINTS DE ADMINISTRACIÓN (solo para admin)
 // ============================================================
 
-// ✅ Listar todos los usuarios del sistema
+// Listar todos los usuarios
 app.get('/api/admin/users', verifyAdmin, async (req, res) => {
     try {
         console.log('👥 Admin solicitando lista de usuarios:', req.user?.email);
         
-        const { data: users, error } = await supabase
+        const { data: users, error } = await supabaseAdmin
             .from('users')
             .select('id, email, full_name, role, is_active, created_at, store_name')
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('❌ Error en consulta de usuarios:', error);
-            throw error;
-        }
+        if (error) throw error;
         
         console.log(`✅ Usuarios encontrados: ${users?.length || 0}`);
         
         res.json({ 
             success: true, 
             users: users || [], 
-            count: users?.length || 0,
-            requestedBy: req.user.email
+            count: users?.length || 0
         });
     } catch (error) {
         console.error('❌ Error en /api/admin/users:', error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            users: []
-        });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Listar todos los productos (incluye inactivos/eliminados)
+// Listar todos los productos (incluye inactivos)
 app.get('/api/admin/products', verifyAdmin, async (req, res) => {
     try {
         console.log('📦 Admin solicitando todos los productos:', req.user?.email);
         
-        const { data: products, error } = await supabase
+        const { data: products, error } = await supabaseAdmin
             .from('products')
             .select('*')
             .order('created_at', { ascending: false });
@@ -220,11 +246,35 @@ app.get('/api/admin/products', verifyAdmin, async (req, res) => {
         res.json({ 
             success: true, 
             products: products || [], 
-            count: products?.length || 0,
-            requestedBy: req.user.email
+            count: products?.length || 0
         });
     } catch (error) {
         console.error('❌ Error en /api/admin/products:', error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Listar todas las órdenes
+app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
+    try {
+        console.log('📦 Admin solicitando todas las órdenes:', req.user?.email);
+        
+        const { data: orders, error } = await supabaseAdmin
+            .from('orders')
+            .select('*, buyer:buyer_id(id, email, full_name)')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        console.log(`✅ Órdenes encontradas: ${orders?.length || 0}`);
+        
+        res.json({ 
+            success: true, 
+            orders: orders || [], 
+            count: orders?.length || 0
+        });
+    } catch (error) {
+        console.error('❌ Error en /api/admin/orders:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -234,7 +284,7 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         
-        const { data: user, error: findError } = await supabase
+        const { data: user, error: findError } = await supabaseAdmin
             .from('users')
             .select('is_active, email, role')
             .eq('id', id)
@@ -246,7 +296,7 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
         
         // No permitir desactivar al último admin
         if (user.is_active === true && user.role === 'admin') {
-            const { data: otherAdmins } = await supabase
+            const { data: otherAdmins } = await supabaseAdmin
                 .from('users')
                 .select('id')
                 .eq('role', 'admin')
@@ -254,23 +304,25 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
                 .neq('id', id);
             
             if (otherAdmins?.length === 0) {
-                return res.status(400).json({ success: false, error: 'No se puede desactivar el último administrador' });
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'No se puede desactivar el último administrador' 
+                });
             }
         }
         
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('users')
             .update({ is_active: !user.is_active, updated_at: new Date().toISOString() })
             .eq('id', id);
         
         if (error) throw error;
         
-        console.log(`✅ Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'} por ${req.user.email}`);
+        console.log(`✅ Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}`);
         
         res.json({ 
             success: true, 
-            message: `Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}`,
-            user: { id, email: user.email, is_active: !user.is_active }
+            message: `Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}`
         });
     } catch (error) {
         console.error('❌ Error en toggle usuario:', error.message);
@@ -278,25 +330,28 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
     }
 });
 
-// Actualizar estado de producto (active/inactive/archived)
+// Actualizar estado de producto
 app.put('/api/admin/products/:id/status', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
         
-        const validStatuses = ['active', 'inactive', 'archived'];
+        const validStatuses = ['active', 'inactive', 'archived', 'sold'];
         if (!validStatuses.includes(status)) {
-            return res.status(400).json({ success: false, error: `Estado inválido. Permitidos: ${validStatuses.join(', ')}` });
+            return res.status(400).json({ 
+                success: false, 
+                error: `Estado inválido. Permitidos: ${validStatuses.join(', ')}` 
+            });
         }
         
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('products')
             .update({ status, updated_at: new Date().toISOString() })
             .eq('id', id);
         
         if (error) throw error;
         
-        console.log(`✅ Producto ${id} actualizado a estado: ${status} por ${req.user.email}`);
+        console.log(`✅ Producto ${id} actualizado a estado: ${status}`);
         
         res.json({ success: true, message: 'Estado actualizado', product: { id, status } });
     } catch (error) {
@@ -305,12 +360,12 @@ app.put('/api/admin/products/:id/status', verifyAdmin, async (req, res) => {
     }
 });
 
-// Eliminar producto (hard delete)
+// Eliminar producto
 app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         
-        const { data: product, error: findError } = await supabase
+        const { data: product, error: findError } = await supabaseAdmin
             .from('products')
             .select('title')
             .eq('id', id)
@@ -320,14 +375,14 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('products')
             .delete()
             .eq('id', id);
         
         if (error) throw error;
         
-        console.log(`✅ Producto "${product.title}" eliminado por ${req.user.email}`);
+        console.log(`✅ Producto "${product.title}" eliminado`);
         
         res.json({ success: true, message: `Producto "${product.title}" eliminado`, id });
     } catch (error) {
@@ -336,23 +391,10 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// Endpoint para listar pedidos (orders)
-app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
-    try {
-        const { data: orders, error } = await supabase
-            .from('orders')
-            .select('*, buyer:buyer_id(id, email, full_name)')
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        res.json({ success: true, orders: orders || [], count: orders?.length || 0 });
-    } catch (error) {
-        console.error('❌ Error en /api/admin/orders:', error.message);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
+// ============================================================
+// DEBUG: Decodificar Token
+// ============================================================
 
-// Debug: Decodificar Token
 app.get('/api/admin/decode-token', async (req, res) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -369,52 +411,49 @@ app.get('/api/admin/decode-token', async (req, res) => {
     }
 });
 
-// Debug: Verificar usuario autenticado
-app.get('/api/admin/debug-user', verifyAdmin, async (req, res) => {
-    res.json({ 
-        success: true, 
-        user: req.user,
-        message: 'Verificación exitosa'
-    });
-});
+// ============================================================
+// RUTAS DE AUTENTICACIÓN
+// ============================================================
 
-// ============================================================
-// RUTAS ADICIONALES
-// ============================================================
 const authRoutes = require('./src/routes/authRoutes');
 app.use('/api/auth', authRoutes);
-
-// const ordersRoutes = require('./src/routes/orders');
-// app.use('/api/orders', ordersRoutes);
 
 // ============================================================
 // MANEJO DE ERRORES
 // ============================================================
+
 app.use((req, res) => {
-    res.status(404).json({ success: false, error: 'Ruta no encontrada', path: req.originalUrl });
+    res.status(404).json({ 
+        success: false, 
+        error: 'Ruta no encontrada', 
+        path: req.originalUrl 
+    });
 });
 
 app.use((err, req, res, next) => {
     console.error('[ERROR GLOBAL]', err.message);
-    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+    res.status(500).json({ 
+        success: false, 
+        error: 'Error interno del servidor' 
+    });
 });
 
 // ============================================================
 // INICIO DEL SERVIDOR
 // ============================================================
+
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.1.2');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.2.0');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`🔐 Admin: http://localhost:${PORT}/api/admin/users`);
-    console.log(`🔑 Debug: http://localhost:${PORT}/api/admin/decode-token`);
     console.log('='.repeat(60));
-    console.log('⚠️  Endpoints /api/admin/* requieren Bearer Token de admin');
-    console.log('🔧 CORS configurado | JWT_SECRET activo');
+    console.log('✅ CORS configurado | JWT_SECRET activo');
+    console.log('✅ supabaseAdmin activo para bypass RLS');
     console.log('');
 });
 
