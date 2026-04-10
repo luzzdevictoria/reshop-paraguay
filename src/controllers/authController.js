@@ -2,13 +2,14 @@
 ================================================================================
 ARCHIVO: authController.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.0.0 - REGISTRO AUTOMATICO EN TABLA USERS (SIN PASSWORD_HASH)
+VERSION: 4.0.0 - SIN RATE LIMIT (USA supabaseAdmin PARA CREAR USUARIOS)
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-10
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Controlador de autenticacion con Supabase.
              Maneja registro, login, perfil y actualizacion de usuarios.
+             REGISTRO: usa supabaseAdmin.auth.admin.createUser() para evitar rate limit.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial del controlador
@@ -19,6 +20,9 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [REMOVE] Eliminado password_hash (no es necesario, Supabase Auth lo maneja)
 2026-04-10 - [ADD] Mensaje especifico para error de rate limit
 2026-04-10 - [IMPROVE] Manejo de errores mas descriptivo
+2026-04-10 - [MAJOR] REGISTRO: usa supabaseAdmin.auth.admin.createUser() en lugar de supabase.auth.signUp()
+2026-04-10 - [MAJOR] Elimina completamente el rate limit de Supabase
+2026-04-10 - [ADD] Email confirmado automaticamente (email_confirm: true)
 ================================================================================
 */
 
@@ -31,7 +35,7 @@ const supabase = createClient(
     process.env.SUPABASE_ANON_KEY
 );
 
-// Cliente admin (bypassea RLS) - necesario para insertar en tabla users
+// Cliente admin (bypassea RLS y rate limit)
 const supabaseAdmin = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -49,7 +53,7 @@ function generateToken(userId, email, role) {
 }
 
 // ============================================================
-// REGISTRAR NUEVO USUARIO
+// REGISTRAR NUEVO USUARIO (SIN RATE LIMIT)
 // ============================================================
 async function register(req, res) {
     try {
@@ -84,32 +88,33 @@ async function register(req, res) {
             });
         }
 
-        // Crear usuario en Supabase Auth
-        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { 
-                    full_name, 
-                    role: role || 'buyer',
-                    phone: phone || null
-                }
+        // 🔧 MEJORA CRÍTICA: Usar supabaseAdmin.auth.admin.createUser()
+        // Esto bypassea el rate limit de Supabase Auth
+        const { data: authUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
+            email: email,
+            password: password,
+            email_confirm: true,  // Auto-confirmar email, el usuario no necesita verificar
+            user_metadata: {
+                full_name: full_name,
+                role: role || 'buyer',
+                phone: phone || null
             }
         });
 
         if (signUpError) {
             console.error('[AUTH ERROR]', signUpError);
             
-            if (signUpError.message.includes('rate limit')) {
-                return res.status(429).json({
+            // Mensaje específico para diferentes errores
+            if (signUpError.message.includes('already been registered')) {
+                return res.status(409).json({
                     success: false,
-                    error: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'
+                    error: 'El email ya esta registrado'
                 });
             }
             
             return res.status(500).json({
                 success: false,
-                error: signUpError.message
+                error: signUpError.message || 'Error al crear el usuario'
             });
         }
 
@@ -122,7 +127,7 @@ async function register(req, res) {
 
         const userRole = role === 'seller' ? 'seller' : 'buyer';
         
-        // Preparar datos para insertar en tabla users (SIN password_hash)
+        // Preparar datos para insertar en tabla users
         const newUser = {
             id: authUser.user.id,
             email: email,
@@ -135,7 +140,7 @@ async function register(req, res) {
             updated_at: new Date().toISOString()
         };
 
-        // Insertar en la tabla users (usando supabaseAdmin para bypass RLS)
+        // Insertar en la tabla users
         const { data: insertedUser, error: insertError } = await supabaseAdmin
             .from('users')
             .insert(newUser)
@@ -145,7 +150,7 @@ async function register(req, res) {
         if (insertError) {
             console.error('[INSERT ERROR]', insertError);
             
-            // Si falla la inserción, intentar eliminar el usuario de Auth para mantener consistencia
+            // Si falla la inserción, eliminar el usuario de Auth para mantener consistencia
             try {
                 await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
             } catch (e) {
