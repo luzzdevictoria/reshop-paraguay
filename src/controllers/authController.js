@@ -1,11 +1,28 @@
 /**
-* UBICACION: C:\Users\pirov\ReShop\src\controllers\authController.js
-* VERSION: 2.0.0 - CORREGIDO
-* DESCRIPCION: Controlador de autenticacion con Supabase
+================================================================================
+ARCHIVO: authController.js
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 3.0.0 - REGISTRO AUTOMATICO EN TABLA USERS (SIN PASSWORD_HASH)
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-10
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Controlador de autenticacion con Supabase.
+             Maneja registro, login, perfil y actualizacion de usuarios.
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creacion inicial del controlador
+2026-04-10 - [FIX] Correccion de registro para insertar automaticamente en tabla users
+2026-04-10 - [FIX] Verificacion de email existente antes de registrar
+2026-04-10 - [FIX] Uso de supabaseAdmin para bypass RLS en operaciones de escritura
+2026-04-10 - [ADD] Sincronizacion automatica entre Auth y tabla users
+2026-04-10 - [REMOVE] Eliminado password_hash (no es necesario, Supabase Auth lo maneja)
+2026-04-10 - [ADD] Mensaje especifico para error de rate limit
+2026-04-10 - [IMPROVE] Manejo de errores mas descriptivo
+================================================================================
 */
 
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const { createClient } = require('@supabase/supabase-js');
 
 // Inicializar Supabase
@@ -14,6 +31,7 @@ const supabase = createClient(
     process.env.SUPABASE_ANON_KEY
 );
 
+// Cliente admin (bypassea RLS) - necesario para insertar en tabla users
 const supabaseAdmin = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -30,7 +48,9 @@ function generateToken(userId, email, role) {
     );
 }
 
-// Registrar nuevo usuario
+// ============================================================
+// REGISTRAR NUEVO USUARIO
+// ============================================================
 async function register(req, res) {
     try {
         const { email, password, full_name, phone, role, store_name } = req.body;
@@ -50,7 +70,7 @@ async function register(req, res) {
             });
         }
 
-        // Verificar si el email ya existe
+        // Verificar si el email ya existe en la tabla users
         const { data: existingUser } = await supabaseAdmin
             .from('users')
             .select('email')
@@ -64,43 +84,59 @@ async function register(req, res) {
             });
         }
 
-        // Hashear contraseña
-        const saltRounds = 10;
-        const password_hash = await bcrypt.hash(password, saltRounds);
-
         // Crear usuario en Supabase Auth
         const { data: authUser, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                data: { full_name, role: role || 'buyer' }
+                data: { 
+                    full_name, 
+                    role: role || 'buyer',
+                    phone: phone || null
+                }
             }
         });
 
         if (signUpError) {
             console.error('[AUTH ERROR]', signUpError);
+            
+            if (signUpError.message.includes('rate limit')) {
+                return res.status(429).json({
+                    success: false,
+                    error: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.'
+                });
+            }
+            
             return res.status(500).json({
                 success: false,
                 error: signUpError.message
             });
         }
 
+        if (!authUser || !authUser.user) {
+            return res.status(500).json({
+                success: false,
+                error: 'Error al crear el usuario en el sistema de autenticación'
+            });
+        }
+
         const userRole = role === 'seller' ? 'seller' : 'buyer';
         
+        // Preparar datos para insertar en tabla users (SIN password_hash)
         const newUser = {
             id: authUser.user.id,
-            email,
-            full_name,
+            email: email,
+            full_name: full_name,
             phone: phone || null,
             role: userRole,
-            password_hash,
-            store_name: userRole === 'seller' ? store_name || null : null,
+            store_name: (userRole === 'seller' && store_name) ? store_name : null,
             is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
 
-        const { data: user, error: insertError } = await supabaseAdmin
+        // Insertar en la tabla users (usando supabaseAdmin para bypass RLS)
+        const { data: insertedUser, error: insertError } = await supabaseAdmin
             .from('users')
             .insert(newUser)
             .select()
@@ -108,27 +144,34 @@ async function register(req, res) {
 
         if (insertError) {
             console.error('[INSERT ERROR]', insertError);
+            
+            // Si falla la inserción, intentar eliminar el usuario de Auth para mantener consistencia
+            try {
+                await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
+            } catch (e) {
+                console.error('[CLEANUP ERROR]', e);
+            }
+            
             return res.status(500).json({
                 success: false,
-                error: 'Error al crear el usuario'
+                error: 'Error al crear el perfil de usuario. Por favor intenta nuevamente.'
             });
         }
 
         // Generar token
-        const token = generateToken(user.id, user.email, user.role);
+        const token = generateToken(insertedUser.id, insertedUser.email, insertedUser.role);
 
-        // Ocultar datos sensibles
-        delete user.password_hash;
-
+        // Responder con éxito
         res.status(201).json({
             success: true,
             message: 'Usuario registrado exitosamente',
             user: {
-                id: user.id,
-                email: user.email,
-                full_name: user.full_name,
-                role: user.role,
-                store_name: user.store_name
+                id: insertedUser.id,
+                email: insertedUser.email,
+                full_name: insertedUser.full_name,
+                role: insertedUser.role,
+                store_name: insertedUser.store_name,
+                phone: insertedUser.phone
             },
             token
         });
@@ -137,12 +180,14 @@ async function register(req, res) {
         console.error('[REGISTER ERROR]', error);
         res.status(500).json({
             success: false,
-            error: 'Error interno del servidor: ' + error.message
+            error: 'Error interno del servidor. Por favor intenta nuevamente.'
         });
     }
 }
 
-// Iniciar sesion
+// ============================================================
+// INICIAR SESION
+// ============================================================
 async function login(req, res) {
     try {
         const { email, password } = req.body;
@@ -167,14 +212,14 @@ async function login(req, res) {
             });
         }
 
-        // Buscar usuario en nuestra tabla
+        // Buscar usuario en la tabla users
         const { data: user, error: findError } = await supabaseAdmin
             .from('users')
             .select('*')
             .eq('id', authData.user.id)
             .single();
 
-        if (!user) {
+        if (!user || findError) {
             return res.status(401).json({
                 success: false,
                 error: 'Usuario no encontrado en la base de datos'
@@ -184,7 +229,7 @@ async function login(req, res) {
         if (!user.is_active) {
             return res.status(403).json({
                 success: false,
-                error: 'Cuenta desactivada'
+                error: 'Cuenta desactivada. Contacta al administrador.'
             });
         }
 
@@ -197,9 +242,6 @@ async function login(req, res) {
         // Generar token
         const token = generateToken(user.id, user.email, user.role);
 
-        // Ocultar datos sensibles
-        delete user.password_hash;
-
         res.json({
             success: true,
             message: 'Inicio de sesion exitoso',
@@ -209,6 +251,7 @@ async function login(req, res) {
                 full_name: user.full_name,
                 role: user.role,
                 store_name: user.store_name,
+                phone: user.phone,
                 rating: user.rating,
                 total_sales: user.total_sales
             },
@@ -219,12 +262,14 @@ async function login(req, res) {
         console.error('[LOGIN ERROR]', error);
         res.status(500).json({
             success: false,
-            error: 'Error interno del servidor: ' + error.message
+            error: 'Error interno del servidor'
         });
     }
 }
 
-// Obtener perfil del usuario autenticado
+// ============================================================
+// OBTENER PERFIL
+// ============================================================
 async function getMe(req, res) {
     try {
         const userId = req.user.sub;
@@ -242,8 +287,6 @@ async function getMe(req, res) {
             });
         }
 
-        delete user.password_hash;
-
         res.json({
             success: true,
             user
@@ -258,20 +301,24 @@ async function getMe(req, res) {
     }
 }
 
-// Actualizar perfil
+// ============================================================
+// ACTUALIZAR PERFIL
+// ============================================================
 async function updateProfile(req, res) {
     try {
         const userId = req.user.sub;
         const { full_name, phone, address, city, store_name, store_description } = req.body;
 
-        const updateData = {};
+        const updateData = {
+            updated_at: new Date().toISOString()
+        };
+        
         if (full_name) updateData.full_name = full_name;
         if (phone) updateData.phone = phone;
         if (address) updateData.address = address;
         if (city) updateData.city = city;
         if (store_name) updateData.store_name = store_name;
         if (store_description) updateData.store_description = store_description;
-        updateData.updated_at = new Date().toISOString();
 
         const { data: user, error } = await supabaseAdmin
             .from('users')
@@ -286,8 +333,6 @@ async function updateProfile(req, res) {
                 error: 'Error al actualizar el perfil'
             });
         }
-
-        delete user.password_hash;
 
         res.json({
             success: true,
