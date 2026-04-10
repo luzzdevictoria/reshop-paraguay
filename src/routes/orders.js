@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: src/routes/orders.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.1.0 - ENHANCED LOGGING + ERROR HANDLING
+VERSION: 3.0.0 - FINAL FIXED (columnas correctas para order_items)
 CREADO: 2026-04-10
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
@@ -13,12 +13,11 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - Creacion inicial del modulo de ordenes
 2026-04-10 - Implementacion de endpoints: POST /, GET /my-orders, GET /my-sales
 2026-04-10 - Integracion con tabla orders y order_items de Supabase
-2026-04-10 - [FIX] authenticateToken ahora usa JWT_SECRET en lugar de supabase.auth.getUser
+2026-04-10 - [FIX] authenticateToken ahora usa JWT_SECRET
 2026-04-10 - [FIX] Busqueda de usuario por ID en lugar de email
-2026-04-10 - [IMPROVE] Manejo de errores mas descriptivo
-2026-04-11 - [ENHANCE] Logging detallado en POST /api/orders para debugging
-2026-04-11 - [FIX] Retorno temprano en errores de orderError e itemsError con mensaje específico
-2026-04-11 - [IMPROVE] Comentarios de debug para trazabilidad de datos en consola
+2026-04-11 - [FIX] order_status cambiado a 'pending_payment'
+2026-04-11 - [FIX] order_items usa columnas: product_name, product_price (NO unit_price, NO subtotal)
+2026-04-11 - [FIX] Eliminado campo 'notes' (no existe en la tabla)
 ================================================================================
 */
 
@@ -46,11 +45,9 @@ const authenticateToken = async (req, res, next) => {
     }
     
     try {
-        // Decodificar el token JWT
         const decoded = jwt.verify(token, JWT_SECRET);
         console.log('🔑 Token decodificado:', { sub: decoded.sub, email: decoded.email, role: decoded.role });
         
-        // Buscar usuario en la base de datos por ID
         const { data: dbUser, error: dbError } = await supabase
             .from('users')
             .select('*')
@@ -87,11 +84,10 @@ function generateOrderNumber() {
 // ============================================================
 router.post('/', authenticateToken, async (req, res) => {
     try {
-        // 🐛 DEBUG: Log detallado del request
         console.log('📦 [DEBUG] Body recibido:', JSON.stringify(req.body, null, 2));
         console.log('👤 [DEBUG] Usuario autenticado:', { id: req.user?.id, email: req.user?.email });
         
-        const { items, total_amount, payment_method, shipping_address, notes } = req.body;
+        const { items, total_amount, payment_method, shipping_address } = req.body;
         
         // Validaciones iniciales
         if (!items || items.length === 0) {
@@ -129,7 +125,7 @@ router.post('/', authenticateToken, async (req, res) => {
         const seller_payout = total_amount - platform_fee;
         console.log(`💰 Cálculos: total=${total_amount}, fee=${platform_fee}, payout=${seller_payout}`);
         
-        // Crear la orden
+        // Crear la orden (SIN campo 'notes')
         console.log('📝 Insertando orden en Supabase...');
         const { data: order, error: orderError } = await supabase
             .from('orders')
@@ -155,30 +151,20 @@ router.post('/', authenticateToken, async (req, res) => {
         
         if (orderError) {
             console.error('❌ Error creating order:', orderError);
-            console.error('🔍 Detalles del error:', {
-                code: orderError.code,
-                message: orderError.message,
-                details: orderError.details,
-                hint: orderError.hint
-            });
-            return res.status(500).json({ 
-                success: false, 
-                error: orderError.message,
-                debug: process.env.NODE_ENV === 'development' ? orderError : undefined
-            });
+            return res.status(500).json({ success: false, error: orderError.message });
         }
         
         console.log(`✅ Orden creada en DB: ${order.id}`);
         
-        // Crear los items de la orden
+        // Crear los items de la orden (con las columnas CORRECTAS de la tabla)
         console.log('📦 Insertando items de la orden...');
-const orderItems = items.map(item => ({
-    order_id: order.id,
-    product_id: item.id,
-    quantity: item.quantity,
-    product_price: item.price
-    // subtotal no existe en la tabla
-}));
+        const orderItems = items.map(item => ({
+            order_id: order.id,
+            product_id: item.id,
+            product_name: item.title,
+            product_price: item.price,
+            quantity: item.quantity
+        }));
         
         console.log(`📋 Items a insertar: ${orderItems.length}`);
         
@@ -188,16 +174,7 @@ const orderItems = items.map(item => ({
         
         if (itemsError) {
             console.error('❌ Error creating order items:', itemsError);
-            console.error('🔍 Detalles del error en items:', {
-                code: itemsError.code,
-                message: itemsError.message,
-                details: itemsError.details
-            });
-            return res.status(500).json({ 
-                success: false, 
-                error: itemsError.message,
-                debug: process.env.NODE_ENV === 'development' ? itemsError : undefined
-            });
+            return res.status(500).json({ success: false, error: itemsError.message });
         }
         
         console.log(`✅ Orden completada exitosamente: ${orderNumber} por ${req.user.email}`);
@@ -211,12 +188,7 @@ const orderItems = items.map(item => ({
         
     } catch (error) {
         console.error('❌ [CATCH GLOBAL] Error general creando orden:', error);
-        console.error('🔍 Stack trace:', error.stack);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            debug: process.env.NODE_ENV === 'development' ? { stack: error.stack } : undefined
-        });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -291,12 +263,11 @@ router.put('/:orderId/status', authenticateToken, async (req, res) => {
         
         console.log(`🔄 Actualizando estado de orden ${orderId} a: ${order_status}`);
         
-        const validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+        const validStatuses = ['pending_payment', 'paid', 'processing', 'shipped', 'delivered', 'completed', 'cancelled', 'refunded'];
         if (!validStatuses.includes(order_status)) {
             return res.status(400).json({ success: false, error: 'Estado inválido' });
         }
         
-        // Verificar que la orden existe
         const { data: order, error: findError } = await supabase
             .from('orders')
             .select('seller_id, buyer_id')
@@ -307,7 +278,6 @@ router.put('/:orderId/status', authenticateToken, async (req, res) => {
             return res.status(404).json({ success: false, error: 'Orden no encontrada' });
         }
         
-        // Verificar permisos (solo vendedor o admin pueden actualizar)
         if (order.seller_id !== req.user.id && req.user.role !== 'admin') {
             console.warn(`⚠️ Permiso denegado: usuario ${req.user.id} intentó modificar orden ${orderId}`);
             return res.status(403).json({ success: false, error: 'No tienes permiso para modificar esta orden' });
