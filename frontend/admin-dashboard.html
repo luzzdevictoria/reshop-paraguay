@@ -276,11 +276,12 @@ HISTORIAL DE MODIFICACIONES:
 
 
 
-        document.getElementById('logoutBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.clear();
-            window.location.href = 'login.html';
-        });
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    localStorage.removeItem('reshop_cart');
+    localStorage.clear();
+    window.location.href = 'login.html';
+});
         
         loadStats();
         loadUsers();
