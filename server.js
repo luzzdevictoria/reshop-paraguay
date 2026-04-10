@@ -115,8 +115,8 @@ app.use('/api/auth', authRoutes);
 const productRoutes = require('./src/routes/productRoutes');
 app.use('/api/products', productRoutes);
 
-const ordersRoutes = require('./src/routes/orders');
-app.use('/api/orders', ordersRoutes);
+//const ordersRoutes = require('./src/routes/orders');
+//app.use('/api/orders', ordersRoutes);
 
 // TODO - FASE 8: Sistema de chat
 // const chatRoutes = require('./src/routes/chatRoutes');
