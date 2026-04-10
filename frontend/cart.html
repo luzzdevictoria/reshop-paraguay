@@ -23,18 +23,20 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Carrito - ReShop Paraguay</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .header { background: #2A5C6E; color: white; padding: 15px; text-align: center; }
-        .header a { color: white; text-decoration: none; margin: 0 10px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
         .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
         .cart-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .cart-table th, .cart-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
         .cart-table th { background: #2A5C6E; color: white; }
         .cart-table tr:hover { background: #f9f9f9; }
         .quantity-input { width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 5px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
         .btn-danger { background: #D95A41; color: white; }
         .btn-danger:hover { background: #c04a33; }
         .btn-primary { background: #2A5C6E; color: white; }
@@ -47,27 +49,30 @@ HISTORIAL DE MODIFICACIONES:
         .empty-cart { text-align: center; padding: 50px; color: #666; }
         .back-link { display: inline-block; margin-bottom: 20px; color: #2A5C6E; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
-        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; }
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
         .action-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .header i { margin-right: 6px; }
+        .btn i { margin-right: 6px; }
+        @media (max-width: 600px) { .cart-table { font-size: 0.8rem; } .btn { padding: 5px 10px; font-size: 0.7rem; } }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🛍️ ReShop Paraguay</h1>
-        <p>Shopping Virtual de Ropa de Segunda Mano</p>
+        <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+        <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
         <div style="margin-top: 10px;">
-            <a href="index.html">🏠 Inicio</a>
-            <a href="cart.html">🛒 Carrito</a>
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
         </div>
     </div>
     <div class="container">
-        <a href="index.html" class="back-link">← Volver a la tienda</a>
-        <h2 style="margin-bottom: 20px; color: #2A5C6E;">🛒 Mi Carrito</h2>
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
+        <h2 style="margin-bottom: 20px; color: #2A5C6E;"><i class="fas fa-shopping-bag"></i> Mi Carrito</h2>
         <div id="cartContent"></div>
     </div>
     <div class="footer">
-        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
-        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
     <script>
@@ -78,8 +83,8 @@ HISTORIAL DE MODIFICACIONES:
             if (cart.length === 0) {
                 container.innerHTML = `
                     <div class="empty-cart">
-                        <p>🛒 Tu carrito está vacío</p>
-                        <a href="index.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;">Ver productos</a>
+                        <p><i class="fas fa-box-open"></i> Tu carrito está vacío</p>
+                        <a href="index.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;"><i class="fas fa-store"></i> Ver productos</a>
                     </div>
                 `;
                 return;
@@ -87,12 +92,9 @@ HISTORIAL DE MODIFICACIONES:
             
             let itemsHtml = `
                 <table class="cart-table">
-                    <thead>
-                        <tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th></th></tr>
-                    </thead>
+                    <thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th></th></tr></thead>
                     <tbody>
             `;
-            
             let total = 0;
             
             for (let i = 0; i < cart.length; i++) {
@@ -102,42 +104,36 @@ HISTORIAL DE MODIFICACIONES:
                 const priceFormatted = new Intl.NumberFormat('es-PY').format(item.price);
                 const subtotalFormatted = new Intl.NumberFormat('es-PY').format(subtotal);
                 
-                itemsHtml += `
-                    <tr>
-                        <td>${escapeHtml(item.title)}</td>
-                        <td>${priceFormatted} Gs</td>
-                        <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></td>
-                        <td>${subtotalFormatted} Gs</td>
-                        <td><button class="btn btn-danger" onclick="removeFromCart(${item.id})">Eliminar</button></td>
-                    </tr>
-                `;
+                itemsHtml += `<tr>
+                    <td><i class="fas fa-tag"></i> ${escapeHtml(item.title)}</td>
+                    <td>${priceFormatted} Gs</td>
+                    <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></td>
+                    <td>${subtotalFormatted} Gs</td>
+                    <td><button class="btn btn-danger" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
+                </tr>`;
             }
             
             itemsHtml += `
                     </tbody>
                 </table>
                 <div class="cart-summary">
-                    <h3>Total del Pedido</h3>
+                    <h3><i class="fas fa-receipt"></i> Total del Pedido</h3>
                     <div class="total-price">${new Intl.NumberFormat('es-PY').format(total)} Gs</div>
                     <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="clearCart()">Vaciar Carrito</button>
-                        <button class="btn btn-primary" onclick="checkout()">Proceder al Pago</button>
+                        <button class="btn btn-secondary" onclick="clearCart()"><i class="fas fa-trash"></i> Vaciar Carrito</button>
+                        <button class="btn btn-primary" onclick="checkout()"><i class="fas fa-credit-card"></i> Proceder al Pago</button>
                     </div>
                 </div>
             `;
-            
             container.innerHTML = itemsHtml;
         }
         
         function updateQuantity(productId, newQuantity) {
             let cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
             const index = cart.findIndex(item => item.id == productId);
-            
             if (index !== -1) {
                 cart[index].quantity = parseInt(newQuantity);
-                if (cart[index].quantity <= 0) {
-                    cart.splice(index, 1);
-                }
+                if (cart[index].quantity <= 0) cart.splice(index, 1);
                 localStorage.setItem('reshop_cart', JSON.stringify(cart));
                 loadCart();
             }
@@ -159,9 +155,7 @@ HISTORIAL DE MODIFICACIONES:
         
         function checkout() {
             const cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
-            if (cart.length > 0) {
-                window.location.href = 'checkout.html';
-            }
+            if (cart.length > 0) window.location.href = 'checkout.html';
         }
         
         function escapeHtml(text) {
