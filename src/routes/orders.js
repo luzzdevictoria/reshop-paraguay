@@ -144,7 +144,7 @@ router.post('/', authenticateToken, async (req, res) => {
                 seller_payout: seller_payout,
                 payment_method: payment_method,
                 payment_status: 'pending',
-                order_status: 'pending',
+                order_status: 'pending_payment',
                 shipping_address: shipping_address,
                 buyer_confirmed: false,
                 created_at: new Date(),
