@@ -23,6 +23,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [FIX] Corregida posicion del boton Mi Panel
 2026-04-10 - [IMPROVE] Mejorada visualizacion del logo y header responsivo
 2026-04-10 - [IMPROVE] Reemplazo de emojis por iconos profesionales Font Awesome
+2026-04-10 - [ADD] Enlace de Admin en menu con logica de visualizacion condicional
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -104,6 +105,8 @@ HISTORIAL DE MODIFICACIONES:
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
             <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+            <!-- ✅ CAMBIO 1: Enlace de Admin agregado después de Mi Panel -->
+            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
             <span id="authLinks">
                 <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
                 <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
@@ -147,10 +150,18 @@ HISTORIAL DE MODIFICACIONES:
                 if (dashboardLink && user.role === 'seller') {
                     dashboardLink.style.display = 'inline';
                 }
+                // ✅ CAMBIO 2: Lógica para mostrar enlace de Admin si el rol es 'admin'
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink && user.role === 'admin') {
+                    adminLink.style.display = 'inline';
+                }
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
                 if (dashboardLink) dashboardLink.style.display = 'none';
+                // Ocultar adminLink si no hay usuario logueado
+                const adminLink = document.getElementById('adminLink');
+                if (adminLink) adminLink.style.display = 'none';
             }
         }
 
