@@ -1,19 +1,25 @@
 /**
 * ARCHIVO: upload.js
+* CREADO: 2026-04-09
+* ACTUALIZADO: 2026-04-09
+* VERSION: 1.0.1
 * DESCRIPCION: Middleware para subir imagenes a Supabase Storage
 * RESPONSABLE: Pedro José Pirovani
 * PROPIETARIA: Luciana Noelia Da Silva
 */
 
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
 const { supabaseAdmin } = require('../../database');
 
-// Configurar multer (almacenamiento en memoria)
+// Generar ID unico simple (reemplaza uuid)
+function generateSimpleId() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+}
+
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
         if (allowedTypes.includes(file.mimetype)) {
@@ -24,11 +30,10 @@ const upload = multer({
     }
 });
 
-// Funcion para subir imagen a Supabase Storage
 async function uploadImageToSupabase(file, productId) {
     try {
         const fileExt = file.originalname.split('.').pop();
-        const fileName = `${productId}/${uuidv4()}.${fileExt}`;
+        const fileName = `${productId}/${generateSimpleId()}.${fileExt}`;
         
         const { data, error } = await supabaseAdmin.storage
             .from('product-images')
@@ -39,7 +44,6 @@ async function uploadImageToSupabase(file, productId) {
         
         if (error) throw error;
         
-        // Obtener URL publica
         const { data: publicUrl } = supabaseAdmin.storage
             .from('product-images')
             .getPublicUrl(fileName);
@@ -51,7 +55,6 @@ async function uploadImageToSupabase(file, productId) {
     }
 }
 
-// Funcion para eliminar imagen de Supabase Storage
 async function deleteImageFromSupabase(imageUrl) {
     try {
         const urlParts = imageUrl.split('/');
