@@ -2,7 +2,7 @@
    REPORTE DE ESTRUCTURA - RESHOP PARAGUAY 
 ================================================ 
  
-Fecha: jue 09/04/2026 13:55:46,67 
+Fecha: jue 09/04/2026 23:47:44,85 
 Propietaria: Luciana Noelia Da Silva 
 Desarrollador: Pedro Jose Pirovani 
  
@@ -20,22 +20,22 @@ Desarrollador: Pedro Jose Pirovani
 ================================================ 
 [2] ESTRUCTURA DEL BACKEND 
 ================================================ 
-  [OK] backend\server.js 
-  [OK] backend\database.js 
-  [OK] backend\.env 
-  [OK] backend\package.json 
-  [OK] backend\src\controllers 
-  [OK] backend\src\models 
-  [OK] backend\src\routes 
-  [OK] backend\src\middleware 
-  [OK] backend\src\utils 
-  [OK] backend\uploads 
-  [OK] backend\logs 
-  [OK] backend\src\controllers\authController.js 
-  [OK] backend\src\controllers\productController.js 
-  [OK] backend\src\routes\authRoutes.js 
-  [OK] backend\src\routes\productRoutes.js 
-  [OK] backend\src\middleware\auth.js 
+  [MISSING] backend\server.js 
+  [MISSING] backend\database.js 
+  [WARN] backend\.env (crear con variables
+  [MISSING] backend\package.json 
+  [MISSING] backend\src\controllers 
+  [WARN] backend\src\models (opcional
+  [MISSING] backend\src\routes 
+  [MISSING] backend\src\middleware 
+  [WARN] backend\src\utils (opcional
+  [WARN] backend\uploads (opcional
+  [WARN] backend\logs (opcional
+  [MISSING] backend\src\controllers\authController.js 
+  [MISSING] backend\src\controllers\productController.js 
+  [MISSING] backend\src\routes\authRoutes.js 
+  [MISSING] backend\src\routes\productRoutes.js 
+  [MISSING] backend\src\middleware\auth.js 
  
 ================================================ 
 [3] ESTRUCTURA DEL FRONTEND 
@@ -84,5 +84,5 @@ Desarrollador: Pedro Jose Pirovani
 El proyecto ReShop Paraguay esta listo para funcionar! 
  
  
-Reporte generado el: jue 09/04/2026 13:55:47,96 
+Reporte generado el: jue 09/04/2026 23:47:46,89 
 Ubicacion del reporte: C:\Users\pirov\ReShop\datos_analizados\reporte_estructura.txt 

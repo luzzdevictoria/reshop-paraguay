@@ -3,7 +3,7 @@
 * DESCRIPCION: Cliente HTTP para comunicarse con el backend
 */
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://reshop-backend.vercel.app/api';
 
 async function apiRequest(endpoint, method = 'GET', body = null, token = null) {
     const headers = {
