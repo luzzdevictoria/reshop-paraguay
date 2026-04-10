@@ -369,6 +369,15 @@ app.get('/api/admin/decode-token', async (req, res) => {
     }
 });
 
+// Debug: Verificar usuario autenticado
+app.get('/api/admin/debug-user', verifyAdmin, async (req, res) => {
+    res.json({ 
+        success: true, 
+        user: req.user,
+        message: 'Verificación exitosa'
+    });
+});
+
 // ============================================================
 // RUTAS ADICIONALES
 // ============================================================
