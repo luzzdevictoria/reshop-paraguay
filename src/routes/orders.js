@@ -172,13 +172,13 @@ router.post('/', authenticateToken, async (req, res) => {
         
         // Crear los items de la orden
         console.log('📦 Insertando items de la orden...');
-        const orderItems = items.map(item => ({
-            order_id: order.id,
-            product_id: item.id,
-            quantity: item.quantity,
-            unit_price: item.price,
-            subtotal: item.price * item.quantity
-        }));
+const orderItems = items.map(item => ({
+    order_id: order.id,
+    product_id: item.id,
+    quantity: item.quantity,
+    product_price: item.price
+    // subtotal no existe en la tabla
+}));
         
         console.log(`📋 Items a insertar: ${orderItems.length}`);
         
