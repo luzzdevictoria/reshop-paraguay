@@ -159,13 +159,13 @@ HISTORIAL DE MODIFICACIONES:
                 itemsHtml += `
                     <div class="summary-item">
                         <span>${item.quantity}x ${escapeHtml(item.title)}</span>
-                        <span>${new Intl.NumberFormat('es-PY').format(subtotal)} Gs</span>
+                        <span>${new Intl.NumberFormat('es-PY').format(subtotal)} ?</span>
                     </div>
                 `;
             }
             
             summaryItems.innerHTML = itemsHtml;
-            totalAmount.innerHTML = `Total: ${new Intl.NumberFormat('es-PY').format(total)} Gs`;
+            totalAmount.innerHTML = `Total: ${new Intl.NumberFormat('es-PY').format(total)} ?`;
             
             // Guardar total en el formulario
             document.getElementById('checkoutForm').dataset.total = total;

@@ -260,7 +260,7 @@ HISTORIAL DE MODIFICACIONES:
                         html += `<tr>
                             <td>${product.id}</td>
                             <td>${escapeHtml(product.title)}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(product.price)} Gs</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(product.price)} ?</td>
                             <td><span class="badge">${product.status}</span></td>
                             <td>
                                 <button class="btn btn-warning" onclick="toggleProductStatus(${product.id}, '${product.status}')">Cambiar Estado</button>
@@ -344,8 +344,8 @@ HISTORIAL DE MODIFICACIONES:
                     <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
                     <td>${escapeHtml(order.buyer?.email || '-')}</td>
                     <td>${escapeHtml(order.seller?.email || '-')}</td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} Gs</td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} Gs</td>
+                    <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ?</td>
+                    <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ?</td>
                     <td><span class="order-status ${statusClass}">${statusText}</span></td>
                     <td>${paymentMethod}</td>
                     <td><button class="btn btn-info" onclick="openOrderModal(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar</button></td>

@@ -237,7 +237,7 @@ function setupLogout() {
                                 html += `
                                     <div class="order-item">
                                         <span class="item-name"><i class="fas fa-tag"></i> ${item.quantity}x ${escapeHtml(item.product?.title || 'Producto')}</span>
-                                        <span class="item-price">${new Intl.NumberFormat('es-PY').format(item.subtotal)} Gs</span>
+                                        <span class="item-price">${new Intl.NumberFormat('es-PY').format(item.subtotal)} ?</span>
                                     </div>
                                 `;
                             }
@@ -246,7 +246,7 @@ function setupLogout() {
                         html += `
                                 </div>
                                 <div class="order-total">
-                                    <i class="fas fa-dollar-sign"></i> Total: ${new Intl.NumberFormat('es-PY').format(order.total_amount)} Gs
+                                    <i class="fas fa-money-bill-wave"></i> Total: ${new Intl.NumberFormat('es-PY').format(order.total_amount)} ?
                                 </div>
                                 <div class="order-meta">
                                     <i class="fas fa-credit-card"></i> Método de pago: ${formatPaymentMethod(order.payment_method)}

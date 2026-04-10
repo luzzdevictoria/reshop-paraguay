@@ -237,7 +237,7 @@ HISTORIAL DE MODIFICACIONES:
             const container = document.getElementById('productDetail');
             const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
             const conditionText = { 
-                'new_with_tags': 'Nuevo con etiqueta', 'new_without_tags': 'Nuevo sin etiqueta',
+                'new_with_ta?': 'Nuevo con etiqueta', 'new_without_ta?': 'Nuevo sin etiqueta',
                 'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable'
             }[product.condition] || product.condition;
             const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
@@ -251,7 +251,7 @@ HISTORIAL DE MODIFICACIONES:
                     <span class="rating-value">${avgRating.toFixed(1)}</span>
                     <span class="rating-count">(${product.reviews_count || 0} reseñas)</span>
                 </div>
-                <div class="product-price"><i class="fas fa-dollar-sign"></i> ${priceFormatted} Gs</div>
+                <div class="product-price"><i class="fas fa-money-bill-wave"></i> ${priceFormatted} ?</div>
                 <div class="product-info"><label><i class="fas fa-align-left"></i> Descripción:</label><span>${escapeHtml(product.description || 'Sin descripción')}</span></div>
                 <div class="product-info"><label><i class="fas fa-tshirt"></i> Categoría:</label><span>${product.category}</span></div>
                 <div class="product-info"><label><i class="fas fa-ruler"></i> Talla:</label><span>${product.size || 'Talla única'}</span></div>

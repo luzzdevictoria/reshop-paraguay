@@ -106,9 +106,9 @@ HISTORIAL DE MODIFICACIONES:
                 
                 itemsHtml += `<tr>
                     <td><i class="fas fa-tag"></i> ${escapeHtml(item.title)}</td>
-                    <td>${priceFormatted} Gs</td>
+                    <td>${priceFormatted} ?</td>
                     <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></td>
-                    <td>${subtotalFormatted} Gs</td>
+                    <td>${subtotalFormatted} ?</td>
                     <td><button class="btn btn-danger" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
                 </tr>`;
             }
@@ -118,7 +118,7 @@ HISTORIAL DE MODIFICACIONES:
                 </table>
                 <div class="cart-summary">
                     <h3><i class="fas fa-receipt"></i> Total del Pedido</h3>
-                    <div class="total-price">${new Intl.NumberFormat('es-PY').format(total)} Gs</div>
+                    <div class="total-price">${new Intl.NumberFormat('es-PY').format(total)} ?</div>
                     <div class="action-buttons">
                         <button class="btn btn-secondary" onclick="clearCart()"><i class="fas fa-trash"></i> Vaciar Carrito</button>
                         <button class="btn btn-primary" onclick="checkout()"><i class="fas fa-credit-card"></i> Proceder al Pago</button>
