@@ -2,19 +2,18 @@
 ================================================================================
 ARCHIVO: profile.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.0
+VERSION: 1.1.0
 CREADO: 2026-04-11
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Perfil de usuario. Permite ver y editar información personal,
-             dirección, y datos de tienda (si es vendedor).
+             incluyendo número de cédula (document_id), dirección, y datos de tienda.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-11 - Creacion inicial del perfil de usuario
-2026-04-11 - [ADD] Carga de datos del usuario desde API
-2026-04-11 - [ADD] Edición de perfil (nombre, teléfono, dirección, ciudad)
-2026-04-11 - [ADD] Campos específicos para vendedores (nombre tienda, descripción)
+2026-04-11 - [ADD] Campo document_id (Cédula de Identidad / CI)
+2026-04-11 - [ADD] Carga y edición de document_id desde API
 2026-04-11 - [FIX] Header con logo y navegación profesional
 ================================================================================
 -->
@@ -61,8 +60,6 @@ HISTORIAL DE MODIFICACIONES:
         .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .btn-primary { background: #2A5C6E; color: white; width: 100%; }
         .btn-primary:hover { background: #1e4452; }
-        .btn-secondary { background: #E8B86B; color: #333; }
-        .btn-secondary:hover { background: #d4a050; }
         
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
@@ -94,6 +91,8 @@ HISTORIAL DE MODIFICACIONES:
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
             <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
             <span id="authLinks">
                 <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
                 <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
@@ -124,14 +123,20 @@ HISTORIAL DE MODIFICACIONES:
                         <input type="text" id="fullName" required>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-phone"></i> Teléfono</label>
-                        <input type="tel" id="phone">
+                        <label><i class="fas fa-id-card"></i> Cédula / CI / Documento</label>
+                        <input type="text" id="documentId" placeholder="Ej: 12345678">
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="email" readonly disabled style="background: #f5f5f5;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-phone"></i> Teléfono</label>
+                        <input type="tel" id="phone" placeholder="+595 9XX XXX XXX">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="email" readonly disabled style="background: #f5f5f5;">
+                    </div>
                 </div>
                 
                 <div class="form-row">
@@ -186,14 +191,25 @@ HISTORIAL DE MODIFICACIONES:
             const authLinks = document.getElementById('authLinks');
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
+            const dashboardLink = document.getElementById('dashboardLink');
+            const adminLink = document.getElementById('adminLink');
 
             if (token && user) {
                 authLinks.style.display = 'none';
                 userMenu.style.display = 'inline-block';
                 userName.innerHTML = user.full_name || user.email;
+                
+                if (dashboardLink && user.role === 'seller') {
+                    dashboardLink.style.display = 'inline';
+                }
+                if (adminLink && user.role === 'admin') {
+                    adminLink.style.display = 'inline';
+                }
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
+                if (dashboardLink) dashboardLink.style.display = 'none';
+                if (adminLink) adminLink.style.display = 'none';
             }
         }
 
@@ -227,6 +243,7 @@ HISTORIAL DE MODIFICACIONES:
                     document.getElementById('fullName').value = currentUser.full_name || '';
                     document.getElementById('email').value = currentUser.email || '';
                     document.getElementById('phone').value = currentUser.phone || '';
+                    document.getElementById('documentId').value = currentUser.document_id || '';
                     document.getElementById('address').value = currentUser.address || '';
                     document.getElementById('city').value = currentUser.city || '';
                     
@@ -265,6 +282,7 @@ HISTORIAL DE MODIFICACIONES:
             const updateData = {
                 full_name: document.getElementById('fullName').value.trim(),
                 phone: document.getElementById('phone').value.trim(),
+                document_id: document.getElementById('documentId').value.trim(),
                 address: document.getElementById('address').value.trim(),
                 city: document.getElementById('city').value.trim()
             };
