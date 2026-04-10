@@ -2,28 +2,20 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.4
+VERSION: 2.0.0 - CON BUSCADOR, FILTROS Y PAGINACIÓN
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-10
+ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Pagina principal de la tienda. Obtiene productos desde la API
-             del backend y los renderiza dinamicamente en un grid responsivo.
+DESCRIPCION: Página principal de la tienda con buscador, filtros y paginación.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
-2026-04-09 - Creacion inicial con estructura HTML5, CSS inline y JS vanilla
-2026-04-09 - Implementacion de fetch a http://localhost:3000/api/products
-2026-04-09 - Agregada funcion escapeHtml para prevenir inyeccion XSS
-2026-04-09 - Estilos de tarjeta, badges de estado y grid responsivo
-2026-04-09 - Manejo de errores y estados vacios/cargando
-2026-04-09 - [ADD] Agregado menu de usuario con login/logout
-2026-04-09 - [ADD] Enlaces a registro y login
-2026-04-09 - [FIX] API_URL corregida para produccion
-2026-04-10 - [ADD] Agregado logo en el header
-2026-04-10 - [FIX] Corregida posicion del boton Mi Panel
-2026-04-10 - [IMPROVE] Mejorada visualizacion del logo y header responsivo
-2026-04-10 - [IMPROVE] Reemplazo de emojis por iconos profesionales Font Awesome
-2026-04-10 - [ADD] Enlace de Admin en menu con logica de visualizacion condicional
+2026-04-09 - Creacion inicial
+2026-04-10 - [ADD] Logo y header profesional
+2026-04-11 - [ADD] Buscador por título
+2026-04-11 - [ADD] Filtros por categoría, precio, talla, estado
+2026-04-11 - [ADD] Paginación (10 productos por página)
+2026-04-11 - [IMPROVE] Diseño responsive de filtros
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -32,18 +24,15 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReShop Paraguay - Ropa de Segunda Mano</title>
-    <!-- Font Awesome 6 (iconos profesionales) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
         
-        /* Header */
         .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
-        .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; transition: opacity 0.2s; }
-        .header a:hover { opacity: 0.8; text-decoration: none; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
         
-        /* Logo y titulo */
         .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
         .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
         .logo-img:hover { transform: scale(1.02); }
@@ -51,44 +40,54 @@ HISTORIAL DE MODIFICACIONES:
         .header-title h1 i { margin-right: 8px; color: #E8B86B; }
         .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
         
-        /* Menu */
         .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        .header-menu a i, .header-menu button i { margin-right: 6px; }
         .user-menu { display: inline-block; margin-left: 15px; }
         .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
-        .logout-btn i { margin-right: 6px; }
         
-        /* Contenido */
+        /* Filtros */
+        .filters-section { background: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .search-box button { padding: 12px 20px; background: #2A5C6E; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .filter-group label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px; }
+        .filter-group select, .filter-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .filter-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .filter-actions button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-clear { background: #e0e0e0; color: #333; }
+        
+        /* Productos */
         .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
         
-        /* Tarjetas de producto */
         .product-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
         .product-card h3 { color: #2A5C6E; margin-bottom: 8px; font-size: 1.1rem; }
-        .product-card h3 i { margin-right: 6px; color: #E8B86B; font-size: 0.9rem; }
+        .product-card h3 i { margin-right: 6px; color: #E8B86B; }
         .product-card p { color: #666; margin-bottom: 10px; font-size: 0.85rem; line-height: 1.4; }
         .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
         .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
         .product-category { font-size: 0.75rem; color: #888; margin-top: 8px; }
         .product-category i { margin-right: 4px; }
         
-        /* Estados */
+        /* Paginación */
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+        .pagination button { padding: 8px 14px; border: 1px solid #ddd; background: white; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+        .pagination button:hover { background: #2A5C6E; color: white; border-color: #2A5C6E; }
+        .pagination button.active { background: #2A5C6E; color: white; border-color: #2A5C6E; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .loading, .error { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
         .error { color: #D95A41; }
+        .no-results { text-align: center; padding: 50px; color: #666; }
         
-        /* Footer */
         .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 40px; font-size: 0.8rem; }
         
-        /* Responsive */
         @media (max-width: 600px) {
             .logo-img { height: 55px; }
             .header-title h1 { font-size: 1.2rem; }
-            .header-title p { font-size: 0.7rem; }
-            .header a { font-size: 0.8rem; margin: 0 5px; }
+            .filters-grid { grid-template-columns: 1fr; }
             .products-grid { gap: 15px; }
-            .product-card h3 { font-size: 0.9rem; }
-            .price { font-size: 1.1rem; }
         }
     </style>
 </head>
@@ -104,9 +103,8 @@ HISTORIAL DE MODIFICACIONES:
         <div class="header-menu">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-			<a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
             <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
-            <!-- ✅ CAMBIO 1: Enlace de Admin agregado después de Mi Panel -->
             <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
             <span id="authLinks">
                 <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
@@ -120,9 +118,61 @@ HISTORIAL DE MODIFICACIONES:
     </div>
     
     <div class="container">
+        <!-- Sección de filtros -->
+        <div class="filters-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Buscar productos..." value="">
+                <button onclick="applyFilters()"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label><i class="fas fa-list"></i> Categoría</label>
+                    <select id="categoryFilter">
+                        <option value="">Todas</option>
+                        <option value="pantalones">Pantalones</option>
+                        <option value="camisas">Camisas</option>
+                        <option value="vestidos">Vestidos</option>
+                        <option value="chaquetas">Chaquetas</option>
+                        <option value="calzado">Calzado</option>
+                        <option value="accesorios">Accesorios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Estado</label>
+                    <select id="conditionFilter">
+                        <option value="">Todos</option>
+                        <option value="new_with_tags">Nuevo con etiqueta</option>
+                        <option value="new_without_tags">Nuevo sin etiqueta</option>
+                        <option value="very_good">Muy bueno</option>
+                        <option value="good">Bueno</option>
+                        <option value="acceptable">Aceptable</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-ruler"></i> Talla</label>
+                    <input type="text" id="sizeFilter" placeholder="Ej: M, L, 32...">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-dollar-sign"></i> Precio mínimo</label>
+                    <input type="number" id="minPriceFilter" placeholder="0">
+                </div>
+                <div class="filter-group">
+                    <label><i class="fas fa-dollar-sign"></i> Precio máximo</label>
+                    <input type="number" id="maxPriceFilter" placeholder="Ilimitado">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-clear" onclick="clearFilters()"><i class="fas fa-eraser"></i> Limpiar filtros</button>
+            </div>
+        </div>
+        
+        <!-- Resultados -->
         <div class="products-grid" id="productsGrid">
             <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>
         </div>
+        
+        <!-- Paginación -->
+        <div id="pagination" class="pagination"></div>
     </div>
 
     <div class="footer">
@@ -131,10 +181,14 @@ HISTORIAL DE MODIFICACIONES:
     </div>
 
     <script>
-        // ============================================================
-        // FUNCIONES DE AUTENTICACION
-        // ============================================================
+        const API_URL = 'https://reshop-backend.vercel.app';
+        let allProducts = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
         
+        // ============================================================
+        // AUTENTICACION
+        // ============================================================
         function updateUserMenu() {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -142,6 +196,7 @@ HISTORIAL DE MODIFICACIONES:
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
             const dashboardLink = document.getElementById('dashboardLink');
+            const adminLink = document.getElementById('adminLink');
 
             if (token && user) {
                 authLinks.style.display = 'none';
@@ -151,8 +206,6 @@ HISTORIAL DE MODIFICACIONES:
                 if (dashboardLink && user.role === 'seller') {
                     dashboardLink.style.display = 'inline';
                 }
-                // ✅ CAMBIO 2: Lógica para mostrar enlace de Admin si el rol es 'admin'
-                const adminLink = document.getElementById('adminLink');
                 if (adminLink && user.role === 'admin') {
                     adminLink.style.display = 'inline';
                 }
@@ -160,87 +213,171 @@ HISTORIAL DE MODIFICACIONES:
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
                 if (dashboardLink) dashboardLink.style.display = 'none';
-                // Ocultar adminLink si no hay usuario logueado
-                const adminLink = document.getElementById('adminLink');
                 if (adminLink) adminLink.style.display = 'none';
             }
         }
 
-function setupLogout() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // Borrar carrito y sesión
-            localStorage.removeItem('reshop_cart');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        });
-    }
-}
-
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('reshop_cart');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+        
         // ============================================================
-        // FUNCIONES DE PRODUCTOS
+        // FILTROS
         // ============================================================
-
-        const API_URL = 'https://reshop-backend.vercel.app';
-
+        function applyFilters() {
+            currentPage = 1;
+            renderProducts();
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('conditionFilter').value = '';
+            document.getElementById('sizeFilter').value = '';
+            document.getElementById('minPriceFilter').value = '';
+            document.getElementById('maxPriceFilter').value = '';
+            applyFilters();
+        }
+        
+        function getFilteredProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const condition = document.getElementById('conditionFilter').value;
+            const size = document.getElementById('sizeFilter').value.toLowerCase();
+            const minPrice = parseInt(document.getElementById('minPriceFilter').value) || 0;
+            const maxPrice = parseInt(document.getElementById('maxPriceFilter').value) || Infinity;
+            
+            return allProducts.filter(product => {
+                if (searchTerm && !product.title.toLowerCase().includes(searchTerm)) return false;
+                if (category && product.category !== category) return false;
+                if (condition && product.condition !== condition) return false;
+                if (size && !(product.size || '').toLowerCase().includes(size)) return false;
+                if (product.price < minPrice) return false;
+                if (product.price > maxPrice) return false;
+                return true;
+            });
+        }
+        
+        // ============================================================
+        // RENDERIZADO
+        // ============================================================
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const filtered = getFilteredProducts();
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedProducts = filtered.slice(start, start + itemsPerPage);
+            
+            if (paginatedProducts.length === 0) {
+                grid.innerHTML = '<div class="no-results"><i class="fas fa-box-open"></i> No se encontraron productos<br><br>¡Vuelve a intentarlo con otros filtros!</div>';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            for (const product of paginatedProducts) {
+                const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
+                const conditionText = {
+                    'new_with_tags': 'Nuevo con etiqueta',
+                    'new_without_tags': 'Nuevo sin etiqueta',
+                    'very_good': 'Muy bueno',
+                    'good': 'Bueno',
+                    'acceptable': 'Aceptable'
+                }[product.condition] || product.condition;
+                
+                html += `
+                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                        <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
+                        <p>${escapeHtml(product.description || 'Sin descripción')}</p>
+                        <div class="price"><i class="fas fa-dollar-sign"></i> ${priceFormatted} Gs</div>
+                        <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
+                        <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+            renderPagination(totalPages);
+        }
+        
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = `<button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left"></i></button>`;
+            html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-left"></i></button>`;
+            
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                html += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+            }
+            
+            html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angle-right"></i></button>`;
+            html += `<button onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-angle-double-right"></i></button>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            renderProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ============================================================
+        // CARGA DE PRODUCTOS
+        // ============================================================
         async function loadProducts() {
             const grid = document.getElementById('productsGrid');
-            if (!grid) return;
-            
             grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
             
             try {
-                console.log('🔍 Cargando productos...');
                 const response = await fetch(`${API_URL}/api/products`);
                 const data = await response.json();
-                console.log('📦 Datos recibidos:', data);
                 
                 if (data.success && data.products && data.products.length > 0) {
-                    let html = '';
-                    for (const product of data.products) {
-                        const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
-                        const conditionText = {
-                            'new_with_tags': 'Nuevo con etiqueta',
-                            'new_without_tags': 'Nuevo sin etiqueta',
-                            'very_good': 'Muy bueno',
-                            'good': 'Bueno',
-                            'acceptable': 'Aceptable'
-                        }[product.condition] || product.condition;
-                        
-                        html += `
-                            <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
-                                <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
-                                <p>${escapeHtml(product.description || 'Sin descripción')}</p>
-                                <div class="price"><i class="fas fa-dollar-sign"></i> ${priceFormatted} Gs</div>
-                                <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
-                                <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
-                            </div>
-                        `;
-                    }
-                    grid.innerHTML = html;
-                    console.log('✅ Productos renderizados correctamente');
+                    allProducts = data.products;
+                    renderProducts();
                 } else {
                     grid.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No hay productos disponibles</div>';
+                    document.getElementById('pagination').innerHTML = '';
                 }
             } catch (error) {
-                console.error('❌ Error:', error);
+                console.error('Error:', error);
                 grid.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> Error al cargar productos: ${error.message}</div>`;
             }
         }
-
+        
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
+        
+        // Eventos
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('conditionFilter').addEventListener('change', applyFilters);
+        document.getElementById('sizeFilter').addEventListener('input', applyFilters);
+        document.getElementById('minPriceFilter').addEventListener('input', applyFilters);
+        document.getElementById('maxPriceFilter').addEventListener('input', applyFilters);
+        
         // ============================================================
         // INICIALIZACION
         // ============================================================
-        
         document.addEventListener('DOMContentLoaded', () => {
             updateUserMenu();
             setupLogout();
