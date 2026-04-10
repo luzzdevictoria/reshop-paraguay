@@ -2,13 +2,13 @@
 ================================================================================
 ARCHIVO: server.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.2.0 - RLS FIXED + ADMIN MIDDLEWARE
+VERSION: 3.3.0 - ADDED SELLER ORDERS ENDPOINT
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-10
+ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: API REST principal de ReShop Paraguay.
-             Inicializa Express, middlewares, rutas y endpoints de administración.
+             Inicializa Express, middlewares, rutas y endpoints.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial del servidor
@@ -20,6 +20,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [FIX] Busqueda por email en lugar de id
 2026-04-10 - [ADD] Endpoint /api/admin/orders
 2026-04-10 - [ADD] Endpoint /api/admin/decode-token para debugging
+2026-04-11 - [ADD] Endpoint GET /api/seller/orders para que vendedores vean sus ventas
 ================================================================================
 */
 
@@ -53,14 +54,39 @@ const supabaseAdmin = createClient(
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
 // ============================================================
-// MIDDLEWARES GLOBALES
+// MIDDLEWARE DE AUTENTICACIÓN GENERAL
 // ============================================================
-app.use(cors({ origin: '*', credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const authenticateToken = async (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ success: false, error: 'Token requerido' });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const { data: dbUser, error: dbError } = await supabaseAdmin
+            .from('users')
+            .select('*')
+            .eq('id', decoded.sub)
+            .single();
+        
+        if (dbError || !dbUser) {
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        }
+        
+        req.user = dbUser;
+        next();
+    } catch (error) {
+        console.error('❌ Error en authenticateToken:', error.message);
+        res.status(403).json({ success: false, error: 'Token inválido o expirado' });
+    }
+};
 
 // ============================================================
-// MIDDLEWARE DE AUTENTICACIÓN ADMIN (CON supabaseAdmin)
+// MIDDLEWARE DE AUTENTICACIÓN ADMIN
 // ============================================================
 const verifyAdmin = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -76,7 +102,6 @@ const verifyAdmin = async (req, res, next) => {
         const decoded = jwt.verify(token, JWT_SECRET);
         console.log('✅ Token decodificado:', { email: decoded.email, role: decoded.role });
         
-        // 🔧 CRÍTICO: Usar supabaseAdmin (bypassea RLS) en lugar de supabase
         const { data: dbUser, error: dbError } = await supabaseAdmin
             .from('users')
             .select('id, email, full_name, role, is_active, store_name')
@@ -119,6 +144,13 @@ const verifyAdmin = async (req, res, next) => {
 };
 
 // ============================================================
+// MIDDLEWARES GLOBALES
+// ============================================================
+app.use(cors({ origin: '*', credentials: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ============================================================
 // RUTAS BASE
 // ============================================================
 
@@ -129,13 +161,14 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         name: 'ReShop Paraguay API', 
-        version: '3.2.0', 
+        version: '3.3.0', 
         status: 'active',
         endpoints: {
             health: 'GET /api/health',
             products: 'GET /api/products',
             auth: 'POST /api/auth/register, POST /api/auth/login',
-            admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders'
+            admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
+            seller: 'GET /api/seller/orders'
         }
     });
 });
@@ -294,7 +327,6 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
             return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
         }
         
-        // No permitir desactivar al último admin
         if (user.is_active === true && user.role === 'admin') {
             const { data: otherAdmins } = await supabaseAdmin
                 .from('users')
@@ -392,6 +424,39 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
 });
 
 // ============================================================
+// 🆕 ENDPOINT PARA VENDEDORES: Ver sus ventas
+// ============================================================
+app.get('/api/seller/orders', authenticateToken, async (req, res) => {
+    try {
+        // Solo vendedores o admin pueden acceder
+        if (req.user.role !== 'seller' && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'Acceso denegado. Solo vendedores.' });
+        }
+        
+        console.log(`📋 Vendedor ${req.user.email} solicitando sus ventas...`);
+        
+        const { data: orders, error } = await supabaseAdmin
+            .from('orders')
+            .select(`
+                *,
+                buyer:buyer_id(id, email, full_name, phone),
+                items:order_items(*)
+            `)
+            .eq('seller_id', req.user.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        console.log(`✅ Encontradas ${orders?.length || 0} ventas para ${req.user.email}`);
+        
+        res.json({ success: true, orders: orders || [] });
+    } catch (error) {
+        console.error('❌ Error obteniendo ventas del vendedor:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
 // DEBUG: Decodificar Token
 // ============================================================
 
@@ -452,12 +517,13 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.2.0');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.3.0');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`🔐 Admin: http://localhost:${PORT}/api/admin/users`);
+    console.log(`🆕 Seller Orders: http://localhost:${PORT}/api/seller/orders`);
     console.log('='.repeat(60));
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
