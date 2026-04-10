@@ -2,9 +2,9 @@
 ================================================================================
 ARCHIVO: authController.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 4.0.0 - SIN RATE LIMIT (USA supabaseAdmin PARA CREAR USUARIOS)
+VERSION: 4.1.0 - AGREGADO DOCUMENT_ID
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-10
+ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Controlador de autenticacion con Supabase.
@@ -23,6 +23,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [MAJOR] REGISTRO: usa supabaseAdmin.auth.admin.createUser() en lugar de supabase.auth.signUp()
 2026-04-10 - [MAJOR] Elimina completamente el rate limit de Supabase
 2026-04-10 - [ADD] Email confirmado automaticamente (email_confirm: true)
+2026-04-11 - [ADD] Campo document_id en getMe y updateProfile
+2026-04-11 - [ADD] Campo document_id en respuesta de login
 ================================================================================
 */
 
@@ -88,12 +90,11 @@ async function register(req, res) {
             });
         }
 
-        // 🔧 MEJORA CRÍTICA: Usar supabaseAdmin.auth.admin.createUser()
-        // Esto bypassea el rate limit de Supabase Auth
+        // Usar supabaseAdmin.auth.admin.createUser() para evitar rate limit
         const { data: authUser, error: signUpError } = await supabaseAdmin.auth.admin.createUser({
             email: email,
             password: password,
-            email_confirm: true,  // Auto-confirmar email, el usuario no necesita verificar
+            email_confirm: true,
             user_metadata: {
                 full_name: full_name,
                 role: role || 'buyer',
@@ -104,7 +105,6 @@ async function register(req, res) {
         if (signUpError) {
             console.error('[AUTH ERROR]', signUpError);
             
-            // Mensaje específico para diferentes errores
             if (signUpError.message.includes('already been registered')) {
                 return res.status(409).json({
                     success: false,
@@ -150,7 +150,6 @@ async function register(req, res) {
         if (insertError) {
             console.error('[INSERT ERROR]', insertError);
             
-            // Si falla la inserción, eliminar el usuario de Auth para mantener consistencia
             try {
                 await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
             } catch (e) {
@@ -257,6 +256,7 @@ async function login(req, res) {
                 role: user.role,
                 store_name: user.store_name,
                 phone: user.phone,
+                document_id: user.document_id,
                 rating: user.rating,
                 total_sales: user.total_sales
             },
@@ -281,7 +281,7 @@ async function getMe(req, res) {
 
         const { data: user, error } = await supabaseAdmin
             .from('users')
-            .select('id, email, full_name, phone, address, city, role, store_name, store_description, store_logo_url, rating, total_sales, created_at, is_active')
+            .select('id, email, full_name, phone, document_id, address, city, role, store_name, store_description, store_logo_url, rating, total_sales, created_at, is_active')
             .eq('id', userId)
             .single();
 
@@ -307,23 +307,24 @@ async function getMe(req, res) {
 }
 
 // ============================================================
-// ACTUALIZAR PERFIL
+// ACTUALIZAR PERFIL (CON DOCUMENT_ID)
 // ============================================================
 async function updateProfile(req, res) {
     try {
         const userId = req.user.sub;
-        const { full_name, phone, address, city, store_name, store_description } = req.body;
+        const { full_name, phone, document_id, address, city, store_name, store_description } = req.body;
 
         const updateData = {
             updated_at: new Date().toISOString()
         };
         
-        if (full_name) updateData.full_name = full_name;
-        if (phone) updateData.phone = phone;
-        if (address) updateData.address = address;
-        if (city) updateData.city = city;
-        if (store_name) updateData.store_name = store_name;
-        if (store_description) updateData.store_description = store_description;
+        if (full_name !== undefined) updateData.full_name = full_name;
+        if (phone !== undefined) updateData.phone = phone;
+        if (document_id !== undefined) updateData.document_id = document_id;
+        if (address !== undefined) updateData.address = address;
+        if (city !== undefined) updateData.city = city;
+        if (store_name !== undefined) updateData.store_name = store_name;
+        if (store_description !== undefined) updateData.store_description = store_description;
 
         const { data: user, error } = await supabaseAdmin
             .from('users')
@@ -333,6 +334,7 @@ async function updateProfile(req, res) {
             .single();
 
         if (error) {
+            console.error('Error en updateProfile:', error);
             return res.status(500).json({
                 success: false,
                 error: 'Error al actualizar el perfil'
@@ -347,6 +349,7 @@ async function updateProfile(req, res) {
                 email: user.email,
                 full_name: user.full_name,
                 phone: user.phone,
+                document_id: user.document_id,
                 address: user.address,
                 city: user.city,
                 role: user.role,
