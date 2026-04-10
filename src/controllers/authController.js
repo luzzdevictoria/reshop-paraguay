@@ -1,28 +1,31 @@
 /**
-* UBICACION: C:\Users\pirov\ReShop\backend\src\controllers\authController.js
-* CREADO: 2026-04-09
-* ACTUALIZADO: 2026-04-09
-* VERSION: 1.0.0
-* DESCRIPCION: Controlador de autenticacion. Maneja registro, login,
-* obtencion y actualizacion de perfiles de usuario.
-* 
-* RESPONSABLE: Pedro José Pirovani
-* PROPIETARIA: Luciana Noelia Da Silva
-* PROYECTO: ReShop Paraguay
-* 
-* HISTORIAL DE MODIFICACIONES:
-* 2026-04-09 - Creacion inicial del controlador
+* UBICACION: C:\Users\pirov\ReShop\src\controllers\authController.js
+* VERSION: 2.0.0 - CORREGIDO
+* DESCRIPCION: Controlador de autenticacion con Supabase
 */
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { supabaseAdmin } = require('../../database');
+const { createClient } = require('@supabase/supabase-js');
+
+// Inicializar Supabase
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+);
+
+const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
 // Generar token JWT
 function generateToken(userId, email, role) {
     return jwt.sign(
         { sub: userId, email: email, role: role },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: '7d' }
     );
 }
@@ -48,7 +51,7 @@ async function register(req, res) {
         }
 
         // Verificar si el email ya existe
-        const { data: existingUser, error: findError } = await supabaseAdmin
+        const { data: existingUser } = await supabaseAdmin
             .from('users')
             .select('email')
             .eq('email', email)
@@ -65,15 +68,34 @@ async function register(req, res) {
         const saltRounds = 10;
         const password_hash = await bcrypt.hash(password, saltRounds);
 
-        // Crear usuario en Supabase Auth (opcional - por ahora solo en nuestra tabla)
+        // Crear usuario en Supabase Auth
+        const { data: authUser, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { full_name, role: role || 'buyer' }
+            }
+        });
+
+        if (signUpError) {
+            console.error('[AUTH ERROR]', signUpError);
+            return res.status(500).json({
+                success: false,
+                error: signUpError.message
+            });
+        }
+
         const userRole = role === 'seller' ? 'seller' : 'buyer';
         
         const newUser = {
+            id: authUser.user.id,
             email,
             full_name,
             phone: phone || null,
             role: userRole,
+            password_hash,
             store_name: userRole === 'seller' ? store_name || null : null,
+            is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -85,7 +107,7 @@ async function register(req, res) {
             .single();
 
         if (insertError) {
-            console.error('[REGISTER ERROR]', insertError);
+            console.error('[INSERT ERROR]', insertError);
             return res.status(500).json({
                 success: false,
                 error: 'Error al crear el usuario'
@@ -115,7 +137,7 @@ async function register(req, res) {
         console.error('[REGISTER ERROR]', error);
         res.status(500).json({
             success: false,
-            error: 'Error interno del servidor'
+            error: 'Error interno del servidor: ' + error.message
         });
     }
 }
@@ -132,35 +154,39 @@ async function login(req, res) {
             });
         }
 
-        // Buscar usuario por email
+        // Autenticar con Supabase Auth
+        const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if (signInError) {
+            return res.status(401).json({
+                success: false,
+                error: 'Email o contraseña incorrectos'
+            });
+        }
+
+        // Buscar usuario en nuestra tabla
         const { data: user, error: findError } = await supabaseAdmin
             .from('users')
             .select('*')
-            .eq('email', email)
+            .eq('id', authData.user.id)
             .single();
 
         if (!user) {
             return res.status(401).json({
                 success: false,
-                error: 'Email o contraseña incorrectos'
+                error: 'Usuario no encontrado en la base de datos'
             });
         }
 
-        // Verificar contraseña (como aun no tenemos password_hash, simulamos)
-        // TODO: Cuando implementemos password_hash, usar bcrypt.compare
-        
-        // Por ahora, aceptamos cualquier contraseña para pruebas
-        // En produccion, descomentar la linea de bcrypt
-        
-        /*
-        const isValidPassword = await bcrypt.compare(password, user.password_hash);
-        if (!isValidPassword) {
-            return res.status(401).json({
+        if (!user.is_active) {
+            return res.status(403).json({
                 success: false,
-                error: 'Email o contraseña incorrectos'
+                error: 'Cuenta desactivada'
             });
         }
-        */
 
         // Actualizar ultimo login
         await supabaseAdmin
@@ -170,6 +196,9 @@ async function login(req, res) {
 
         // Generar token
         const token = generateToken(user.id, user.email, user.role);
+
+        // Ocultar datos sensibles
+        delete user.password_hash;
 
         res.json({
             success: true,
@@ -190,7 +219,7 @@ async function login(req, res) {
         console.error('[LOGIN ERROR]', error);
         res.status(500).json({
             success: false,
-            error: 'Error interno del servidor'
+            error: 'Error interno del servidor: ' + error.message
         });
     }
 }
@@ -212,6 +241,8 @@ async function getMe(req, res) {
                 error: 'Usuario no encontrado'
             });
         }
+
+        delete user.password_hash;
 
         res.json({
             success: true,
@@ -255,6 +286,8 @@ async function updateProfile(req, res) {
                 error: 'Error al actualizar el perfil'
             });
         }
+
+        delete user.password_hash;
 
         res.json({
             success: true,
