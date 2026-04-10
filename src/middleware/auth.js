@@ -1,5 +1,5 @@
 /**
-* UBICACION: C:\Users\pirov\ReShop\backend\src\middleware\auth.js
+* UBICACION: C:\Users\pirov\ReShop\src\middleware\auth.js
 * CREADO: 2026-04-09
 * ACTUALIZADO: 2026-04-09
 * VERSION: 1.0.0

@@ -1,5 +1,5 @@
 /**
-* UBICACION: C:\Users\pirov\ReShop\backend\src\routes\authRoutes.js
+* UBICACION: C:\Users\pirov\ReShop\src\routes\authRoutes.js
 * CREADO: 2026-04-09
 * ACTUALIZADO: 2026-04-09
 * VERSION: 1.0.0

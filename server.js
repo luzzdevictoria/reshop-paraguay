@@ -292,8 +292,8 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
 // ============================================================
 // RUTAS ADICIONALES (comentadas hasta que los archivos existan)
 // ============================================================
-// const authRoutes = require('./src/routes/authRoutes');
-// app.use('/api/auth', authRoutes);
+   const authRoutes = require('./src/routes/authRoutes');
+   app.use('/api/auth', authRoutes);
 // const ordersRoutes = require('./src/routes/orders');
 // app.use('/api/orders', ordersRoutes);
 
