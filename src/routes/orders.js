@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: src/routes/orders.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.0
+VERSION: 2.0.0 - FIXED AUTHENTICATION
 CREADO: 2026-04-10
 ACTUALIZADO: 2026-04-10
 RESPONSABLE: Pedro José Pirovani
@@ -11,22 +11,28 @@ DESCRIPCION: Rutas para gestionar órdenes de compra (crear, listar, actualizar 
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-10 - Creacion inicial del modulo de ordenes
-2026-04-10 - Implementacion de endpoints: POST /, GET /my-orders, GET /my-sales, PUT /:id/status, PUT /:id/confirm
+2026-04-10 - Implementacion de endpoints: POST /, GET /my-orders, GET /my-sales
 2026-04-10 - Integracion con tabla orders y order_items de Supabase
+2026-04-10 - [FIX] authenticateToken ahora usa JWT_SECRET en lugar de supabase.auth.getUser
+2026-04-10 - [FIX] Busqueda de usuario por ID en lugar de email
+2026-04-10 - [IMPROVE] Manejo de errores mas descriptivo
 ================================================================================
 */
 
 const express = require('express');
 const router = express.Router();
 const { createClient } = require('@supabase/supabase-js');
+const jwt = require('jsonwebtoken');
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
+
 // ============================================================
-// MIDDLEWARE: Verificar token de autenticación
+// MIDDLEWARE: Verificar token JWT
 // ============================================================
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -37,25 +43,27 @@ const authenticateToken = async (req, res, next) => {
     }
     
     try {
-        const { data: { user }, error } = await supabase.auth.getUser(token);
-        if (error || !user) {
-            return res.status(403).json({ success: false, error: 'Token inválido' });
-        }
+        // Decodificar el token JWT
+        const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('🔑 Token decodificado:', { sub: decoded.sub, email: decoded.email, role: decoded.role });
         
+        // Buscar usuario en la base de datos por ID
         const { data: dbUser, error: dbError } = await supabase
             .from('users')
             .select('*')
-            .eq('email', user.email)
+            .eq('id', decoded.sub)
             .single();
         
         if (dbError || !dbUser) {
+            console.error('❌ Usuario no encontrado:', dbError?.message);
             return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
         }
         
         req.user = dbUser;
         next();
     } catch (error) {
-        res.status(403).json({ success: false, error: 'Error de autenticación' });
+        console.error('❌ Error en authenticateToken:', error.message);
+        res.status(403).json({ success: false, error: 'Token inválido o expirado' });
     }
 };
 
@@ -143,6 +151,8 @@ router.post('/', authenticateToken, async (req, res) => {
             .insert(orderItems);
         
         if (itemsError) throw itemsError;
+        
+        console.log(`✅ Orden creada: ${orderNumber} por ${req.user.email}`);
         
         res.json({
             success: true,
