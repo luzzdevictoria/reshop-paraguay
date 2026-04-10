@@ -108,7 +108,7 @@ HISTORIAL DE MODIFICACIONES:
                     <td><i class="fas fa-tag"></i> ${escapeHtml(item.title)}</td>
                     <td>${priceFormatted} ₲</td>
                     <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></td>
-                    <td>${subtotalFormatted} ?</td>
+                    <td>${subtotalFormatted} ₲</td>
                     <td><button class="btn btn-danger" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
                 </tr>`;
             }

@@ -245,7 +245,7 @@ HISTORIAL DE MODIFICACIONES:
                         html += `<tr>
                             <td>${firstImage ? `<img src="${firstImage}" class="product-image">` : '<i class="fas fa-image"></i>'}</td>
                             <td><i class="fas fa-tag"></i> ${escapeHtml(p.title)}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(p.price)} ?</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(p.price)} ₲</td>
                             <td>${p.category}</td>
                             <td>${p.status}</td>
                             <td><button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
@@ -355,8 +355,8 @@ HISTORIAL DE MODIFICACIONES:
                             <td>${order.order_number}</td>
                             <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
                             <td>${escapeHtml(order.buyer?.full_name || order.buyer?.email || 'N/A')}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ?</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ?</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ₲</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ₲</td>
                             <td><strong>${new Intl.NumberFormat('es-PY').format(order.seller_payout || order.total_amount)} ?</strong></td>
                             <td><span class="order-status ${statusClass}">${statusText}</span></td>
                             <td><button class="btn btn-info btn-sm" onclick="updateOrderStatus(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar Estado</button></td>
