@@ -95,6 +95,17 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================
+// TEST CORS
+// ============================================================
+app.get('/api/admin/cors-test', (req, res) => {
+    res.json({ 
+        success: true, 
+        message: 'CORS funciona correctamente',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// ============================================================
 // RUTA DE PRODUCTOS (CONSULTA SUPABASE)
 // ============================================================
 app.get('/api/products', async (req, res) => {
