@@ -136,7 +136,7 @@ HISTORIAL DE MODIFICACIONES:
         
         // Verificar autenticacion
         if (!token) {
-            window.location.href = 'login.html₲redirect=checkout.html';
+            window.location.href = 'login.html?redirect=checkout.html';
         }
         
         // Cargar resumen del carrito
@@ -216,7 +216,7 @@ HISTORIAL DE MODIFICACIONES:
                     localStorage.removeItem('reshop_cart');
                     
                     // Redirigir a confirmación con número de orden
-                    window.location.href = `order-confirmation.html₲order=${data.order.order_number}`;
+                    window.location.href = `order-confirmation.html?order=${data.order.order_number}`;
                 } else {
                     showMessage(data.error || 'Error al procesar el pedido', 'error');
                 }

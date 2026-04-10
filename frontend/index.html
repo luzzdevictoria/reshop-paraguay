@@ -295,7 +295,7 @@ HISTORIAL DE MODIFICACIONES:
                 }[product.condition] || product.condition;
                 
                 html += `
-                    <div class="product-card" onclick="window.location.href='product-detail.html₲id=${product.id}'">
+                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
                         <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
                         <p>${escapeHtml(product.description || 'Sin descripción')}</p>
                         <div class="price">${priceFormatted} ₲</div>
