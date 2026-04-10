@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: server.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.3.0 - ADDED SELLER ORDERS ENDPOINT
+VERSION: 3.4.0 - ADDED REVIEWS ENDPOINTS
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
@@ -21,6 +21,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [ADD] Endpoint /api/admin/orders
 2026-04-10 - [ADD] Endpoint /api/admin/decode-token para debugging
 2026-04-11 - [ADD] Endpoint GET /api/seller/orders para que vendedores vean sus ventas
+2026-04-11 - [ADD] Endpoints de reseñas: GET/POST /api/products/:id/reviews, GET /api/products/:id/rating
 ================================================================================
 */
 
@@ -161,11 +162,12 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         name: 'ReShop Paraguay API', 
-        version: '3.3.0', 
+        version: '3.4.0', 
         status: 'active',
         endpoints: {
             health: 'GET /api/health',
             products: 'GET /api/products',
+            reviews: 'GET/POST /api/products/:id/reviews, GET /api/products/:id/rating',
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
             seller: 'GET /api/seller/orders'
@@ -229,6 +231,128 @@ app.get('/api/products/:id', async (req, res) => {
         res.json({ success: true, product });
     } catch (error) {
         console.error('Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// ENDPOINTS DE RESEÑAS ⭐ NUEVO EN v3.4.0
+// ============================================================
+
+// Obtener reseñas de un producto
+app.get('/api/products/:id/reviews', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const { data: reviews, error } = await supabase
+            .from('reviews')
+            .select(`
+                *,
+                reviewer:reviewer_id(id, full_name, email)
+            `)
+            .eq('product_id', id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        res.json({ success: true, reviews: reviews || [] });
+    } catch (error) {
+        console.error('Error al obtener reseñas:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Crear reseña (solo usuarios autenticados que compraron el producto)
+app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rating, comment, order_id } = req.body;
+        
+        // Validar rating
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({ success: false, error: 'La calificación debe ser entre 1 y 5 estrellas' });
+        }
+        
+        // Verificar que el usuario compró este producto
+        const { data: orderItem, error: orderError } = await supabase
+            .from('order_items')
+            .select('order_id')
+            .eq('product_id', id)
+            .eq('order_id', order_id);
+        
+        // También verificar que la orden pertenece al usuario
+        const { data: order, error: orderCheck } = await supabase
+            .from('orders')
+            .select('id, buyer_id')
+            .eq('id', order_id)
+            .eq('buyer_id', req.user.id)
+            .single();
+        
+        if (orderCheck || !order) {
+            return res.status(403).json({ success: false, error: 'Solo puedes reseñar productos que has comprado' });
+        }
+        
+        // Verificar si ya existe una reseña para esta orden y producto
+        const { data: existingReview } = await supabase
+            .from('reviews')
+            .select('id')
+            .eq('order_id', order_id)
+            .eq('product_id', id)
+            .single();
+        
+        if (existingReview) {
+            return res.status(400).json({ success: false, error: 'Ya has reseñado este producto' });
+        }
+        
+        // Obtener el vendedor del producto
+        const { data: product } = await supabase
+            .from('products')
+            .select('seller_id')
+            .eq('id', id)
+            .single();
+        
+        // Crear la reseña
+        const { data: review, error } = await supabase
+            .from('reviews')
+            .insert({
+                product_id: id,
+                order_id: order_id,
+                reviewer_id: req.user.id,
+                reviewed_id: product.seller_id,
+                rating: parseInt(rating),
+                comment: comment || null
+            })
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        res.json({ success: true, message: 'Reseña agregada exitosamente', review });
+    } catch (error) {
+        console.error('Error al crear reseña:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Obtener calificación promedio de un producto (ya lo da el campo rating de products)
+app.get('/api/products/:id/rating', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const { data: product, error } = await supabase
+            .from('products')
+            .select('rating, reviews_count')
+            .eq('id', id)
+            .single();
+        
+        if (error) throw error;
+        
+        res.json({ 
+            success: true, 
+            rating: product?.rating || 0,
+            count: product?.reviews_count || 0
+        });
+    } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -517,16 +641,18 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.3.0');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.4.0');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
+    console.log(`⭐ Reviews: GET/POST /api/products/:id/reviews`);
     console.log(`🔐 Admin: http://localhost:${PORT}/api/admin/users`);
     console.log(`🆕 Seller Orders: http://localhost:${PORT}/api/seller/orders`);
     console.log('='.repeat(60));
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
+    console.log('✅ Endpoints de reseñas implementados');
     console.log('');
 });
 
