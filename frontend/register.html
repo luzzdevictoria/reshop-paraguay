@@ -1,63 +1,176 @@
+<!--
+================================================================================
+ARCHIVO: register.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 2.0.0
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-10
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Formulario de registro para compradores y vendedores.
+             Permite seleccionar el tipo de cuenta (buyer/seller).
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creacion inicial (solo vendedores)
+2026-04-10 - [ADD] Selector de rol (comprador/vendedor)
+2026-04-10 - [ADD] Campo nombre de tienda condicional (solo para vendedores)
+2026-04-10 - [IMPROVE] Header con logo y navegacion profesional
+2026-04-10 - [FIX] Validacion dinamica segun rol seleccionado
+================================================================================
+-->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Vendedor - ReShop Paraguay</title>
+    <title>Registro - ReShop Paraguay</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        
+        /* Header */
         .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
         .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
+        .header i { margin-right: 6px; }
+        
+        /* Logo y titulo */
+        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .logo-img:hover { transform: scale(1.02); }
+        .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header-title h1 i { margin-right: 8px; color: #E8B86B; }
+        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Menu */
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        
+        /* Contenido */
         .container { max-width: 600px; margin: 0 auto; padding: 30px 20px; }
         .form-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
         .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; width: 100%; transition: background 0.2s; }
         .btn-primary { background: #2A5C6E; color: white; }
         .btn-primary:hover { background: #1e4452; }
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
+        .message.loading { background: #cce5ff; color: #004085; display: block; }
+        
+        /* Footer */
         .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
         .login-link { text-align: center; margin-top: 20px; }
-        .header i, .btn i { margin-right: 6px; }
+        
+        /* Ocultar campo condicional */
+        .hidden-field { display: none; }
+        
+        @media (max-width: 600px) {
+            .logo-img { height: 55px; }
+            .header-title h1 { font-size: 1.2rem; }
+            .header-title p { font-size: 0.7rem; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
-        <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
-        <div style="margin-top: 10px;"><a href="index.html"><i class="fas fa-home"></i> Inicio</a><a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a></div>
-    </div>
-    <div class="container">
-        <div class="form-card">
-            <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Registro de Vendedor</h2>
-            <p style="margin-bottom: 20px; color: #666;"><i class="fas fa-store"></i> Crea tu tienda en ReShop y comienza a vender ropa de segunda mano.</p>
-            <form id="registerForm">
-                <div class="form-group"><label><i class="fas fa-user"></i> Nombre completo *</label><input type="text" id="fullName" required></div>
-                <div class="form-group"><label><i class="fas fa-envelope"></i> Email *</label><input type="email" id="email" required></div>
-                <div class="form-group"><label><i class="fas fa-phone"></i> Teléfono</label><input type="tel" id="phone"></div>
-                <div class="form-group"><label><i class="fas fa-store"></i> Nombre de tu tienda *</label><input type="text" id="storeName" required></div>
-                <div class="form-group"><label><i class="fas fa-lock"></i> Contraseña *</label><input type="password" id="password" required></div>
-                <div class="form-group"><label><i class="fas fa-lock"></i> Confirmar contraseña *</label><input type="password" id="confirmPassword" required></div>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Registrar mi tienda</button>
-                <div id="message" class="message"></div>
-            </form>
-            <div class="login-link">¿Ya tienes cuenta? <a href="login.html"><i class="fas fa-sign-in-alt"></i> Inicia sesión aquí</a></div>
+        <div class="header-top">
+            <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
+            </div>
+        </div>
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
         </div>
     </div>
+    
+    <div class="container">
+        <div class="form-card">
+            <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-user-plus"></i> Crear Cuenta</h2>
+            <p style="margin-bottom: 20px; color: #666;"><i class="fas fa-store"></i> Únete a ReShop Paraguay como comprador o vendedor.</p>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label><i class="fas fa-user-tag"></i> Tipo de cuenta *</label>
+                    <select id="role" required>
+                        <option value="buyer">🛍️ Comprador - Solo para comprar</option>
+                        <option value="seller">🏪 Vendedor - Para vender productos</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Nombre completo *</label>
+                    <input type="text" id="fullName" required placeholder="Ej: Juan Perez">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email *</label>
+                    <input type="email" id="email" required placeholder="ejemplo@correo.com">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Teléfono</label>
+                    <input type="tel" id="phone" placeholder="+595 9XX XXX XXX">
+                </div>
+                
+                <div class="form-group" id="storeNameGroup" style="display: none;">
+                    <label><i class="fas fa-store"></i> Nombre de tu tienda *</label>
+                    <input type="text" id="storeName" placeholder="Ej: Moda Express">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Contraseña *</label>
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Confirmar contraseña *</label>
+                    <input type="password" id="confirmPassword" required placeholder="Repite tu contraseña">
+                </div>
+                
+                <button type="submit" class="btn btn-primary"><i class="fas fa-check-circle"></i> Registrarme</button>
+                <div id="message" class="message"></div>
+            </form>
+            
+            <div class="login-link">
+                ¿Ya tienes cuenta? <a href="login.html"><i class="fas fa-sign-in-alt"></i> Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+    
     <div class="footer">
         <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
+
     <script>
         const API_URL = 'https://reshop-backend.vercel.app';
+        
+        // Mostrar/ocultar campo de nombre de tienda segun rol
+        const roleSelect = document.getElementById('role');
+        const storeNameGroup = document.getElementById('storeNameGroup');
+        const storeNameInput = document.getElementById('storeName');
+        
+        roleSelect.addEventListener('change', function() {
+            if (this.value === 'seller') {
+                storeNameGroup.style.display = 'block';
+                storeNameInput.required = true;
+            } else {
+                storeNameGroup.style.display = 'none';
+                storeNameInput.required = false;
+                storeNameInput.value = '';
+            }
+        });
+        
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const role = document.getElementById('role').value;
             const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
@@ -65,19 +178,77 @@
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const messageDiv = document.getElementById('message');
-            if (!fullName || !email || !storeName || !password) { messageDiv.className = 'message error'; messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete todos los campos obligatorios'; return; }
-            if (password !== confirmPassword) { messageDiv.className = 'message error'; messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Las contraseñas no coinciden'; return; }
-            if (password.length < 6) { messageDiv.className = 'message error'; messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> La contraseña debe tener al menos 6 caracteres'; return; }
-            messageDiv.className = 'message'; messageDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Registrando...';
+            
+            // Validaciones
+            if (!fullName || !email || !password) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Complete todos los campos obligatorios';
+                return;
+            }
+            
+            if (role === 'seller' && !storeName) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Los vendedores deben ingresar un nombre de tienda';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Las contraseñas no coinciden';
+                return;
+            }
+            
+            if (password.length < 6) {
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> La contraseña debe tener al menos 6 caracteres';
+                return;
+            }
+            
+            // Mostrar loading
+            messageDiv.className = 'message loading';
+            messageDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Registrando...';
+            
             try {
-                const response = await fetch(`${API_URL}/api/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, full_name: fullName, phone, role: 'seller', store_name: storeName }) });
+                const requestBody = {
+                    email,
+                    password,
+                    full_name: fullName,
+                    phone: phone || null,
+                    role: role
+                };
+                
+                // Solo agregar store_name si es vendedor
+                if (role === 'seller') {
+                    requestBody.store_name = storeName;
+                }
+                
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
                 const data = await response.json();
+                
                 if (data.success) {
-                    messageDiv.className = 'message success'; messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message} Redirigiendo al inicio...`;
-                    localStorage.setItem('token', data.token); localStorage.setItem('user', JSON.stringify(data.user));
-                    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-                } else { messageDiv.className = 'message error'; messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.error}`; }
-            } catch (error) { messageDiv.className = 'message error'; messageDiv.innerHTML = `<i class="fas fa-wifi"></i> Error de conexión: ${error.message}`; }
+                    messageDiv.className = 'message success';
+                    messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ¡Registro exitoso! ${data.message} Redirigiendo...`;
+                    
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.error}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.innerHTML = `<i class="fas fa-wifi"></i> Error de conexión: ${error.message}`;
+            }
         });
     </script>
 </body>
