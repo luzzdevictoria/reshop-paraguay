@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.3
+VERSION: 1.0.4
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-10
 RESPONSABLE: Pedro José Pirovani
@@ -22,6 +22,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [ADD] Agregado logo en el header
 2026-04-10 - [FIX] Corregida posicion del boton Mi Panel
 2026-04-10 - [IMPROVE] Mejorada visualizacion del logo y header responsivo
+2026-04-10 - [IMPROVE] Reemplazo de emojis por iconos profesionales Font Awesome
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -30,26 +31,31 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReShop Paraguay - Ropa de Segunda Mano</title>
+    <!-- Font Awesome 6 (iconos profesionales) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
         
         /* Header */
         .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
-        .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; }
-        .header a:hover { text-decoration: underline; opacity: 0.9; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; text-decoration: none; }
         
         /* Logo y titulo */
         .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s;}
+        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
         .logo-img:hover { transform: scale(1.02); }
         .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header-title h1 i { margin-right: 8px; color: #E8B86B; }
         .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
         
         /* Menu */
         .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .header-menu a i, .header-menu button i { margin-right: 6px; }
         .user-menu { display: inline-block; margin-left: 15px; }
-        .logout-btn { background: none; border: none; color: white; cursor: pointer; text-decoration: underline; font-size: 0.95rem; margin-left: 10px; }
+        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+        .logout-btn i { margin-right: 6px; }
         
         /* Contenido */
         .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
@@ -59,10 +65,12 @@ HISTORIAL DE MODIFICACIONES:
         .product-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
         .product-card h3 { color: #2A5C6E; margin-bottom: 8px; font-size: 1.1rem; }
+        .product-card h3 i { margin-right: 6px; color: #E8B86B; font-size: 0.9rem; }
         .product-card p { color: #666; margin-bottom: 10px; font-size: 0.85rem; line-height: 1.4; }
         .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
         .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
         .product-category { font-size: 0.75rem; color: #888; margin-top: 8px; }
+        .product-category i { margin-right: 4px; }
         
         /* Estados */
         .loading, .error { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
@@ -73,7 +81,7 @@ HISTORIAL DE MODIFICACIONES:
         
         /* Responsive */
         @media (max-width: 600px) {
-            .logo-img { height: 45px; }
+            .logo-img { height: 55px; }
             .header-title h1 { font-size: 1.2rem; }
             .header-title p { font-size: 0.7rem; }
             .header a { font-size: 0.8rem; margin: 0 5px; }
@@ -88,34 +96,34 @@ HISTORIAL DE MODIFICACIONES:
         <div class="header-top">
             <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
             <div class="header-title">
-                <h1>🛍️ ReShop Paraguay</h1>
-                <p>Shopping Virtual de Ropa de Segunda Mano</p>
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
             </div>
         </div>
         <div class="header-menu">
-            <a href="index.html">🏠 Inicio</a>
-            <a href="cart.html">🛒 Carrito</a>
-            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;">📊 Mi Panel</a>
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
             <span id="authLinks">
-                <a href="login.html">🔑 Iniciar Sesión</a>
-                <a href="register.html">📝 Registrarse</a>
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
             </span>
             <span id="userMenu" style="display: none;" class="user-menu">
-                <span>👤 <span id="userName"></span></span>
-                <button id="logoutBtn" class="logout-btn">Cerrar Sesión</button>
+                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
             </span>
         </div>
     </div>
     
     <div class="container">
         <div class="products-grid" id="productsGrid">
-            <div class="loading">Cargando productos...</div>
+            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>
         </div>
     </div>
 
     <div class="footer">
-        <p>Propietaria: Luciana Noelia Da Silva | Desarrollador: Pedro Jose Pirovani</p>
-        <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
     <script>
@@ -168,7 +176,7 @@ HISTORIAL DE MODIFICACIONES:
             const grid = document.getElementById('productsGrid');
             if (!grid) return;
             
-            grid.innerHTML = '<div class="loading">🔄 Cargando productos...</div>';
+            grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
             
             try {
                 console.log('🔍 Cargando productos...');
@@ -190,22 +198,22 @@ HISTORIAL DE MODIFICACIONES:
                         
                         html += `
                             <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
-                                <h3>${escapeHtml(product.title)}</h3>
+                                <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
                                 <p>${escapeHtml(product.description || 'Sin descripción')}</p>
-                                <div class="price">${priceFormatted} Gs</div>
-                                <div class="badge">${conditionText}</div>
-                                <div class="product-category">👕 ${product.category} | 📏 ${product.size || 'Talla única'}</div>
+                                <div class="price"><i class="fas fa-dollar-sign"></i> ${priceFormatted} Gs</div>
+                                <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
+                                <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
                             </div>
                         `;
                     }
                     grid.innerHTML = html;
                     console.log('✅ Productos renderizados correctamente');
                 } else {
-                    grid.innerHTML = '<div class="loading">📭 No hay productos disponibles</div>';
+                    grid.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No hay productos disponibles</div>';
                 }
             } catch (error) {
                 console.error('❌ Error:', error);
-                grid.innerHTML = `<div class="error">❌ Error al cargar productos: ${error.message}</div>`;
+                grid.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> Error al cargar productos: ${error.message}</div>`;
             }
         }
 
