@@ -419,6 +419,13 @@ const authRoutes = require('./src/routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
 // ============================================================
+// RUTAS DE ÓRDENES
+// ============================================================
+
+const ordersRoutes = require('./src/routes/orders');
+app.use('/api/orders', ordersRoutes);
+
+// ============================================================
 // MANEJO DE ERRORES
 // ============================================================
 
