@@ -66,7 +66,35 @@ function initHamburgerMenu() {
     drawer.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', closeDrawer);
     });
+    // Sincronizar estado del usuario en el drawer
+const token = localStorage.getItem('token');
+const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+if (token && user) {
+    const drawerAuthLinks = document.getElementById('drawerAuthLinks');
+    const drawerUserMenu = document.getElementById('drawerUserMenu');
+    const drawerUserName = document.getElementById('drawerUserName');
+    const drawerDashboardLink = document.getElementById('drawerDashboardLink');
+    const drawerAdminLink = document.getElementById('drawerAdminLink');
     
+    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
+    if (drawerUserMenu) drawerUserMenu.style.display = 'block';
+    if (drawerUserName) drawerUserName.textContent = user.full_name || user.email;
+    if (drawerDashboardLink && user.role === 'seller') drawerDashboardLink.style.display = 'flex';
+    if (drawerAdminLink && user.role === 'admin') drawerAdminLink.style.display = 'flex';
+}
+
+// Logout en el drawer
+const drawerLogoutBtn = document.getElementById('drawerLogoutBtn');
+if (drawerLogoutBtn) {
+    drawerLogoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('reshop_cart');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        closeDrawer();
+        window.location.href = 'index.html';
+    });
+}
     return { drawer, overlay, hamburger };
 }
 

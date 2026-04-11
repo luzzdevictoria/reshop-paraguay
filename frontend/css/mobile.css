@@ -340,3 +340,16 @@ input[type="number"]::-webkit-outer-spin-button {
         padding: 12px;
     }
 }
+/* Correcciones para móviles */
+.hamburger {
+    z-index: 1001;
+}
+
+.drawer {
+    z-index: 1000;
+}
+
+#drawerAuthLinks,
+#drawerUserMenu {
+    display: block;
+}

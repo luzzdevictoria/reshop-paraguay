@@ -42,7 +42,7 @@ HISTORIAL DE MODIFICACIONES:
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
         
-        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; position: relative; }
+        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; position: relative; z-index: 100; }
         .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
         
@@ -109,6 +109,7 @@ HISTORIAL DE MODIFICACIONES:
         }
     </style>
 	<link rel="stylesheet" href="css/mobile.css?v=2">
+	<script src="js/mobile.js?v=2" defer></script>
 </head>
 <body>
     <div class="header">
@@ -576,21 +577,6 @@ window.addEventListener('appinstalled', () => {
     installBtn.style.display = 'none';
     console.log('App instalada exitosamente');
 });
-
-// Inicializar funciones móviles
-if (window.innerWidth <= 768) {
-    setTimeout(() => {
-        // Crear menú hamburguesa manualmente
-        const hamburger = document.createElement('button');
-        hamburger.className = 'hamburger';
-        hamburger.innerHTML = '<span></span><span></span><span></span>';
-        document.body.appendChild(hamburger);
-        
-        hamburger.addEventListener('click', () => {
-            alert('Menú clickeado');
-        });
-    }, 1000);
-}
     </script>
 	<script src="js/mobile.js?v=2"></script>
 </body>
