@@ -2,21 +2,12 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.1.0 - CON FAVORITOS Y CALIFICACIONES
+VERSION: 2.2.0 - CON MENSAJERÍA
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Página de detalle de producto con reseñas, calificaciones y favoritos.
-================================================================================
-HISTORIAL DE MODIFICACIONES:
-2026-04-09 - Creacion inicial
-2026-04-10 - [FIX] Header con logo
-2026-04-11 - [ADD] Mostrar calificación promedio con estrellas
-2026-04-11 - [ADD] Listado de reseñas de otros compradores
-2026-04-11 - [ADD] Formulario para agregar reseña (solo compradores verificados)
-2026-04-11 - [ADD] Validación: solo se puede reseñar después de comprar
-2026-04-11 - [ADD] Botón de favoritos con toggle y verificación de estado
+DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favoritos y mensajería.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -25,7 +16,6 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Producto - ReShop Paraguay</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
     <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
@@ -54,6 +44,9 @@ HISTORIAL DE MODIFICACIONES:
         .user-menu { display: inline-block; margin-left: 15px; }
         .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
         
+        /* Badge de mensajes no leídos */
+        .unread-badge { background: #D95A41; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; margin-left: 5px; display: none; }
+        
         .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
         .product-detail { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .product-title { color: #2A5C6E; font-size: 2rem; margin-bottom: 20px; }
@@ -62,16 +55,13 @@ HISTORIAL DE MODIFICACIONES:
         .product-info label { font-weight: bold; width: 130px; display: inline-block; color: #555; }
         .product-info span { color: #333; }
         
-        /* Estrellas de calificación */
         .rating-container { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
         .stars { display: inline-flex; gap: 2px; }
         .star { color: #ddd; font-size: 1.2rem; }
         .star.filled { color: #E8B86B; }
-        .star.half-filled { color: #E8B86B; position: relative; }
         .rating-value { font-weight: bold; color: #2A5C6E; }
         .rating-count { color: #666; font-size: 0.9rem; }
         
-        /* Sección de reseñas */
         .reviews-section { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .reviews-section h3 { color: #2A5C6E; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .review-card { border-bottom: 1px solid #eee; padding: 15px 0; }
@@ -82,7 +72,6 @@ HISTORIAL DE MODIFICACIONES:
         .review-rating { margin: 8px 0; }
         .review-comment { color: #555; line-height: 1.5; }
         
-        /* Formulario de reseña */
         .review-form { background: #f9f9f9; border-radius: 12px; padding: 20px; margin-top: 20px; }
         .review-form h4 { color: #2A5C6E; margin-bottom: 15px; }
         .rating-input { display: flex; gap: 5px; margin-bottom: 15px; cursor: pointer; }
@@ -100,10 +89,11 @@ HISTORIAL DE MODIFICACIONES:
         .btn-primary:hover { background: #1e4452; }
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
+        .btn-message { background: #25D366; color: white; }
+        .btn-message:hover { background: #1da15b; }
         .btn-fav { background: #E8B86B; color: #333; }
         .btn-fav:hover { background: #d4a050; }
         .btn-fav.active { background: #D95A41; color: white; }
-        .btn-fav.active:hover { background: #c44a32; }
         
         .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
         .error { text-align: center; padding: 50px; font-size: 1.2rem; color: #D95A41; }
@@ -117,6 +107,24 @@ HISTORIAL DE MODIFICACIONES:
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
         
+        /* Modal de mensajería */
+        .modal-message { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-message.is-open { display: flex; }
+        .modal-message-content { background: white; border-radius: 16px; width: 90%; max-width: 500px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+        .modal-message-header { background: #2A5C6E; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-message-header h3 { margin: 0; font-size: 1.1rem; }
+        .modal-message-header .close { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+        .modal-message-body { padding: 20px; overflow-y: auto; max-height: 400px; }
+        .message-list { display: flex; flex-direction: column; gap: 10px; }
+        .message-item { padding: 10px; border-radius: 12px; max-width: 80%; }
+        .message-item.sent { background: #2A5C6E; color: white; align-self: flex-end; margin-left: auto; }
+        .message-item.received { background: #f0f0f0; color: #333; align-self: flex-start; }
+        .message-text { font-size: 0.9rem; word-wrap: break-word; }
+        .message-time { font-size: 0.7rem; opacity: 0.7; margin-top: 5px; }
+        .modal-message-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+        .modal-message-footer input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .modal-message-footer button { background: #2A5C6E; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
+        
         @media (max-width: 600px) {
             .product-title { font-size: 1.3rem; }
             .product-price { font-size: 1.3rem; }
@@ -124,6 +132,7 @@ HISTORIAL DE MODIFICACIONES:
             .review-header { flex-direction: column; align-items: flex-start; gap: 5px; }
             .product-actions { flex-direction: column; }
             .product-actions .btn { width: 100%; margin-right: 0; margin-bottom: 8px; }
+            .message-item { max-width: 90%; }
         }
     </style>
 </head>
@@ -140,6 +149,10 @@ HISTORIAL DE MODIFICACIONES:
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
             <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="messages.html" id="messagesLink" style="display: none;">
+                <i class="fas fa-envelope"></i> Mensajes
+                <span id="unreadBadge" class="unread-badge">0</span>
+            </a>
             <span id="authLinks">
                 <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
                 <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
@@ -157,6 +170,23 @@ HISTORIAL DE MODIFICACIONES:
         <div id="reviewsSection" class="reviews-section"><div class="loading">Cargando reseñas...</div></div>
     </div>
     
+    <!-- Modal de mensajería -->
+    <div id="messageModal" class="modal-message">
+        <div class="modal-message-content">
+            <div class="modal-message-header">
+                <h3><i class="fas fa-comments"></i> <span id="modalVendorName">Vendedor</span></h3>
+                <button class="close" onclick="closeMessageModal()">&times;</button>
+            </div>
+            <div class="modal-message-body" id="modalMessageBody">
+                <div class="message-list" id="messageList"></div>
+            </div>
+            <div class="modal-message-footer">
+                <input type="text" id="messageInput" placeholder="Escribe tu mensaje..." maxlength="500">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="footer">
         <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
@@ -169,6 +199,8 @@ HISTORIAL DE MODIFICACIONES:
         let currentProduct = null;
         let currentUser = null;
         let selectedRating = 0;
+        let currentConversationId = null;
+        let messagePollingInterval = null;
         
         // ============================================================
         // AUTENTICACION
@@ -179,15 +211,40 @@ HISTORIAL DE MODIFICACIONES:
             const authLinks = document.getElementById('authLinks');
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
+            const messagesLink = document.getElementById('messagesLink');
             currentUser = user;
 
             if (token && user) {
                 authLinks.style.display = 'none';
                 userMenu.style.display = 'inline-block';
                 userName.innerHTML = user.full_name || user.email;
+                if (messagesLink) messagesLink.style.display = 'inline';
+                loadUnreadCount();
+                setInterval(() => loadUnreadCount(), 30000);
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
+                if (messagesLink) messagesLink.style.display = 'none';
+            }
+        }
+        
+        async function loadUnreadCount() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const response = await fetch(`${API_URL}/api/messages/unread/count`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success && data.unread_count > 0) {
+                    const badge = document.getElementById('unreadBadge');
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.style.display = 'inline';
+                } else {
+                    document.getElementById('unreadBadge').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error cargando mensajes no leídos:', error);
             }
         }
 
@@ -224,6 +281,122 @@ HISTORIAL DE MODIFICACIONES:
         }
         
         // ============================================================
+        // MENSAJERÍA
+        // ============================================================
+        async function startConversation(sellerId, sellerName) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Inicia sesión para contactar al vendedor');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            document.getElementById('modalVendorName').textContent = sellerName;
+            document.getElementById('messageModal').classList.add('is-open');
+            document.getElementById('messageInput').value = '';
+            
+            try {
+                // Crear o obtener conversación
+                const response = await fetch(`${API_URL}/api/conversations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        seller_id: sellerId
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    currentConversationId = data.conversation.id;
+                    loadMessages();
+                    // Iniciar polling cada 5 segundos
+                    if (messagePollingInterval) clearInterval(messagePollingInterval);
+                    messagePollingInterval = setInterval(() => loadMessages(), 5000);
+                } else {
+                    alert('Error al iniciar conversación: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+        
+        async function loadMessages() {
+            if (!currentConversationId) return;
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_URL}/api/messages/${currentConversationId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success && data.messages) {
+                    renderMessages(data.messages);
+                    loadUnreadCount();
+                }
+            } catch (error) {
+                console.error('Error cargando mensajes:', error);
+            }
+        }
+        
+        function renderMessages(messages) {
+            const container = document.getElementById('messageList');
+            const userId = currentUser?.id;
+            container.innerHTML = messages.map(msg => `
+                <div class="message-item ${msg.sender_id === userId ? 'sent' : 'received'}">
+                    <div class="message-text">${escapeHtml(msg.message)}</div>
+                    <div class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
+                </div>
+            `).join('');
+            // Scroll al final
+            const body = document.getElementById('modalMessageBody');
+            body.scrollTop = body.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_URL}/api/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        conversation_id: currentConversationId,
+                        receiver_id: currentProduct?.seller_id,
+                        message: message
+                    })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    input.value = '';
+                    loadMessages();
+                } else {
+                    alert('Error al enviar mensaje: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+        
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('is-open');
+            if (messagePollingInterval) {
+                clearInterval(messagePollingInterval);
+                messagePollingInterval = null;
+            }
+            currentConversationId = null;
+        }
+        
+        // ============================================================
         // CARGAR PRODUCTO
         // ============================================================
         async function loadProductDetail() {
@@ -239,7 +412,6 @@ HISTORIAL DE MODIFICACIONES:
                     currentProduct = data.product;
                     renderProduct(data.product); 
                     loadReviews();
-                    // Verificar favoritos después de renderizar
                     setTimeout(() => checkFavorite(), 100);
                 } else { 
                     container.innerHTML = '<div class="error"><i class="fas fa-search"></i> Producto no encontrado</div>'; 
@@ -276,11 +448,11 @@ HISTORIAL DE MODIFICACIONES:
                 <div class="product-info"><label><i class="fas fa-trademark"></i> Marca:</label><span>${product.brand || 'No especificada'}</span></div>
                 <div class="product-info"><label><i class="fas fa-palette"></i> Color:</label><span>${product.color || 'No especificado'}</span></div>
                 <div class="product-info"><label><i class="fas fa-store"></i> Vendedor:</label><span>
-    ${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})
-    <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
-        <i class="fas fa-external-link-alt"></i> Ver tienda
-    </a>
-</span></div>
+                    ${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})
+                    <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
+                        <i class="fas fa-external-link-alt"></i> Ver tienda
+                    </a>
+                </span></div>
                 <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
                 <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
                 <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
@@ -290,6 +462,9 @@ HISTORIAL DE MODIFICACIONES:
                     </button>
                     <button class="btn btn-secondary" onclick="buyNow(${product.id})">
                         <i class="fas fa-bolt"></i> Comprar Ahora
+                    </button>
+                    <button class="btn btn-message" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
+                        <i class="fab fa-whatsapp"></i> Contactar vendedor
                     </button>
                     <button class="btn btn-fav" id="favBtn" onclick="toggleFavorite()">
                         <i class="far fa-heart"></i> Favorito
@@ -515,7 +690,6 @@ HISTORIAL DE MODIFICACIONES:
             const favBtn = document.getElementById('favBtn');
             if (!favBtn) return;
             
-            // Feedback visual inmediato
             const originalContent = favBtn.innerHTML;
             favBtn.disabled = true;
             favBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> ...';
@@ -544,7 +718,6 @@ HISTORIAL DE MODIFICACIONES:
                         showMessage('🗑️ Producto removido de favoritos', 'success');
                     }
                 } else {
-                    // Revertir en caso de error
                     favBtn.innerHTML = originalContent;
                     favBtn.disabled = false;
                     showMessage(data.error || 'Error al actualizar favoritos', 'error');
@@ -557,7 +730,6 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
 
-        // Función auxiliar para mostrar mensajes temporales
         function showMessage(msg, type) {
             let messageDiv = document.getElementById('favMessage');
             if (!messageDiv) {
@@ -612,6 +784,13 @@ HISTORIAL DE MODIFICACIONES:
             updateUserMenu();
             setupLogout();
             loadProductDetail();
+        });
+        
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMessageModal();
+            }
         });
     </script>
 </body>
