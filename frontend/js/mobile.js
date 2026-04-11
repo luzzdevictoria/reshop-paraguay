@@ -215,4 +215,4 @@ document.addEventListener('DOMContentLoaded', () => {
         initButtonFeedback();
         setupNumericInputs();
     }
-});
+});"" 
