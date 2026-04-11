@@ -225,6 +225,9 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 </div>
                 <button class="btn btn-primary" id="applyFilters"><i class="fas fa-check"></i> Aplicar</button>
                 <button class="btn btn-outline" id="clearFilters"><i class="fas fa-undo"></i> Limpiar</button>
+				<button class="btn btn-secondary" id="nearMeBtn" style="background: #E8B86B; color: #333; margin-top: 8px;">
+    <i class="fas fa-location-dot"></i> Buscar cerca de mí
+</button>
             </aside>
 
             <!-- Grilla de productos -->
@@ -394,6 +397,39 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             setupFilters();
             loadProducts();
         });
+		
+		// Geolocalización - Buscar cerca de mí
+const nearMeBtn = document.getElementById('nearMeBtn');
+if (nearMeBtn) {
+    nearMeBtn.addEventListener('click', () => {
+        if (navigator.geolocation) {
+            nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    // Guardar en filtros y recargar
+                    currentFilters.latitude = lat;
+                    currentFilters.longitude = lng;
+                    currentFilters.nearby = true;
+                    nearMeBtn.innerHTML = '<i class="fas fa-check"></i> Cerca de mí activado';
+                    loadProducts();
+                    setTimeout(() => {
+                        nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                    }, 2000);
+                },
+                (error) => {
+                    let errorMsg = 'Error al obtener ubicación';
+                    if (error.code === error.PERMISSION_DENIED) errorMsg = 'Permiso denegado. Activa la ubicación en tu navegador.';
+                    alert(errorMsg);
+                    nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                }
+            );
+        } else {
+            alert('Tu navegador no soporta geolocalización');
+        }
+    });
+}
     </script>
 
     <!-- JS Móvil (carga al final) -->

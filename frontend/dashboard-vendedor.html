@@ -214,6 +214,30 @@ DESCRIPCION: Panel del vendedor.
             </div>
         </div>
 
+        <!-- 🆕 FILTRO POR ORIGEN -->
+        <div style="background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; box-shadow: var(--shadow);">
+            <label style="font-size: 0.75rem; color: var(--text-light); display: block; margin-bottom: 6px;"><i class="fas fa-globe-americas"></i> Filtrar por origen</label>
+            <select id="sellerOriginFilter" style="width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.9rem;">
+                <option value="todos">🌍 Todos los orígenes</option>
+                <option value="PAR">🇵🇾 Paraguay</option>
+                <option value="ARG">🇦🇷 Argentina</option>
+                <option value="BRA">🇧🇷 Brasil</option>
+                <option value="USA">🇺🇸 Estados Unidos</option>
+                <option value="CHN">🇨🇳 China</option>
+                <option value="EUR">🇪🇺 Europa</option>
+                <option value="JPN">🇯🇵 Japón</option>
+                <option value="MEX">🇲🇽 México</option>
+                <option value="URY">🇺🇾 Uruguay</option>
+                <option value="CHL">🇨🇱 Chile</option>
+                <option value="BOL">🇧🇴 Bolivia</option>
+                <option value="PER">🇵🇪 Perú</option>
+                <option value="COL">🇨🇴 Colombia</option>
+                <option value="VEN">🇻🇪 Venezuela</option>
+                <option value="ECU">🇪🇨 Ecuador</option>
+                <option value="OTH">🌎 Otro</option>
+            </select>
+        </div>
+
         <!-- Tabs -->
         <div class="vendor-tabs">
             <button class="tab-btn active" onclick="showTab('products')"><i class="fas fa-box"></i> Mis Productos</button>
@@ -305,6 +329,30 @@ DESCRIPCION: Panel del vendedor.
                         <label>Color</label>
                         <input type="text" id="color" placeholder="Azul, Negro...">
                     </div>
+                </div>
+                
+                <!-- 🆕 ORIGEN (PROCEDENCIA) -->
+                <div class="form-group">
+                    <label><i class="fas fa-globe-americas"></i> Origen / Procedencia *</label>
+                    <select id="origin" required>
+                        <option value="">Seleccionar origen</option>
+                        <option value="PAR">🇵🇾 Paraguay</option>
+                        <option value="ARG">🇦🇷 Argentina</option>
+                        <option value="BRA">🇧🇷 Brasil</option>
+                        <option value="USA">🇺🇸 Estados Unidos</option>
+                        <option value="CHN">🇨🇳 China</option>
+                        <option value="EUR">🇪🇺 Europa</option>
+                        <option value="JPN">🇯🇵 Japón</option>
+                        <option value="MEX">🇲🇽 México</option>
+                        <option value="URY">🇺🇾 Uruguay</option>
+                        <option value="CHL">🇨🇱 Chile</option>
+                        <option value="BOL">🇧🇴 Bolivia</option>
+                        <option value="PER">🇵🇪 Perú</option>
+                        <option value="COL">🇨🇴 Colombia</option>
+                        <option value="VEN">🇻🇪 Venezuela</option>
+                        <option value="ECU">🇪🇨 Ecuador</option>
+                        <option value="OTH">🌎 Otro</option>
+                    </select>
                 </div>
                 
                 <!-- Área de imágenes -->
@@ -768,8 +816,17 @@ DESCRIPCION: Panel del vendedor.
             const container = document.getElementById('productsContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
 
+            // Obtener filtro de origen
+            const originFilter = document.getElementById('sellerOriginFilter')?.value || 'todos';
+            
+            // Construir URL con filtro
+            let url = `${API_URL}/api/products/seller/${user.id}`;
+            if (originFilter !== 'todos') {
+                url += `?origin=${originFilter}`;
+            }
+
             try {
-                const res = await fetch(`${API_URL}/api/products/seller/${user.id}`, {
+                const res = await fetch(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -783,12 +840,13 @@ DESCRIPCION: Panel del vendedor.
                         <div style="overflow-x:auto;">
                             <table class="products-table">
                                 <thead>
-                                    <tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
+                                    <tr><th>Imagen</th><th>Título</th><th>Origen</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
                                 <tbody>
                                     ${data.products.map(p => `
                                         <tr>
                                             <td>${p.images_urls?.[0] ? `<img src="${p.images_urls[0]}" class="product-image" alt="${esc(p.title)}" loading="lazy">` : `<div class="no-image"><i class="fas fa-image"></i></div>`}</td>
                                             <td><strong>${esc(p.title)}</strong></td>
+                                            <td>${getOriginFlag(p.origin)}</td>
                                             <td style="color: var(--accent); font-weight: 700;">${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
                                             <td><span style="text-transform: capitalize;">${p.category}</span></td>
                                             <td><span class="status-badge status-${p.status}">${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}</span></td>
@@ -820,6 +878,29 @@ DESCRIPCION: Panel del vendedor.
                 container.innerHTML = `<div class="loading" style="color: var(--accent);"><i class="fas fa-exclamation-triangle"></i><br>Error: ${err.message}</div>`;
             }
         }
+        
+        // Función auxiliar para mostrar bandera según origen
+        function getOriginFlag(origin) {
+            const flags = {
+                'PAR': '🇵🇾 Paraguay',
+                'ARG': '🇦🇷 Argentina',
+                'BRA': '🇧🇷 Brasil',
+                'USA': '🇺🇸 USA',
+                'CHN': '🇨🇳 China',
+                'EUR': '🇪🇺 Europa',
+                'JPN': '🇯🇵 Japón',
+                'MEX': '🇲🇽 México',
+                'URY': '🇺🇾 Uruguay',
+                'CHL': '🇨🇱 Chile',
+                'BOL': '🇧🇴 Bolivia',
+                'PER': '🇵🇪 Perú',
+                'COL': '🇨🇴 Colombia',
+                'VEN': '🇻🇪 Venezuela',
+                'ECU': '🇪🇨 Ecuador',
+                'OTH': '🌎 Otro'
+            };
+            return flags[origin] || (origin ? `🌍 ${origin}` : '🌍 No especificado');
+        }
 
         function showCreateModal() {
             uploadedImageUrls = [];
@@ -829,6 +910,7 @@ DESCRIPCION: Panel del vendedor.
             document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('modalMessage').innerHTML = '';
             document.getElementById('fileInputArea').style.display = 'none';
+			document.getElementById('origin').value = 'PAR'; // 🆕 Valor por defecto Paraguay
             document.getElementById('productModal').classList.add('is-open');
         }
 
@@ -851,6 +933,7 @@ DESCRIPCION: Panel del vendedor.
                 document.getElementById('condition').value = p.condition || 'good';
                 document.getElementById('brand').value = p.brand || '';
                 document.getElementById('color').value = p.color || '';
+				document.getElementById('origin').value = p.origin || 'PAR'; // 🆕 Cargar origen
                 document.getElementById('modalMessage').innerHTML = '';
                 document.getElementById('fileInputArea').style.display = 'none';
                 
@@ -905,6 +988,7 @@ DESCRIPCION: Panel del vendedor.
             formData.append('condition', document.getElementById('condition').value);
             formData.append('brand', document.getElementById('brand').value.trim());
             formData.append('color', document.getElementById('color').value.trim());
+			formData.append('origin', document.getElementById('origin').value.trim());
             
             formData.append('images_urls', JSON.stringify(uploadedImageUrls));
 
@@ -942,6 +1026,11 @@ DESCRIPCION: Panel del vendedor.
         loadProducts();
         updateHeaderUnreadBadge();  // Actualizar badge del header
         setInterval(() => updateHeaderUnreadBadge(), 30000);  // Actualizar cada 30 segundos
+		
+		        // 🆕 Escuchar cambios en el filtro de origen
+        document.getElementById('sellerOriginFilter')?.addEventListener('change', () => {
+            loadProducts();
+        });
         
         // Cerrar modal de mensajes con Escape
         document.addEventListener('keydown', (e) => {
