@@ -69,6 +69,28 @@
             })
             .sort((a, b) => a._distanceKm - b._distanceKm);
     }
+    function getOriginFlagMobile(origin) {
+        const flags = {
+            'PAR': '🇵🇾 Paraguay',
+            'ARG': '🇦🇷 Argentina',
+            'BRA': '🇧🇷 Brasil',
+            'USA': '🇺🇸 USA',
+            'CHN': '🇨🇳 China',
+            'EUR': '🇪🇺 Europa',
+            'JPN': '🇯🇵 Japón',
+            'MEX': '🇲🇽 México',
+            'URY': '🇺🇾 Uruguay',
+            'CHL': '🇨🇱 Chile',
+            'BOL': '🇧🇴 Bolivia',
+            'PER': '🇵🇪 Perú',
+            'COL': '🇨🇴 Colombia',
+            'VEN': '🇻🇪 Venezuela',
+            'ECU': '🇪🇨 Ecuador',
+            'OTH': '🌎 Otro'
+        };
+        return flags[origin] || (origin ? `🌍 ${origin}` : '🌍 No especificado');
+    }
+
 
     // ── Render productos cercanos ──────────────────────────────
     function renderNearbyProducts(products) {
@@ -114,6 +136,7 @@
                     <h3 class="product-card__title">${esc(p.title)}</h3>
                     <p class="product-card__price">${fmt(p.price)} Gs</p>
                     <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(p.seller?.store_name||p.seller?.full_name||'Vendedor')}</p>
+                    <p class="product-card__origin" style="font-size: 0.7rem; color: var(--text-light); margin: 4px 0;"><i class="fas fa-globe-americas"></i> ${getOriginFlagMobile(p.origin)}</p>
                     <span class="product-card__condition">${condMap[p.condition]||''}</span>
                     <button class="product-card__button"
                             onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">
@@ -397,6 +420,27 @@
                         <option value="acceptable">Aceptable</option>
                     </select>
                 </div>
+				<div class="filters-drawer__group"><label class="filters-drawer__label"><i class="fas fa-globe-americas"></i> Origen</label>
+                    <select class="filters-drawer__select" id="drawerFilterOrigin">
+                        <option value="">Todos los orígenes</option>
+                        <option value="PAR">🇵🇾 Paraguay</option>
+                        <option value="ARG">🇦🇷 Argentina</option>
+                        <option value="BRA">🇧🇷 Brasil</option>
+                        <option value="USA">🇺🇸 Estados Unidos</option>
+                        <option value="CHN">🇨🇳 China</option>
+                        <option value="EUR">🇪🇺 Europa</option>
+                        <option value="JPN">🇯🇵 Japón</option>
+                        <option value="MEX">🇲🇽 México</option>
+                        <option value="URY">🇺🇾 Uruguay</option>
+                        <option value="CHL">🇨🇱 Chile</option>
+                        <option value="BOL">🇧🇴 Bolivia</option>
+                        <option value="PER">🇵🇪 Perú</option>
+                        <option value="COL">🇨🇴 Colombia</option>
+                        <option value="VEN">🇻🇪 Venezuela</option>
+                        <option value="ECU">🇪🇨 Ecuador</option>
+                        <option value="OTH">🌎 Otro</option>
+                    </select>
+                </div>
                 <div class="filters-drawer__group"><label class="filters-drawer__label">Precio (Gs)</label>
                     <div class="filters-drawer__price-row">
                         <input type="number" class="filters-drawer__input" id="drawerFilterMinPrice" placeholder="Mínimo">
@@ -432,13 +476,13 @@
 
         document.getElementById('filtersApplyBtn').addEventListener('click', () => {
             [['filterCategory','drawerFilterCategory'],['filterSize','drawerFilterSize'],
-             ['filterCondition','drawerFilterCondition'],['filterMinPrice','drawerFilterMinPrice'],
-             ['filterMaxPrice','drawerFilterMaxPrice']].forEach(([sid, did]) => {
+             ['filterCondition','drawerFilterCondition'],['filterOrigin','drawerFilterOrigin'],
+             ['filterMinPrice','drawerFilterMinPrice'],['filterMaxPrice','drawerFilterMaxPrice']].forEach(([sid, did]) => {
                 const s = document.getElementById(sid), d = document.getElementById(did);
                 if (s && d) s.value = d.value;
             });
             document.getElementById('applyFilters')?.click();
-            const hasF = ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+            const hasF = ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition','drawerFilterOrigin',
                           'drawerFilterMinPrice','drawerFilterMaxPrice']
                 .some(id => (document.getElementById(id)?.value||'')!=='');
             floatingBtn.classList.toggle('has-filters', hasF);
@@ -446,7 +490,7 @@
         });
 
         document.getElementById('filtersClearBtn').addEventListener('click', () => {
-            ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+            ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition','drawerFilterOrigin',
              'drawerFilterMinPrice','drawerFilterMaxPrice'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.value='';
             });
