@@ -333,7 +333,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         async function loadProducts() {
             const grid = document.getElementById('productsGrid');
             if (!grid) return;
-            grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
+                                grid.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay productos disponibles</p></div>';
             try {
                 const params = new URLSearchParams();
                 Object.entries(currentFilters).forEach(([k, v]) => { if (v) params.append(k, v); });

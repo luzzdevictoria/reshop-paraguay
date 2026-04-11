@@ -118,7 +118,10 @@ DESCRIPCION: Página de productos favoritos del usuario.
     <div class="container">
         <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-heart"></i> Mis Favoritos</h2>
         <div id="favoritesGrid" class="products-grid">
-            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando favoritos...</div>
+            <div class="loader-container">
+    <div class="three-body three-body-secondary"></div>
+    <p>Cargando favoritos...</p>
+</div>
         </div>
     </div>
 
@@ -179,7 +182,10 @@ DESCRIPCION: Página de productos favoritos del usuario.
         // ============================================================
         async function loadFavorites() {
             const container = document.getElementById('favoritesGrid');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando favoritos...</div>';
+            container.innerHTML = '<div class="loader-container">
+    <div class="three-body three-body-secondary"></div>
+    <p>Cargando favoritos...</p>
+</div>';
             
             try {
                 const response = await fetch(`${API_URL}/api/favorites`, {

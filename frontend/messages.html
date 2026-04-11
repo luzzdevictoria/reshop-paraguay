@@ -169,7 +169,10 @@ DESCRIPCION: Página de mensajes para compradores.
 
         <!-- Contenedor de conversaciones -->
         <div id="conversationsContainer">
-            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando conversaciones...</div>
+            <div class="loader-container">
+    <div class="three-body three-body-accent"></div>
+    <p>Cargando conversaciones...</p>
+</div>
         </div>
     </div>
 
@@ -270,7 +273,10 @@ DESCRIPCION: Página de mensajes para compradores.
         // ============================================================
         async function loadConversations() {
             const container = document.getElementById('conversationsContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando conversaciones...</div>';
+            container.innerHTML = '<div class="loader-container">
+    <div class="three-body three-body-accent"></div>
+    <p>Cargando conversaciones...</p>
+</div>';
             
             const token = localStorage.getItem('token');
             if (!token) return;

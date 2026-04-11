@@ -215,6 +215,7 @@ HISTORIAL DE MODIFICACIONES:
             }
             
             showMessage('Procesando tu pedido...', 'loading');
+// Y modificar la función showMessage para aceptar HTML
             
             try {
                 const response = await fetch(`${API_URL}/api/orders`, {

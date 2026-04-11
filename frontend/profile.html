@@ -374,7 +374,7 @@ HISTORIAL DE MODIFICACIONES:
         function showMessage(msg, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = type === 'loading' ? `<i class="fas fa-spinner fa-pulse"></i> ${msg}` : `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+            messageDiv.innerHTML = type === 'loading' ? `<div class="loader-container" style="padding: 10px;"><div class="three-body three-body-sm"></div><p style="margin-top: 8px;">${msg}</p></div>` :  `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
             if (type !== 'loading') { setTimeout(() => { if (messageDiv.className === `message ${type}`) { messageDiv.className = 'message'; } }, 4000); }
         }
         
