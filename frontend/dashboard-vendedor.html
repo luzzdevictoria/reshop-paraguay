@@ -397,6 +397,9 @@ DESCRIPCION: Panel del vendedor.
         <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
         <canvas id="cameraCanvas" style="display: none;"></canvas>
         <div class="camera-controls" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+            <button class="btn btn-secondary" id="switchCameraBtn">
+                <i class="fas fa-sync-alt"></i> Cambiar cámara
+            </button>
             <button class="btn btn-danger" id="closeCameraBtn">
                 <i class="fas fa-times"></i> Cancelar
             </button>
@@ -729,39 +732,9 @@ DESCRIPCION: Panel del vendedor.
         };
 
         // ============================================================
-        // CÁMARA (con cambio frontal/trasera y toasts informativos)
+        // CÁMARA (con botón fijo en HTML)
         // ============================================================
         let useFrontCamera = false;  // false = trasera, true = frontal
-
-        function showCameraToast(message, type = 'info') {
-            // Eliminar toast anterior
-            const oldToast = document.getElementById('cameraToast');
-            if (oldToast) oldToast.remove();
-            
-            const toast = document.createElement('div');
-            toast.id = 'cameraToast';
-            const bgColor = type === 'warning' ? '#D95A41' : '#2A5C6E';
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: ${bgColor};
-                color: white;
-                padding: 8px 16px;
-                border-radius: 24px;
-                font-size: 0.8rem;
-                z-index: 10000;
-                font-family: monospace;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                white-space: nowrap;
-                pointer-events: none;
-            `;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.remove(), 2500);
-        }
 
         async function startCamera() {
             const overlay = document.getElementById('cameraOverlay');
@@ -774,8 +747,7 @@ DESCRIPCION: Panel del vendedor.
                 
                 // Elegir cámara según preferencia
                 const facingMode = useFrontCamera ? "user" : "environment";
-                const cameraName = useFrontCamera ? 'FRONTAL (selfie)' : 'TRASERA (producto)';
-                console.log(`📷 Intentando usar cámara: ${cameraName}`);
+                console.log(`📷 Usando cámara: ${useFrontCamera ? 'FRONTAL' : 'TRASERA'}`);
                 
                 const constraints = {
                     video: { facingMode: { exact: facingMode } }
@@ -785,55 +757,25 @@ DESCRIPCION: Panel del vendedor.
                 video.srcObject = currentStream;
                 overlay.classList.add('is-open');
                 
-                // Mostrar qué cámara se está usando
-                showCameraToast(`📷 ${useFrontCamera ? 'Cámara FRONTAL' : 'Cámara TRASERA'}`, 'info');
-                
-                // Agregar botón de cambio de cámara si no existe
-                addCameraSwitchButton();
-                
             } catch (error) {
-                console.warn(`⚠️ No se pudo acceder a cámara ${useFrontCamera ? 'frontal' : 'trasera'}:`, error.message);
-                
-                // Fallback: cualquier cámara disponible
+                console.warn(`No se pudo acceder a cámara ${useFrontCamera ? 'frontal' : 'trasera'}:`, error);
+                // Fallback: cualquier cámara
                 try {
-                    console.log('🔄 Intentando con cualquier cámara disponible...');
                     currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = currentStream;
                     overlay.classList.add('is-open');
-                    addCameraSwitchButton();
-                    showCameraToast('⚠️ Usando cámara predeterminada', 'warning');
+                    alert('⚠️ Usando cámara predeterminada');
                 } catch (fallbackError) {
-                    console.error('❌ Error total al acceder a la cámara:', fallbackError);
-                    alert('No se pudo acceder a la cámara. Verifica los permisos.\n\nEn Android: Configuración → Apps → Chrome → Permisos → Cámara → Permitir');
+                    alert('No se pudo acceder a la cámara. Verifica los permisos.');
                 }
             }
         }
         
-        function addCameraSwitchButton() {
-            // Verificar si ya existe el botón
-            if (document.getElementById('switchCameraBtn')) return;
-            
-            const controls = document.querySelector('.camera-controls');
-            if (!controls) {
-                console.error('No se encontraron los controles de cámara');
-                return;
-            }
-            
-            const switchBtn = document.createElement('button');
-            switchBtn.id = 'switchCameraBtn';
-            switchBtn.className = 'btn btn-secondary';
-            switchBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar cámara';
-            switchBtn.onclick = switchCamera;
-            controls.appendChild(switchBtn);
-            console.log('✅ Botón de cambio de cámara agregado');
-        }
-        
+        // Función para cambiar cámara (ahora usa el botón fijo)
         async function switchCamera() {
             useFrontCamera = !useFrontCamera;
-            const newCamera = useFrontCamera ? 'FRONTAL' : 'TRASERA';
-            console.log(`🔄 Cambiando a cámara: ${newCamera}`);
-            showCameraToast(`🔄 Cambiando a cámara ${newCamera}`, 'info');
-            await startCamera();  // Reiniciar con la otra cámara
+            console.log(`🔄 Cambiando a cámara: ${useFrontCamera ? 'FRONTAL' : 'TRASERA'}`);
+            await startCamera();
         }
 
         function stopCamera() {
@@ -842,14 +784,6 @@ DESCRIPCION: Panel del vendedor.
                 currentStream = null;
             }
             document.getElementById('cameraOverlay').classList.remove('is-open');
-            
-            // Remover el botón de cambio de cámara al cerrar
-            const switchBtn = document.getElementById('switchCameraBtn');
-            if (switchBtn) switchBtn.remove();
-            
-            // Remover toast si existe
-            const toast = document.getElementById('cameraToast');
-            if (toast) toast.remove();
         }
 
         function capturePhoto() {
@@ -868,8 +802,6 @@ DESCRIPCION: Panel del vendedor.
                     return;
                 }
                 
-                showCameraToast('📸 Capturando foto...', 'info');
-                
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     addImagePreview(e.target.result, null);
@@ -881,16 +813,17 @@ DESCRIPCION: Panel del vendedor.
                 if (url) {
                     uploadedImageUrls.push(url);
                     updateImagePreviewsWithUrls();
-                    showCameraToast('✅ Foto subida correctamente', 'info');
                 }
                 
                 stopCamera();
             }, 'image/jpeg', 0.9);
         }
 
+        // Event listeners
         document.getElementById('openCameraBtn').addEventListener('click', startCamera);
         document.getElementById('closeCameraBtn').addEventListener('click', stopCamera);
         document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
+        document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
         
         document.getElementById('uploadFileBtn').addEventListener('click', () => {
             const fileArea = document.getElementById('fileInputArea');
