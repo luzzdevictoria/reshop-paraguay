@@ -2,15 +2,34 @@
    ESTILOS MÓVILES - RESHOP PARAGUAY
    ============================================================ */
 
+:root {
+    --primary: #2A5C6E;
+    --primary-dark: #1e4452;
+    --secondary: #E8B86B;
+    --danger: #D95A41;
+    --dark: #333;
+    --light: #f5f5f5;
+    --white: #fff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ============================================================
+   BOTÓN HAMBURGUESA
+   ============================================================ */
 .hamburger {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 14px;
+    left: 14px;
     z-index: 1001;
-    background: #2A5C6E;
+    background: var(--primary);
     border: none;
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -18,28 +37,50 @@
     align-items: center;
     gap: 5px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: var(--shadow-md);
+    transition: background 0.3s ease;
+    padding: 0;
 }
 
 .hamburger span {
     display: block;
-    width: 24px;
-    height: 3px;
+    width: 22px;
+    height: 2px;
     background: white;
-    border-radius: 3px;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform-origin: center;
 }
 
+.hamburger.active span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ============================================================
+   DRAWER LATERAL
+   ============================================================ */
 .drawer {
     position: fixed;
     top: 0;
-    left: -280px;
+    left: -290px;
     width: 280px;
     height: 100%;
-    background: white;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    height: 100dvh;
+    background: var(--white);
+    box-shadow: var(--shadow-md);
     z-index: 1000;
     transition: left 0.3s ease;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .drawer.open {
@@ -52,9 +93,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 999;
     display: none;
+    cursor: pointer;
 }
 
 .drawer-overlay.active {
@@ -62,84 +104,156 @@
 }
 
 .drawer-header {
-    background: #2A5C6E;
+    background: var(--primary);
     color: white;
-    padding: 60px 20px 20px;
-    font-size: 1.2rem;
+    padding: 50px 20px 18px;
+    font-size: 1.05rem;
     font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .drawer-item {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 14px;
     padding: 15px 20px;
-    color: #333;
+    color: var(--dark);
     text-decoration: none;
-    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: background 0.2s;
+    min-height: 52px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    text-align: left;
+    font-family: inherit;
+}
+
+.drawer-item:active,
+.drawer-item:hover {
+    background: var(--light);
 }
 
 .drawer-item i {
-    width: 24px;
-    color: #2A5C6E;
+    width: 20px;
+    text-align: center;
+    color: var(--primary);
+    flex-shrink: 0;
+    font-size: 1rem;
 }
 
 .drawer-divider {
     height: 1px;
-    background: #eee;
-    margin: 10px 0;
+    background: #e0e0e0;
+    margin: 6px 0;
 }
 
-#drawerAuthLinks, #drawerUserMenu {
+#drawerAuthLinks,
+#drawerUserMenu {
     display: block;
+    width: 100%;
 }
 
+/* ============================================================
+   BOTTOM NAVIGATION BAR
+   ============================================================ */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--white);
     display: flex;
     justify-content: space-around;
-    padding: 8px 0 16px;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    align-items: center;
+    padding: 6px 0 env(safe-area-inset-bottom, 8px);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.1);
     z-index: 100;
     border-top: 1px solid #eee;
+    min-height: 62px;
 }
 
 .bottom-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 3px;
     text-decoration: none;
-    color: #888;
-    font-size: 0.7rem;
+    color: #999;
+    font-size: 0.62rem;
+    transition: color 0.2s;
+    padding: 6px 10px;
+    border-radius: 8px;
+    min-width: 56px;
 }
 
 .bottom-nav-item i {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
 }
 
 .bottom-nav-item.active {
-    color: #2A5C6E;
+    color: var(--primary);
+}
+
+.bottom-nav-item:active {
+    background: var(--light);
 }
 
 body.has-bottom-nav {
-    padding-bottom: 70px;
+    padding-bottom: 72px;
 }
 
-@media (min-width: 769px) {
-    .hamburger, .bottom-nav { display: none; }
-    body.has-bottom-nav { padding-bottom: 0; }
+/* ============================================================
+   PULL-TO-REFRESH
+   ============================================================ */
+.pull-to-refresh {
+    text-align: center;
+    padding: 14px;
+    color: #999;
+    font-size: 0.8rem;
 }
 
-@media (max-width: 768px) {
-    .header-menu { display: none !important; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.mobile-toast {
+    position: fixed;
+    bottom: 82px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #28a745;
+    color: white;
+    padding: 11px 22px;
+    border-radius: 25px;
+    font-size: 0.88rem;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    pointer-events: none;
 }
-/* Modo oscuro */
+
+.mobile-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.mobile-toast.error {
+    background: var(--danger);
+}
+
+/* ============================================================
+   MODO OSCURO
+   ============================================================ */
 body.dark-mode {
     background: #121212;
     color: #e0e0e0;
@@ -149,9 +263,21 @@ body.dark-mode .drawer {
     background: #1e1e1e;
 }
 
+body.dark-mode .drawer-header {
+    background: #0f3040;
+}
+
 body.dark-mode .drawer-item {
-    color: #e0e0e0;
-    border-bottom-color: #333;
+    color: #ddd;
+    border-bottom-color: rgba(255,255,255,0.06);
+}
+
+body.dark-mode .drawer-item:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .drawer-item i {
+    color: var(--secondary);
 }
 
 body.dark-mode .bottom-nav {
@@ -160,28 +286,172 @@ body.dark-mode .bottom-nav {
 }
 
 body.dark-mode .bottom-nav-item {
-    color: #888;
+    color: #777;
 }
 
 body.dark-mode .bottom-nav-item.active {
-    color: #E8B86B;
+    color: var(--secondary);
 }
 
-.dark-mode-toggle {
-    position: fixed;
-    bottom: 80px;
-    right: 16px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #2A5C6E;
-    color: white;
-    border: none;
-    cursor: pointer;
-    z-index: 99;
+body.dark-mode .product-card {
+    background: #1e1e1e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+body.dark-mode input,
+body.dark-mode select {
+    background: #2a2a2a;
+    color: #ddd;
+    border-color: #444;
+}
+
+/* ============================================================
+   FILTROS COMO BOTTOM SHEET EN MÓVIL
+   ============================================================ */
+.filter-toggle-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    gap: 10px;
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.filter-bottom-sheet {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 100px;
+    z-index: 600;
+    max-height: 82vh;
+    overflow-y: auto;
+    transition: bottom 0.35s ease;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+}
+
+.filter-bottom-sheet.open {
+    bottom: 0;
+}
+
+.filter-sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 0 auto 18px;
+}
+
+.filter-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    z-index: 599;
+    display: none;
+}
+
+.filter-sheet-overlay.active {
+    display: block;
+}
+
+/* ============================================================
+   DESKTOP: ocultar todo lo móvil
+   ============================================================ */
+@media (min-width: 769px) {
+    .hamburger            { display: none !important; }
+    .bottom-nav           { display: none !important; }
+    .drawer               { display: none !important; }
+    .drawer-overlay       { display: none !important; }
+    .dark-mode-toggle     { display: none !important; }
+    .filter-toggle-btn    { display: none !important; }
+    .filter-bottom-sheet  { display: none !important; }
+    .filter-sheet-overlay { display: none !important; }
+    body.has-bottom-nav   { padding-bottom: 0 !important; }
+}
+
+/* ============================================================
+   MÓVIL: ajustes de layout
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Ocultar menú del header — lo reemplaza el drawer */
+    .header-menu {
+        display: none !important;
+    }
+
+    /* Ocultar selector de idioma */
+    .language-selector {
+        display: none !important;
+    }
+
+    /* Header reducido con espacio para el hamburger */
+    .header {
+        padding: 12px 12px 12px 68px !important;
+        text-align: left !important;
+    }
+
+    .header-top {
+        justify-content: flex-start !important;
+        gap: 12px !important;
+    }
+
+    .logo-img {
+        height: 48px !important;
+    }
+
+    .header-title h1 {
+        font-size: 1.05rem !important;
+    }
+
+    .header-title p {
+        font-size: 0.7rem !important;
+        opacity: 0.85;
+    }
+
+    /* Grid de 2 columnas */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        padding: 0 !important;
+    }
+
+    .product-card {
+        padding: 10px !important;
+    }
+
+    .product-card h3 {
+        font-size: 0.8rem !important;
+        margin-bottom: 5px !important;
+    }
+
+    .price {
+        font-size: 1rem !important;
+    }
+
+    .badge {
+        font-size: 0.65rem !important;
+    }
+
+    /* Ocultar filtros originales — reemplazados por bottom sheet */
+    .filters-section {
+        display: none !important;
+    }
+
+    .container {
+        padding: 12px !important;
+    }
 }
