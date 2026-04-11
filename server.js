@@ -54,36 +54,49 @@ cloudinary.config({
 console.log('✅ Cloudinary configurado:', cloudinary.config().cloud_name);
 
 // ============================================================
-// CONFIGURACIÓN ONESIGNAL (NOTIFICACIONES PUSH)
+// NOTIFICACIONES PUSH (OneSignal via REST API - con axios)
 // ============================================================
-const OneSignal = require('onesignal-node');
+const axios = require('axios');
 
-const onesignalClient = new OneSignal.Client({
-    userAuthKey: process.env.ONESIGNAL_API_KEY,
-    appId: process.env.ONESIGNAL_APP_ID
-});
+const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
+const ONESIGNAL_API_KEY = process.env.ONESIGNAL_API_KEY;
 
-console.log('✅ OneSignal configurado');
+console.log('✅ OneSignal configurado con axios');
 
-// Función para enviar notificación a un usuario
 async function sendNotification(userExternalId, title, message, data = {}) {
+    if (!ONESIGNAL_APP_ID || !ONESIGNAL_API_KEY) {
+        console.warn('⚠️ OneSignal no configurado');
+        return null;
+    }
+
     try {
-        const notification = {
-            contents: { en: message },
-            headings: { en: title },
-            include_external_user_ids: [userExternalId],
+        const payload = {
+            app_id: ONESIGNAL_APP_ID,
+            headings: { es: title, en: title },
+            contents: { es: message, en: message },
+            include_external_user_ids: [String(userExternalId)],
             data: data
         };
-        const response = await onesignalClient.createNotification(notification);
+
+        const response = await axios.post(
+            'https://onesignal.com/api/v1/notifications',
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${ONESIGNAL_API_KEY}`
+                }
+            }
+        );
+
         console.log('✅ Notificación enviada a:', userExternalId);
-        return response;
+        return response.data;
     } catch (error) {
-        console.error('❌ Error enviando notificación:', error.message);
+        console.error('❌ Error enviando notificación:', error.response?.data || error.message);
         return null;
     }
 }
 
-// Función para obtener el external_id del usuario
 function getUserExternalId(userId) {
     return `reshop_user_${userId}`;
 }
