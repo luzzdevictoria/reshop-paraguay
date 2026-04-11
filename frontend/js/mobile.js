@@ -37,18 +37,21 @@ function initHamburgerMenu() {
     overlay.className = 'drawer-overlay';
     document.body.appendChild(overlay);
 
-    function closeDrawer() {
-        drawer.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburger.classList.remove('active');
-    }
+function closeDrawer() {
+    drawer.classList.remove('open');
+    overlay.classList.remove('active');
+    hamburger.classList.remove('active');
+    hamburger.style.opacity = '';
+    hamburger.style.pointerEvents = '';
+}
 
-    function openDrawer() {
-        drawer.classList.add('open');
-        overlay.classList.add('active');
-        hamburger.classList.add('active');
-    }
-
+function openDrawer() {
+    drawer.classList.add('open');
+    overlay.classList.add('active');
+    hamburger.classList.add('active');
+    hamburger.style.opacity = '0';
+    hamburger.style.pointerEvents = 'none';
+}
     hamburger.addEventListener('click', () => {
         if (drawer.classList.contains('open')) {
             closeDrawer();
