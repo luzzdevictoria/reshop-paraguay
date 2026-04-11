@@ -18,76 +18,92 @@
     <link rel="stylesheet" href="css/mobile.css?v=4">
     <script src="js/mobile.js?v=4" defer></script>
     
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
-        
-        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; position: relative; z-index: 100; }
-        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
-        .header a:hover { opacity: 0.8; }
-        
-        .language-selector { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; }
-        .lang-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 8px; border-radius: 5px; transition: background 0.2s; }
-        .lang-btn:hover { background: rgba(255,255,255,0.2); }
-        
-        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
-        .logo-img:hover { transform: scale(1.02); }
-        .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
-        .header-title h1 i { margin-right: 8px; color: #E8B86B; }
-        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
-        
-        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        .user-menu { display: inline-block; margin-left: 15px; }
-        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
-        
-        .filters-section { background: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
-        .search-box button { padding: 12px 20px; background: #2A5C6E; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .filter-group label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px; }
-        .filter-group select, .filter-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
-        .distance-btn { margin-top: 5px; width: 100%; padding: 5px; background: #E8B86B; border: none; border-radius: 5px; cursor: pointer; }
-        .filter-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .filter-actions button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-clear { background: #e0e0e0; color: #333; }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        
-        .product-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
-        .product-card h3 { color: #2A5C6E; margin-bottom: 8px; font-size: 1.1rem; }
-        .product-card h3 i { margin-right: 6px; color: #E8B86B; }
-        .product-card p { color: #666; margin-bottom: 10px; font-size: 0.85rem; line-height: 1.4; }
-        .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
-        .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
-        .product-category { font-size: 0.75rem; color: #888; margin-top: 8px; }
-        .product-category i { margin-right: 4px; }
-        .product-origin { font-size: 0.75rem; color: #888; margin-top: 4px; }
-        .product-origin i { margin-right: 4px; }
-        
-        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
-        .pagination button { padding: 8px 14px; border: 1px solid #ddd; background: white; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
-        .pagination button:hover { background: #2A5C6E; color: white; border-color: #2A5C6E; }
-        .pagination button.active { background: #2A5C6E; color: white; border-color: #2A5C6E; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .loading, .error { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
-        .error { color: #D95A41; }
-        .no-results { text-align: center; padding: 50px; color: #666; }
-        
-        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 40px; font-size: 0.8rem; }
-        
-        @media (max-width: 600px) {
-            .logo-img { height: 55px; }
-            .header-title h1 { font-size: 1.2rem; }
-            .language-selector { position: static; margin-bottom: 10px; justify-content: center; }
-            .filters-grid { grid-template-columns: 1fr; }
-            .products-grid { gap: 15px; }
-        }
-    </style>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+    
+    .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; position: relative; z-index: 100; }
+    .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+    .header a:hover { opacity: 0.8; }
+    
+    .language-selector { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; }
+    .lang-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 8px; border-radius: 5px; transition: background 0.2s; }
+    .lang-btn:hover { background: rgba(255,255,255,0.2); }
+    
+    .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    .logo-img:hover { transform: scale(1.02); }
+    .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+    .header-title h1 i { margin-right: 8px; color: #E8B86B; }
+    .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+    
+    .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+    .user-menu { display: inline-block; margin-left: 15px; }
+    .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+    
+    .filters-section { background: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+    .search-box button { padding: 12px 20px; background: #2A5C6E; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
+    .filter-group label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 5px; }
+    .filter-group select, .filter-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+    .distance-btn { margin-top: 5px; width: 100%; padding: 5px; background: #E8B86B; border: none; border-radius: 5px; cursor: pointer; }
+    .filter-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .filter-actions button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-clear { background: #e0e0e0; color: #333; }
+    
+    .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+    
+    .product-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+    .product-card h3 { color: #2A5C6E; margin-bottom: 8px; font-size: 1.1rem; }
+    .product-card h3 i { margin-right: 6px; color: #E8B86B; }
+    .product-card p { color: #666; margin-bottom: 10px; font-size: 0.85rem; line-height: 1.4; }
+    .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
+    .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
+    .product-category { font-size: 0.75rem; color: #888; margin-top: 8px; }
+    .product-category i { margin-right: 4px; }
+    .product-origin { font-size: 0.75rem; color: #888; margin-top: 4px; }
+    .product-origin i { margin-right: 4px; }
+    
+    /* ===== Enlace a tienda del vendedor ===== */
+    .seller-link { 
+        margin-top: 8px; 
+        font-size: 0.7rem; 
+        display: block; 
+    }
+    .seller-link a { 
+        color: #2A5C6E; 
+        text-decoration: none; 
+        font-weight: 500; 
+    }
+    .seller-link a:hover { 
+        text-decoration: underline; 
+        color: #1a3c4a; 
+    }
+    
+    .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+    .pagination button { padding: 8px 14px; border: 1px solid #ddd; background: white; border-radius: 5px; cursor: pointer; transition: all 0.2s; }
+    .pagination button:hover { background: #2A5C6E; color: white; border-color: #2A5C6E; }
+    .pagination button.active { background: #2A5C6E; color: white; border-color: #2A5C6E; }
+    .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .loading, .error { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
+    .error { color: #D95A41; }
+    .no-results { text-align: center; padding: 50px; color: #666; }
+    
+    .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 40px; font-size: 0.8rem; }
+    
+    @media (max-width: 600px) {
+        .logo-img { height: 55px; }
+        .header-title h1 { font-size: 1.2rem; }
+        .language-selector { position: static; margin-bottom: 10px; justify-content: center; }
+        .filters-grid { grid-template-columns: 1fr; }
+        .products-grid { gap: 15px; }
+    }
+</style>
 </head>
 <body>
     <div class="header">
@@ -351,14 +367,20 @@
                 const conditionText = { 'new_with_tag': 'Nuevo con etiqueta', 'new_without_tag': 'Nuevo sin etiqueta', 'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable' }[product.condition] || product.condition;
                 const originFlag = { 'PAR': '🇵🇾', 'USA': '🇺🇸', 'BRA': '🇧🇷', 'EU': '🇪🇺', 'CHN': '🇨🇳', 'JPN': '🇯🇵', 'KOR': '🇰🇷', 'ARG': '🇦🇷', 'MEX': '🇲🇽' }[product.origin] || '';
                 const originText = product.origin ? `${originFlag} ${product.origin}` : '';
-                html += `<div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
-                    <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
-                    <p>${escapeHtml(product.description || 'Sin descripción')}</p>
-                    <div class="price">${priceFormatted} ₲</div>
-                    <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
-                    <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
-                    ${originText ? `<div class="product-origin"><i class="fas fa-globe-americas"></i> ${originText}</div>` : ''}
-                </div>`;
+html += `<div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+    <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
+    <p>${escapeHtml(product.description || 'Sin descripción')}</p>
+    <div class="price">${priceFormatted} ₲</div>
+    <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
+    <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
+    ${originText ? `<div class="product-origin"><i class="fas fa-globe-americas"></i> ${originText}</div>` : ''}
+    <div style="margin-top: 8px; font-size: 0.7rem;">
+        <i class="fas fa-store"></i> 
+        <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; text-decoration: none;" onclick="event.stopPropagation();">
+            Ver tienda
+        </a>
+    </div>
+</div>`;
             }
             grid.innerHTML = html;
             renderPagination(totalPages);
