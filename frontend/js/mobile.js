@@ -1,246 +1,352 @@
-// ============================================================
-// FUNCIONALIDADES MÓVILES - RESHOP PARAGUAY
-// ============================================================
+/* ============================================================
+   ESTILOS MÓVILES - RESHOP PARAGUAY
+   Mejores prácticas para apps móviles
+   ============================================================ */
 
-// ============================================================
-// 1. MENÚ HAMBURGUESA
-// ============================================================
-function initHamburgerMenu() {
-    const hamburger = document.createElement('button');
-    hamburger.className = 'hamburger';
-    hamburger.innerHTML = '<span></span><span></span><span></span>';
-    document.body.appendChild(hamburger);
-    
-    const drawer = document.createElement('div');
-    drawer.className = 'drawer';
-    drawer.innerHTML = `
-        <div class="drawer-header">
-            <strong>ReShop Paraguay</strong>
-        </div>
-        <a href="index.html" class="drawer-item"><i class="fas fa-home"></i> Inicio</a>
-        <a href="cart.html" class="drawer-item"><i class="fas fa-shopping-bag"></i> Carrito</a>
-        <a href="favorites.html" class="drawer-item"><i class="fas fa-heart"></i> Favoritos</a>
-        <a href="profile.html" class="drawer-item"><i class="fas fa-user-circle"></i> Mi Perfil</a>
-        <div class="drawer-divider"></div>
-        <a href="dashboard-vendedor.html" id="drawerDashboardLink" class="drawer-item" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
-        <a href="admin-dashboard.html" id="drawerAdminLink" class="drawer-item" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
-        <div class="drawer-divider"></div>
-        <span id="drawerAuthLinks">
-            <a href="login.html" class="drawer-item"><i class="fas fa-key"></i> Iniciar Sesión</a>
-            <a href="register.html" class="drawer-item"><i class="fas fa-user-plus"></i> Registrarse</a>
-        </span>
-        <span id="drawerUserMenu" style="display: none;">
-            <div class="drawer-item" id="drawerUserName"></div>
-            <button id="drawerLogoutBtn" class="drawer-item" style="background: none; width: 100%; text-align: left;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-        </span>
-    `;
-    document.body.appendChild(drawer);
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'drawer-overlay';
-    document.body.appendChild(overlay);
-    
-    function closeDrawer() {
-        drawer.classList.remove('open');
-        overlay.classList.remove('active');
-        hamburger.classList.remove('active');
+/* Variables */
+:root {
+    --primary: #2A5C6E;
+    --primary-dark: #1e4452;
+    --secondary: #E8B86B;
+    --danger: #D95A41;
+    --success: #28a745;
+    --dark: #333;
+    --light: #f5f5f5;
+    --white: #fff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+/* Reset táctil */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Botones con tamaño táctil mínimo (48x48px) */
+.btn-touch {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-touch:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+}
+
+/* ============================================================
+   MENÚ HAMBURGUESA
+   ============================================================ */
+.hamburger {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.hamburger span {
+    width: 24px;
+    height: 3px;
+    background: white;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Drawer lateral */
+.drawer {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background: var(--white);
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding-top: 80px;
+}
+
+.drawer.open {
+    left: 0;
+}
+
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+}
+
+.drawer-overlay.active {
+    display: block;
+}
+
+.drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px 20px;
+    color: var(--dark);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.drawer-item:active {
+    background: var(--light);
+}
+
+.drawer-item i {
+    width: 24px;
+    text-align: center;
+    color: var(--primary);
+}
+
+.drawer-divider {
+    height: 1px;
+    background: #eee;
+    margin: 10px 20px;
+}
+
+.drawer-header {
+    padding: 20px;
+    background: var(--primary);
+    color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* ============================================================
+   BOTTOM NAVIGATION BAR
+   ============================================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 16px 16px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    border-top: 1px solid #eee;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #888;
+    font-size: 0.7rem;
+    transition: color 0.2s;
+    padding: 8px 12px;
+    border-radius: 24px;
+}
+
+.bottom-nav-item i {
+    font-size: 1.3rem;
+}
+
+.bottom-nav-item.active {
+    color: var(--primary);
+}
+
+.bottom-nav-item:active {
+    background: var(--light);
+}
+
+/* Ajuste para contenido con bottom nav */
+body.has-bottom-nav {
+    padding-bottom: 70px;
+}
+
+/* ============================================================
+   PULL-TO-REFRESH
+   ============================================================ */
+.pull-to-refresh {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.pull-to-refresh i {
+    transition: transform 0.3s;
+}
+
+/* ============================================================
+   TARJETAS DE PRODUCTO OPTIMIZADAS
+   ============================================================ */
+.product-card-mobile {
+    background: var(--white);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.product-card-mobile:active {
+    transform: scale(0.98);
+}
+
+.product-image-mobile {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    background: #f0f0f0;
+}
+
+.product-info-mobile {
+    padding: 12px;
+}
+
+.product-title-mobile {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-price-mobile {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--danger);
+    margin-top: 8px;
+}
+
+/* ============================================================
+   MODO OSCURO
+   ============================================================ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #1e4452;
+        --light: #1a1a1a;
+        --white: #2d2d2d;
+        --dark: #e0e0e0;
     }
     
-    function openDrawer() {
-        drawer.classList.add('open');
-        overlay.classList.add('active');
-        hamburger.classList.add('active');
+    body.dark-mode {
+        background: #121212;
+        color: #e0e0e0;
     }
     
-    hamburger.addEventListener('click', () => {
-        if (drawer.classList.contains('open')) {
-            closeDrawer();
-        } else {
-            openDrawer();
-        }
-    });
+    .product-card-mobile {
+        background: #2d2d2d;
+    }
     
-    overlay.addEventListener('click', closeDrawer);
-    
-    // Cerrar al seleccionar un enlace
-    drawer.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', closeDrawer);
-    });
-    // Sincronizar estado del usuario en el drawer
-const token = localStorage.getItem('token');
-const user = JSON.parse(localStorage.getItem('user') || 'null');
-
-if (token && user) {
-    const drawerAuthLinks = document.getElementById('drawerAuthLinks');
-    const drawerUserMenu = document.getElementById('drawerUserMenu');
-    const drawerUserName = document.getElementById('drawerUserName');
-    const drawerDashboardLink = document.getElementById('drawerDashboardLink');
-    const drawerAdminLink = document.getElementById('drawerAdminLink');
-    
-    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
-    if (drawerUserMenu) drawerUserMenu.style.display = 'block';
-    if (drawerUserName) drawerUserName.textContent = user.full_name || user.email;
-    if (drawerDashboardLink && user.role === 'seller') drawerDashboardLink.style.display = 'flex';
-    if (drawerAdminLink && user.role === 'admin') drawerAdminLink.style.display = 'flex';
-}
-
-// Logout en el drawer
-const drawerLogoutBtn = document.getElementById('drawerLogoutBtn');
-if (drawerLogoutBtn) {
-    drawerLogoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('reshop_cart');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        closeDrawer();
-        window.location.href = 'index.html';
-    });
-}
-    return { drawer, overlay, hamburger };
-}
-
-// ============================================================
-// 2. BOTTOM NAVIGATION BAR
-// ============================================================
-function initBottomNav() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
-    const bottomNav = document.createElement('div');
-    bottomNav.className = 'bottom-nav';
-    bottomNav.innerHTML = `
-        <a href="index.html" class="bottom-nav-item ${currentPage === 'index.html' ? 'active' : ''}">
-            <i class="fas fa-home"></i>
-            <span>Inicio</span>
-        </a>
-        <a href="cart.html" class="bottom-nav-item ${currentPage === 'cart.html' ? 'active' : ''}">
-            <i class="fas fa-shopping-bag"></i>
-            <span>Carrito</span>
-        </a>
-        <a href="favorites.html" class="bottom-nav-item ${currentPage === 'favorites.html' ? 'active' : ''}">
-            <i class="fas fa-heart"></i>
-            <span>Favoritos</span>
-        </a>
-        <a href="profile.html" class="bottom-nav-item ${currentPage === 'profile.html' ? 'active' : ''}">
-            <i class="fas fa-user-circle"></i>
-            <span>Perfil</span>
-        </a>
-    `;
-    document.body.appendChild(bottomNav);
-    document.body.classList.add('has-bottom-nav');
-}
-
-// ============================================================
-// 3. PULL-TO-REFRESH
-// ============================================================
-function initPullToRefresh(containerId, refreshCallback) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    let startY = 0;
-    let pulling = false;
-    let refreshIndicator = null;
-    
-    const indicator = document.createElement('div');
-    indicator.className = 'pull-to-refresh';
-    indicator.innerHTML = '<i class="fas fa-arrow-down"></i> Desliza para actualizar';
-    container.insertBefore(indicator, container.firstChild);
-    
-    container.addEventListener('touchstart', (e) => {
-        if (container.scrollTop === 0) {
-            startY = e.touches[0].clientY;
-            pulling = true;
-        }
-    });
-    
-    container.addEventListener('touchmove', (e) => {
-        if (!pulling) return;
-        const diff = e.touches[0].clientY - startY;
-        if (diff > 60) {
-            indicator.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Actualizando...';
-        }
-    });
-    
-    container.addEventListener('touchend', async (e) => {
-        if (!pulling) return;
-        const diff = e.changedTouches[0].clientY - startY;
-        if (diff > 60 && refreshCallback) {
-            await refreshCallback();
-            indicator.innerHTML = '<i class="fas fa-check"></i> Actualizado';
-            setTimeout(() => {
-                indicator.innerHTML = '<i class="fas fa-arrow-down"></i> Desliza para actualizar';
-            }, 1500);
-        }
-        pulling = false;
-    });
-}
-
-// ============================================================
-// 4. FEEDBACK TÁCTIL (VIBRACIÓN)
-// ============================================================
-function vibrate(duration = 50) {
-    if (window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(duration);
+    .bottom-nav {
+        background: #2d2d2d;
+        border-top-color: #444;
     }
 }
 
-// ============================================================
-// 5. MODO OSCURO
-// ============================================================
-function initDarkMode() {
-    const darkModeBtn = document.createElement('button');
-    darkModeBtn.className = 'dark-mode-toggle';
-    darkModeBtn.innerHTML = '<i class="fas fa-moon"></i>';
-    darkModeBtn.style.cssText = 'position: fixed; bottom: 80px; right: 20px; width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: white; border: none; box-shadow: var(--shadow); cursor: pointer; z-index: 99; display: flex; align-items: center; justify-content: center;';
-    document.body.appendChild(darkModeBtn);
-    
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-        darkModeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+/* Modo oscuro manual */
+body.dark-mode {
+    background: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-mode .product-card-mobile {
+    background: #2d2d2d;
+}
+
+body.dark-mode .bottom-nav {
+    background: #2d2d2d;
+}
+
+/* ============================================================
+   INPUTS NUMÉRICOS
+   ============================================================ */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.5;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 769px) {
+    .hamburger {
+        display: none;
     }
     
-    darkModeBtn.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-        const isDarkNow = document.body.classList.contains('dark-mode');
-        localStorage.setItem('darkMode', isDarkNow);
-        darkModeBtn.innerHTML = isDarkNow ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        vibrate(30);
-    });
-}
-
-// ============================================================
-// 6. INPUTS NUMÉRICOS CON TECLADO NUMÉRICO
-// ============================================================
-function setupNumericInputs() {
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        input.setAttribute('inputmode', 'numeric');
-        input.setAttribute('pattern', '[0-9]*');
-    });
-}
-
-// ============================================================
-// 7. FEEDBACK VISUAL EN BOTONES
-// ============================================================
-function initButtonFeedback() {
-    document.querySelectorAll('button, .btn, .bottom-nav-item, .drawer-item').forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.style.transform = 'scale(0.96)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 150);
-        });
-    });
-}
-
-// ============================================================
-// INICIALIZAR TODO
-// ============================================================
-// Inicializar funciones móviles cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.innerWidth <= 768) {
-        initHamburgerMenu();
-        initBottomNav();
-        initDarkMode();
-        initButtonFeedback();
-        setupNumericInputs();
+    .bottom-nav {
+        display: none;
     }
-});
+    
+    body.has-bottom-nav {
+        padding-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop-only {
+        display: none;
+    }
+    
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    .header-menu {
+        display: none !important;
+    }
+}
+
+/* Correcciones adicionales */
+#drawerAuthLinks,
+#drawerUserMenu {
+    display: block;
+}

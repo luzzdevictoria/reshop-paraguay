@@ -353,3 +353,9 @@ input[type="number"]::-webkit-outer-spin-button {
 #drawerUserMenu {
     display: block;
 }
+
+@media (max-width: 768px) {
+    .header-menu {
+        display: none !important;
+    }
+}
