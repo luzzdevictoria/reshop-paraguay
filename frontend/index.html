@@ -250,10 +250,15 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 </div>
                 <button class="btn btn-primary" id="applyFilters"><i class="fas fa-check"></i> Aplicar</button>
                 <button class="btn btn-outline" id="clearFilters"><i class="fas fa-undo"></i> Limpiar</button>
-				<button class="btn btn-secondary" id="nearMeBtn" style="background: #E8B86B; color: #333; margin-top: 8px;">
-    <i class="fas fa-location-dot"></i> Buscar cerca de mí
-</button>
+                <!-- Botón nearMeBtn eliminado de aquí (estaba duplicado) -->
             </aside>
+
+            <!-- Botón Buscar cerca de mí (visible en desktop y móvil) -->
+            <div style="margin-bottom: 20px;">
+                <button class="btn btn-secondary" id="nearMeBtn" style="background: #E8B86B; color: #333; width: 100%; padding: 12px; border-radius: 24px; font-weight: 600; cursor: pointer;">
+                    <i class="fas fa-location-dot"></i> Buscar cerca de mí
+                </button>
+            </div>
 
             <!-- Grilla de productos -->
             <div class="products-grid-wrapper">
