@@ -1,20 +1,12 @@
 <!--
 ================================================================================
-ARCHIVO: cart.html
-PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.0
-CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-09
+ARCHIVO: frontend/cart.html
+PROYECTO: ReShop Paraguay
+VERSION: 2.0.0 (Mobile-First)
+ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
-PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Pagina del carrito de compras. Muestra productos agregados,
-             permite modificar cantidades, eliminar items y proceder al checkout.
-================================================================================
-HISTORIAL DE MODIFICACIONES:
-2026-04-09 - Creacion inicial con estructura HTML5
-2026-04-09 - Implementacion de carga de carrito desde localStorage
-2026-04-09 - Funciones para actualizar y eliminar items
-2026-04-09 - Calculo de totales y redireccion a checkout
+DESCRIPCION: Carrito de compras responsive. En móvil la tabla se transforma
+             en tarjetas apiladas con botones táctiles grandes.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -23,48 +15,178 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Carrito - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/mobile.css">
     <style>
+        :root {
+            --primary: #2A5C6E;
+            --secondary: #E8B86B;
+            --accent: #D95A41;
+            --bg: #f5f5f5;
+            --white: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
-        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); }
+
+        /* Header desktop */
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
-        .cart-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .cart-table th, .cart-table td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        .cart-table th { background: #2A5C6E; color: white; }
-        .cart-table tr:hover { background: #f9f9f9; }
-        .quantity-input { width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 5px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-        .btn-danger { background: #D95A41; color: white; }
+
+        /* Container */
+        .container { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--primary); text-decoration: none; font-weight: 500; margin-bottom: 20px; font-size: 0.9rem; }
+        .back-link:hover { opacity: 0.75; }
+        .page-title { color: var(--primary); font-size: 1.4rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+        .btn-danger { background: var(--accent); color: white; }
         .btn-danger:hover { background: #c04a33; }
-        .btn-primary { background: #2A5C6E; color: white; }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: #1e4452; }
-        .btn-secondary { background: #E8B86B; color: #333; }
+        .btn-secondary { background: var(--secondary); color: #333; }
         .btn-secondary:hover { background: #d4a050; }
-        .cart-summary { background: white; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: right; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .cart-summary h3 { margin-bottom: 10px; color: #2A5C6E; }
-        .total-price { font-size: 1.8rem; color: #D95A41; font-weight: bold; }
-        .empty-cart { text-align: center; padding: 50px; color: #666; }
-        .back-link { display: inline-block; margin-bottom: 20px; color: #2A5C6E; text-decoration: none; }
-        .back-link:hover { text-decoration: underline; }
-        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
-        .action-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        .header i { margin-right: 6px; }
         .btn i { margin-right: 6px; }
-        @media (max-width: 600px) { .cart-table { font-size: 0.8rem; } .btn { padding: 5px 10px; font-size: 0.7rem; } }
+
+        /* ── Desktop: tabla ── */
+        .cart-table { width: 100%; background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+        .cart-table th, .cart-table td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        .cart-table th { background: var(--primary); color: white; }
+        .cart-table tr:last-child td { border-bottom: none; }
+        .cart-table tr:hover { background: #f9f9f9; }
+
+        .quantity-input { width: 64px; padding: 6px 10px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+
+        /* Summary */
+        .cart-summary { background: white; border-radius: 12px; padding: 22px; margin-top: 18px; box-shadow: var(--shadow); }
+        .cart-summary h3 { color: var(--primary); margin-bottom: 14px; font-size: 1.05rem; }
+        .total-price { font-size: 2rem; color: var(--accent); font-weight: 700; margin-bottom: 16px; }
+
+        .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+        .action-buttons .btn { min-height: 44px; }
+
+        /* Empty state */
+        .empty-cart { text-align: center; padding: 60px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow); }
+        .empty-cart i { font-size: 3rem; color: #ccc; display: block; margin-bottom: 16px; }
+        .empty-cart p { color: var(--text-light); font-size: 1rem; margin-bottom: 20px; }
+
+        /* Footer */
+        .footer { background: var(--primary); color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
+
+        /* ── MÓVIL: tarjetas ── */
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+
+            .cart-table {
+                display: block;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .cart-table thead { display: none; }
+
+            .cart-table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .cart-table tr {
+                display: block;
+                background: white;
+                border-radius: 14px;
+                padding: 14px;
+                box-shadow: var(--shadow);
+                border-bottom: none !important;
+                position: relative;
+            }
+
+            .cart-table tr:hover { background: white; }
+
+            /* Nombre */
+            .cart-table td:nth-child(1) {
+                display: block;
+                font-weight: 600;
+                font-size: 0.95rem;
+                padding: 0 0 6px !important;
+                border-bottom: none !important;
+                padding-right: 36px !important;
+            }
+
+            /* Precio unitario */
+            .cart-table td:nth-child(2) {
+                display: block;
+                font-size: 0.82rem;
+                color: var(--text-light);
+                padding: 0 0 8px !important;
+                border-bottom: none !important;
+            }
+
+            .cart-table td:nth-child(2)::before {
+                content: "Precio: ";
+                font-weight: 500;
+            }
+
+            /* Cantidad */
+            .cart-table td:nth-child(3) {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 0 8px !important;
+                border-bottom: none !important;
+                font-size: 0.85rem;
+                color: var(--text-light);
+            }
+
+            .cart-table td:nth-child(3)::before {
+                content: "Cantidad:";
+            }
+
+            /* Subtotal */
+            .cart-table td:nth-child(4) {
+                display: block;
+                font-size: 1.05rem;
+                font-weight: 700;
+                color: var(--accent);
+                padding: 0 0 10px !important;
+                border-bottom: none !important;
+            }
+
+            /* Eliminar */
+            .cart-table td:nth-child(5) {
+                display: flex;
+                justify-content: flex-end;
+                padding: 0 !important;
+                border-bottom: none !important;
+            }
+
+            .cart-table td:nth-child(5) .btn {
+                padding: 8px 16px !important;
+                font-size: 0.82rem !important;
+                min-height: 36px;
+            }
+
+            .quantity-input { width: 52px !important; padding: 6px 8px !important; }
+
+            /* Summary mobile */
+            .cart-summary { padding: 16px; }
+            .total-price { font-size: 1.7rem; }
+            .action-buttons { flex-direction: column; }
+            .action-buttons .btn { width: 100%; min-height: 48px; font-size: 1rem; }
+            .action-buttons .btn-secondary { order: 2; }
+            .action-buttons .btn-primary { order: 1; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Header desktop -->
     <div class="header">
         <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
         <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
@@ -73,106 +195,125 @@ HISTORIAL DE MODIFICACIONES:
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
         </div>
     </div>
+
     <div class="container">
         <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
-        <h2 style="margin-bottom: 20px; color: #2A5C6E;"><i class="fas fa-shopping-bag"></i> Mi Carrito</h2>
+        <h2 class="page-title"><i class="fas fa-shopping-bag"></i> Mi Carrito</h2>
         <div id="cartContent"></div>
     </div>
+
     <div class="footer">
-        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
-        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
     <script>
+        function fmt(n) { return new Intl.NumberFormat('es-PY').format(n); }
+        function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
         function loadCart() {
             const container = document.getElementById('cartContent');
             const cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
-            
+
             if (cart.length === 0) {
                 container.innerHTML = `
                     <div class="empty-cart">
-                        <p><i class="fas fa-box-open"></i> Tu carrito está vacío</p>
-                        <a href="index.html" class="btn btn-primary" style="margin-top: 20px; display: inline-block;"><i class="fas fa-store"></i> Ver productos</a>
+                        <i class="fas fa-shopping-bag"></i>
+                        <p>Tu carrito está vacío</p>
+                        <a href="index.html" class="btn btn-primary">
+                            <i class="fas fa-store"></i> Explorar productos
+                        </a>
                     </div>
                 `;
                 return;
             }
-            
-            let itemsHtml = `
-                <table class="cart-table">
-                    <thead><tr><th>Producto</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th><th></th></tr></thead>
-                    <tbody>
-            `;
+
             let total = 0;
-            
-            for (let i = 0; i < cart.length; i++) {
-                const item = cart[i];
+            const rows = cart.map(item => {
                 const subtotal = item.price * item.quantity;
                 total += subtotal;
-                const priceFormatted = new Intl.NumberFormat('es-PY').format(item.price);
-                const subtotalFormatted = new Intl.NumberFormat('es-PY').format(subtotal);
-                
-                itemsHtml += `<tr>
-                    <td><i class="fas fa-tag"></i> ${escapeHtml(item.title)}</td>
-                    <td>${priceFormatted} ₲</td>
-                    <td><input type="number" class="quantity-input" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></td>
-                    <td>${subtotalFormatted} ₲</td>
-                    <td><button class="btn btn-danger" onclick="removeFromCart(${item.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
-                </tr>`;
-            }
-            
-            itemsHtml += `
-                    </tbody>
+                return `
+                    <tr>
+                        <td><i class="fas fa-tag" style="color: var(--primary); margin-right: 6px;"></i>${esc(item.title)}</td>
+                        <td>${fmt(item.price)} Gs</td>
+                        <td>
+                            <input type="number" class="quantity-input" value="${item.quantity}" min="1" max="99"
+                                onchange="updateQuantity(${item.id}, this.value)">
+                        </td>
+                        <td><strong>${fmt(subtotal)} Gs</strong></td>
+                        <td>
+                            <button class="btn btn-danger" onclick="removeFromCart(${item.id})">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
                 </table>
+
                 <div class="cart-summary">
-                    <h3><i class="fas fa-receipt"></i> Total del Pedido</h3>
-                    <div class="total-price">${new Intl.NumberFormat('es-PY').format(total)} ?</div>
+                    <h3><i class="fas fa-receipt"></i> Resumen del pedido</h3>
+                    <div class="total-price">${fmt(total)} Gs</div>
                     <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="clearCart()"><i class="fas fa-trash"></i> Vaciar Carrito</button>
-                        <button class="btn btn-primary" onclick="checkout()"><i class="fas fa-credit-card"></i> Proceder al Pago</button>
+                        <button class="btn btn-secondary" onclick="clearCart()">
+                            <i class="fas fa-trash"></i> Vaciar carrito
+                        </button>
+                        <button class="btn btn-primary" onclick="checkout()">
+                            <i class="fas fa-credit-card"></i> Proceder al pago
+                        </button>
                     </div>
                 </div>
             `;
-            container.innerHTML = itemsHtml;
         }
-        
-        function updateQuantity(productId, newQuantity) {
+
+        function updateQuantity(productId, newQty) {
             let cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
-            const index = cart.findIndex(item => item.id == productId);
-            if (index !== -1) {
-                cart[index].quantity = parseInt(newQuantity);
-                if (cart[index].quantity <= 0) cart.splice(index, 1);
+            const idx = cart.findIndex(i => i.id == productId);
+            if (idx !== -1) {
+                cart[idx].quantity = Math.max(1, parseInt(newQty) || 1);
                 localStorage.setItem('reshop_cart', JSON.stringify(cart));
                 loadCart();
+                if (window.updateMobileCartBadge) updateMobileCartBadge();
             }
         }
-        
+
         function removeFromCart(productId) {
             let cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
-            cart = cart.filter(item => item.id != productId);
+            cart = cart.filter(i => i.id != productId);
             localStorage.setItem('reshop_cart', JSON.stringify(cart));
             loadCart();
+            if (window.updateMobileCartBadge) updateMobileCartBadge();
         }
-        
+
         function clearCart() {
-            if (confirm('¿Vaciar todo el carrito?')) {
-                localStorage.removeItem('reshop_cart');
-                loadCart();
-            }
+            if (!confirm('¿Vaciar todo el carrito?')) return;
+            localStorage.removeItem('reshop_cart');
+            loadCart();
+            if (window.updateMobileCartBadge) updateMobileCartBadge();
         }
-        
+
         function checkout() {
             const cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
             if (cart.length > 0) window.location.href = 'checkout.html';
         }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
+
         loadCart();
     </script>
+
+    <script src="js/mobile.js"></script>
+
 </body>
 </html>

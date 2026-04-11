@@ -1,25 +1,12 @@
 <!--
 ================================================================================
-ARCHIVO: dashboard-vendedor.html
-PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.2.0
-CREADO: 2026-04-09
+ARCHIVO: frontend/dashboard-vendedor.html
+PROYECTO: ReShop Paraguay
+VERSION: 2.0.0 (Mobile-First)
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
-PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Panel de control para vendedores. Permite gestionar productos
-             (crear, editar, eliminar) y ver ventas realizadas con opción
-             de actualizar el estado de las órdenes.
-================================================================================
-HISTORIAL DE MODIFICACIONES:
-2026-04-09 - Creacion inicial (solo gestión de productos)
-2026-04-11 - [ADD] Nueva pestaña "Mis Ventas"
-2026-04-11 - [ADD] Endpoint /api/seller/orders para cargar ventas del vendedor
-2026-04-11 - [ADD] Modal para actualizar estado de órdenes
-2026-04-11 - [ADD] Botones de acción: Pagado, Enviado, Entregado, Cancelado
-2026-04-11 - [ADD] Campo "Origen de la prenda" en formulario de productos
-2026-04-11 - [ADD] Envío de geolocalización del vendedor al crear producto
-2026-04-11 - [IMPROVE] Diseño de tabs y tablas responsive
+DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
+             botones táctiles grandes, pestañas responsivas.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -28,295 +15,419 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Vendedor - ReShop Paraguay</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-    <link rel="manifest" href="assets/icons/site.webmanifest">
-    <meta name="msapplication-TileColor" content="#2A5C6E">
-    <meta name="theme-color" content="#2A5C6E">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/mobile.css">
     <style>
+        :root {
+            --primary: #2A5C6E;
+            --secondary: #E8B86B;
+            --accent: #D95A41;
+            --bg: #f5f5f5;
+            --white: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
-        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); }
+
+        /* Header desktop */
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Panel header */
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; }
-        .btn-primary { background: #2A5C6E; color: white; }
+        .panel-header h2 { color: var(--primary); font-size: 1.3rem; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; }
+        .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: #1e4452; }
-        .btn-danger { background: #D95A41; color: white; }
+        .btn-danger { background: var(--accent); color: white; }
         .btn-danger:hover { background: #c04a33; }
-        .btn-secondary { background: #E8B86B; color: #333; }
+        .btn-secondary { background: var(--secondary); color: #333; }
         .btn-secondary:hover { background: #d4a050; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-info { background: #17a2b8; color: white; }
-        
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 1rem; border-radius: 8px 8px 0 0; }
-        .tab-btn.active { background: #2A5C6E; color: white; }
-        .tab-btn:hover:not(.active) { background: #e0e0e0; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        
-        .products-table, .orders-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .products-table th, .products-table td, .orders-table th, .orders-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .products-table th, .orders-table th { background: #2A5C6E; color: white; }
-        .product-image { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
-        .order-status { padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-        .status-pending_payment { background: #ffc107; color: #333; }
-        .status-paid { background: #28a745; color: white; }
-        .status-shipped { background: #17a2b8; color: white; }
-        .status-delivered { background: #6c757d; color: white; }
-        .status-cancelled { background: #dc3545; color: white; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
-        .image-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .image-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
-        .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
-        .message.success { background: #d4edda; color: #155724; display: block; }
-        .message.error { background: #f8d7da; color: #721c24; display: block; }
-        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
-        .loading { text-align: center; padding: 50px; color: #666; }
-        .btn i, .header i { margin-right: 6px; }
-        @media (max-width: 768px) { .products-table, .orders-table { font-size: 0.8rem; } .btn { padding: 6px 12px; } }
+        .btn i { margin-right: 6px; }
+
+        /* Table (desktop) */
+        .products-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: var(--shadow); }
+        .products-table th, .products-table td { padding: 13px 15px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .products-table th { background: var(--primary); color: white; }
+        .products-table tr:last-child td { border-bottom: none; }
+        .products-table tr:hover { background: #f9f9f9; }
+        .product-image { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; display: block; }
+        .no-image { width: 56px; height: 56px; border-radius: 10px; background: #eee; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 1.4rem; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 12px; }
+        .modal.is-open { display: flex; }
+        .modal-content { background: white; padding: 28px; border-radius: 16px; width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; }
+        .modal-content h3 { color: var(--primary); margin-bottom: 20px; font-size: 1.1rem; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.95rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        .image-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .image-preview img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-actions .btn { flex: 1; }
+
+        /* Status badge */
+        .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-sold { background: #fff3cd; color: #856404; }
+
+        /* Messages */
+        .message { padding: 14px; border-radius: 10px; margin-top: 14px; font-size: 0.9rem; }
+        .message.success { background: #d4edda; color: #155724; }
+        .message.error { background: #f8d7da; color: #721c24; }
+        .message.loading { background: #cce5ff; color: #004085; }
+
+        /* Loading */
+        .loading { text-align: center; padding: 50px; color: var(--text-light); }
+        .loading i { font-size: 2rem; display: block; margin-bottom: 10px; color: var(--primary); }
+
+        /* Footer */
+        .footer { background: var(--primary); color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
+
+        /* Stat cards (resumen rápido) */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat-mini { background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: var(--shadow); }
+        .stat-mini__num { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+        .stat-mini__label { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
+
+        /* Tablet */
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Header desktop -->
     <div class="header">
         <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
         <p><i class="fas fa-chart-line"></i> Panel del Vendedor</p>
         <div style="margin-top: 10px;">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-            <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
-        </div>
-    </div>
-    <div class="container">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('products')"><i class="fas fa-box"></i> Mis Productos</button>
-            <button class="tab-btn" onclick="showTab('sales')"><i class="fas fa-chart-line"></i> Mis Ventas</button>
-        </div>
-        
-        <div id="productsTab" class="tab-content active">
-            <div class="panel-header">
-                <h2><i class="fas fa-boxes"></i> Mis Productos</h2>
-                <button class="btn btn-primary" onclick="showCreateModal()"><i class="fas fa-plus"></i> Nuevo Producto</button>
-            </div>
-            <div id="productsContainer"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div></div>
-        </div>
-        
-        <div id="salesTab" class="tab-content">
-            <h2><i class="fas fa-chart-line"></i> Mis Ventas</h2>
-            <div id="salesContainer"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando ventas...</div></div>
+            <a href="#" id="logoutBtnHeader"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
     </div>
 
-    <!-- Modal de Producto -->
+    <div class="container">
+
+        <!-- Stats rápidas -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-mini">
+                <div class="stat-mini__num" id="statsTotal">—</div>
+                <div class="stat-mini__label"><i class="fas fa-box"></i> Productos</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini__num" id="statsActive">—</div>
+                <div class="stat-mini__label"><i class="fas fa-check-circle"></i> Activos</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-mini__num" id="statsSold">—</div>
+                <div class="stat-mini__label"><i class="fas fa-shopping-cart"></i> Vendidos</div>
+            </div>
+        </div>
+
+        <!-- Panel header con botón nuevo producto -->
+        <div class="panel-header">
+            <h2><i class="fas fa-boxes"></i> Mis Productos</h2>
+            <button class="btn btn-primary" onclick="showCreateModal()">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </button>
+        </div>
+
+        <!-- Contenedor de productos -->
+        <div id="productsContainer">
+            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando tus productos...</div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================
+         MODAL: Crear / Editar Producto
+    ========================================================= -->
     <div id="productModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle"><i class="fas fa-tag"></i> Nuevo Producto</h3>
             <form id="productForm" enctype="multipart/form-data">
                 <input type="hidden" id="productId">
-                <div class="form-group"><label>Título *</label><input type="text" id="title" required></div>
-                <div class="form-group"><label>Descripción</label><textarea id="description" rows="3"></textarea></div>
-                <div class="form-group"><label>Precio ₲ *</label><input type="number" id="price" required></div>
                 <div class="form-group">
-                    <label>Categoría *</label>
-                    <select id="category" required>
-                        <option value="">Seleccionar</option>
-                        <option value="pantalones">Pantalones</option>
-                        <option value="camisas">Camisas</option>
-                        <option value="vestidos">Vestidos</option>
-                        <option value="chaquetas">Chaquetas</option>
-                        <option value="calzado">Calzado</option>
-                        <option value="accesorios">Accesorios</option>
-                    </select>
+                    <label>Título *</label>
+                    <input type="text" id="title" required placeholder="Ej: Camisa de jean azul talle M">
                 </div>
-                <div class="form-group"><label>Talla</label><input type="text" id="size" placeholder="XS, S, M, L, XL, 32, 34..."></div>
                 <div class="form-group">
-                    <label>Estado</label>
-                    <select id="condition">
-                        <option value="new_with_tag">Nuevo con etiqueta</option>
-                        <option value="new_without_tag">Nuevo sin etiqueta</option>
-                        <option value="very_good">Muy bueno</option>
-                        <option value="good">Bueno</option>
-                        <option value="acceptable">Aceptable</option>
-                    </select>
+                    <label>Descripción</label>
+                    <textarea id="description" rows="3" placeholder="Estado, detalles, medidas..."></textarea>
                 </div>
-                <div class="form-group"><label>Marca</label><input type="text" id="brand"></div>
-                <div class="form-group"><label>Color</label><input type="text" id="color"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Precio (Gs) *</label>
+                        <input type="number" id="price" required placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Talla</label>
+                        <input type="text" id="size" placeholder="S, M, L...">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Categoría *</label>
+                        <select id="category" required>
+                            <option value="">Seleccionar</option>
+                            <option value="pantalones">Pantalones</option>
+                            <option value="camisas">Camisas</option>
+                            <option value="vestidos">Vestidos</option>
+                            <option value="chaquetas">Chaquetas</option>
+                            <option value="calzado">Calzado</option>
+                            <option value="accesorios">Accesorios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="condition">
+                            <option value="new_with_tags">Nuevo c/ etiqueta</option>
+                            <option value="new_without_tags">Nuevo s/ etiqueta</option>
+                            <option value="very_good">Muy bueno</option>
+                            <option value="good">Bueno</option>
+                            <option value="acceptable">Aceptable</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Marca</label>
+                        <input type="text" id="brand" placeholder="Adidas, Nike...">
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="text" id="color" placeholder="Azul, Negro...">
+                    </div>
+                </div>
                 <div class="form-group">
-                    <label><i class="fas fa-globe-americas"></i> Origen de la prenda</label>
-                    <select id="origin" required>
-                        <option value="">Seleccionar origen</option>
-                        <option value="PAR">🇵🇾 Paraguay</option>
-                        <option value="USA">🇺🇸 Estados Unidos</option>
-                        <option value="BRA">🇧🇷 Brasil</option>
-                        <option value="EU">🇪🇺 Europa</option>
-                        <option value="CHN">🇨🇳 China</option>
-                        <option value="JPN">🇯🇵 Japón</option>
-                        <option value="KOR">🇰🇷 Corea</option>
-                        <option value="ARG">🇦🇷 Argentina</option>
-                        <option value="MEX">🇲🇽 México</option>
-                    </select>
+                    <label>Imágenes del producto (máx. 5)</label>
+                    <input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp" style="padding: 8px;">
+                    <div id="imagePreview" class="image-preview" style="margin-top: 10px;"></div>
                 </div>
-                <div class="form-group"><label>Imágenes del producto</label><input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp"><div id="imagePreview" class="image-preview"></div></div>
-                <div id="modalMessage" class="message"></div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()"><i class="fas fa-times"></i> Cancelar</button>
+                <div id="modalMessage"></div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Actualizar Estado de Orden -->
-    <div id="orderStatusModal" class="modal">
-        <div class="modal-content">
-            <h3><i class="fas fa-truck"></i> Actualizar Estado de Orden</h3>
-            <form id="orderStatusForm">
-                <input type="hidden" id="currentOrderId">
-                <div class="form-group">
-                    <label>Estado actual</label>
-                    <select id="orderStatus" required>
-                        <option value="pending_payment">⏳ Pendiente de pago</option>
-                        <option value="paid">✅ Pagado</option>
-                        <option value="processing">📦 Procesando</option>
-                        <option value="shipped">🚚 Enviado</option>
-                        <option value="delivered">🏠 Entregado</option>
-                        <option value="cancelled">❌ Cancelado</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Número de seguimiento (opcional)</label>
-                    <input type="text" id="trackingNumber" placeholder="Ej: PY001234567">
-                </div>
-                <div id="orderStatusMessage" class="message"></div>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Actualizar</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeOrderStatusModal()"><i class="fas fa-times"></i> Cancelar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <!-- Footer -->
     <div class="footer">
-        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
-        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
     <script>
         const API_URL = 'https://reshop-backend.vercel.app';
-        let token = localStorage.getItem('token');
-        let currentUser = null;
-        
-        if (!token) window.location.href = 'login.html';
-        try { currentUser = JSON.parse(localStorage.getItem('user') || '{}'); } catch(e) { console.error(e); }
-        
-        function showTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`${tab}Tab`).classList.add('active');
-            event.target.classList.add('active');
-            if (tab === 'products') loadProducts();
-            if (tab === 'sales') loadSales();
-        }
-        
-        document.getElementById('images').addEventListener('change', function(e) {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
-            for (const file of e.target.files) {
-                const reader = new FileReader();
-                reader.onload = function(ev) { const img = document.createElement('img'); img.src = ev.target.result; preview.appendChild(img); };
-                reader.readAsDataURL(file);
-            }
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        if (!token || !user) window.location.href = 'login.html';
+
+        // Cerrar sesión
+        document.getElementById('logoutBtnHeader').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
         });
 
+        // Preview de imágenes
+        document.getElementById('images').addEventListener('change', function (e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            Array.from(e.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        // ── Cargar productos ──────────────────────────────────
         async function loadProducts() {
             const container = document.getElementById('productsContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
+
             try {
-                const response = await fetch(`${API_URL}/api/products/seller/${currentUser.id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success && data.products && data.products.length > 0) {
-                    let html = `<div style="overflow-x:auto;"><table class="products-table"><thead><tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
-                    for (const p of data.products) {
-                        const firstImage = p.images_urls && p.images_urls[0] ? p.images_urls[0] : '';
-                        const originFlag = { 'PAR': '🇵🇾', 'USA': '🇺🇸', 'BRA': '🇧🇷', 'EU': '🇪🇺', 'CHN': '🇨🇳', 'JPN': '🇯🇵', 'KOR': '🇰🇷', 'ARG': '🇦🇷', 'MEX': '🇲🇽' }[p.origin] || '🌍';
-                        html += `<tr>
-                            <td>${firstImage ? `<img src="${firstImage}" class="product-image">` : '<i class="fas fa-image"></i>'}</td>
-                            <td><i class="fas fa-tag"></i> ${escapeHtml(p.title)}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(p.price)} ₲</td>
-                            <td>${p.category}</td>
-                            <td>${p.origin ? `${originFlag} ${p.origin}` : '-'}</td>
-                            <td>${p.status}</td>
-                            <td><button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
-                        </tr>`;
-                    }
-                    html += '</tbody></table></div>';
-                    container.innerHTML = html;
-                } else { container.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No tienes productos aún. ¡Crea tu primer producto!</div>'; }
-            } catch (error) { container.innerHTML = `<div class="error">Error al cargar productos: ${error.message}</div>`; }
+                const res = await fetch(`${API_URL}/api/products/seller/${user.id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.success && data.products?.length > 0) {
+                    // Actualizar stats
+                    document.getElementById('statsTotal').textContent = data.products.length;
+                    document.getElementById('statsActive').textContent = data.products.filter(p => p.status === 'active').length;
+                    document.getElementById('statsSold').textContent = data.products.filter(p => p.status === 'sold').length;
+
+                    container.innerHTML = `
+                        <div style="overflow-x:auto;">
+                            <table class="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Título</th>
+                                        <th>Precio</th>
+                                        <th>Categoría</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.products.map(p => `
+                                        <tr>
+                                            <td>
+                                                ${p.images_urls?.[0]
+                                                    ? `<img src="${p.images_urls[0]}" class="product-image" alt="${esc(p.title)}" loading="lazy">`
+                                                    : `<div class="no-image"><i class="fas fa-image"></i></div>`
+                                                }
+                                            </td>
+                                            <td><strong>${esc(p.title)}</strong></td>
+                                            <td style="color: var(--accent); font-weight: 700;">${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
+                                            <td><span style="text-transform: capitalize;">${p.category}</span></td>
+                                            <td>
+                                                <span class="status-badge status-${p.status}">
+                                                    ${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-secondary" onclick="editProduct(${p.id})" style="margin-right: 6px;">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                                <button class="btn btn-danger" onclick="deleteProduct(${p.id})">
+                                                    <i class="fas fa-trash-alt"></i> Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('statsTotal').textContent = '0';
+                    document.getElementById('statsActive').textContent = '0';
+                    document.getElementById('statsSold').textContent = '0';
+                    container.innerHTML = `
+                        <div class="loading" style="background: white; border-radius: 12px; box-shadow: var(--shadow);">
+                            <i class="fas fa-box-open"></i>
+                            <p>No tienes productos aún.</p>
+                            <button class="btn btn-primary" style="margin-top: 16px;" onclick="showCreateModal()">
+                                <i class="fas fa-plus"></i> Publicar mi primer producto
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="loading" style="color: var(--accent);"><i class="fas fa-exclamation-triangle"></i><br>Error: ${err.message}</div>`;
+            }
         }
 
+        // ── Crear / editar ────────────────────────────────────
         function showCreateModal() {
             document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Nuevo Producto';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
-            document.getElementById('origin').value = 'PAR';
             document.getElementById('imagePreview').innerHTML = '';
-            document.getElementById('productModal').style.display = 'flex';
+            document.getElementById('modalMessage').innerHTML = '';
+            document.getElementById('productModal').classList.add('is-open');
         }
 
         async function editProduct(id) {
             try {
-                const response = await fetch(`${API_URL}/api/products/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success && data.product) {
-                    const p = data.product;
-                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Producto';
-                    document.getElementById('productId').value = p.id;
-                    document.getElementById('title').value = p.title;
-                    document.getElementById('description').value = p.description || '';
-                    document.getElementById('price').value = p.price;
-                    document.getElementById('category').value = p.category;
-                    document.getElementById('size').value = p.size || '';
-                    document.getElementById('condition').value = p.condition || 'good';
-                    document.getElementById('brand').value = p.brand || '';
-                    document.getElementById('color').value = p.color || '';
-                    document.getElementById('origin').value = p.origin || 'PAR';
-                    document.getElementById('imagePreview').innerHTML = '';
-                    if (p.images_urls && p.images_urls.length) {
-                        const preview = document.getElementById('imagePreview');
-                        p.images_urls.forEach(url => { const img = document.createElement('img'); img.src = url; preview.appendChild(img); });
-                    }
-                    document.getElementById('productModal').style.display = 'flex';
-                }
-            } catch (error) { alert('Error al cargar el producto: ' + error.message); }
+                const res = await fetch(`${API_URL}/api/products/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success || !data.product) return alert('No se pudo cargar el producto');
+                const p = data.product;
+
+                document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Producto';
+                document.getElementById('productId').value = p.id;
+                document.getElementById('title').value = p.title;
+                document.getElementById('description').value = p.description || '';
+                document.getElementById('price').value = p.price;
+                document.getElementById('category').value = p.category;
+                document.getElementById('size').value = p.size || '';
+                document.getElementById('condition').value = p.condition || 'good';
+                document.getElementById('brand').value = p.brand || '';
+                document.getElementById('color').value = p.color || '';
+                document.getElementById('modalMessage').innerHTML = '';
+
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = '';
+                p.images_urls?.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    preview.appendChild(img);
+                });
+
+                document.getElementById('productModal').classList.add('is-open');
+            } catch (err) {
+                alert('Error al cargar: ' + err.message);
+            }
         }
 
         async function deleteProduct(id) {
-            if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+            if (!confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return;
             try {
-                const response = await fetch(`${API_URL}/api/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success) { alert('Producto eliminado exitosamente'); loadProducts(); } else { alert('Error: ' + data.error); }
-            } catch (error) { alert('Error: ' + error.message); }
+                const res = await fetch(`${API_URL}/api/products/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    loadProducts();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
         }
 
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('is-open');
+        }
+
+        // Cerrar modal al hacer clic afuera
+        document.getElementById('productModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ── Submit formulario ─────────────────────────────────
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = document.getElementById('productId').value;
+            const msgDiv = document.getElementById('modalMessage');
+            msgDiv.className = 'message loading';
+            msgDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Guardando...';
+
             const formData = new FormData();
             formData.append('title', document.getElementById('title').value.trim());
             formData.append('description', document.getElementById('description').value.trim());
@@ -326,91 +437,45 @@ HISTORIAL DE MODIFICACIONES:
             formData.append('condition', document.getElementById('condition').value);
             formData.append('brand', document.getElementById('brand').value.trim());
             formData.append('color', document.getElementById('color').value.trim());
-            formData.append('origin', document.getElementById('origin').value);
             const images = document.getElementById('images').files;
             for (let i = 0; i < images.length; i++) formData.append('images', images[i]);
-            const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
-            const method = productId ? 'PUT' : 'POST';
-            try {
-                const response = await fetch(url, { method: method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-                const data = await response.json();
-                if (data.success) { closeModal(); loadProducts(); } else { const msgDiv = document.getElementById('modalMessage'); msgDiv.className = 'message error'; msgDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.error; setTimeout(() => { msgDiv.className = 'message'; }, 3000); }
-            } catch (error) { alert('Error: ' + error.message); }
-        });
 
-        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
-        
-        async function loadSales() {
-            const container = document.getElementById('salesContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando ventas...</div>';
             try {
-                const response = await fetch(`${API_URL}/api/seller/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                if (data.success && data.orders && data.orders.length > 0) {
-                    let html = `<div style="overflow-x:auto;"><table class="orders-table"><thead><tr><th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Total</th><th>Comisión (10%)</th><th>Tu Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
-                    for (const order of data.orders) {
-                        const statusClass = `status-${order.order_status}`;
-                        const statusText = { 'pending_payment': '⏳ Pendiente pago', 'paid': '✅ Pagado', 'processing': '📦 Procesando', 'shipped': '🚚 Enviado', 'delivered': '🏠 Entregado', 'cancelled': '❌ Cancelado' }[order.order_status] || order.order_status;
-                        html += `<tr>
-                            <td>${order.order_number}</td>
-                            <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
-                            <td>${escapeHtml(order.buyer?.full_name || order.buyer?.email || 'N/A')}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ₲</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ₲</td>
-                            <td><strong>${new Intl.NumberFormat('es-PY').format(order.seller_payout || order.total_amount)} ₲</strong></td>
-                            <td><span class="order-status ${statusClass}">${statusText}</span></td>
-                            <td><button class="btn btn-info btn-sm" onclick="updateOrderStatus(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar Estado</button></td>
-                        </tr>`;
-                    }
-                    html += '</tbody></table></div>';
-                    container.innerHTML = html;
-                } else { container.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No tienes ventas aún.</div>'; }
-            } catch (error) { container.innerHTML = `<div class="error">Error al cargar ventas: ${error.message}</div>`; }
-        }
-        
-        let currentOrderId = null;
-        function updateOrderStatus(orderId, currentStatus) {
-            currentOrderId = orderId;
-            document.getElementById('currentOrderId').value = orderId;
-            document.getElementById('orderStatus').value = currentStatus;
-            document.getElementById('trackingNumber').value = '';
-            document.getElementById('orderStatusModal').style.display = 'flex';
-        }
-        function closeOrderStatusModal() { document.getElementById('orderStatusModal').style.display = 'none'; currentOrderId = null; }
-        
-        document.getElementById('orderStatusForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const orderId = document.getElementById('currentOrderId').value;
-            const order_status = document.getElementById('orderStatus').value;
-            const shipping_tracking_number = document.getElementById('trackingNumber').value.trim();
-            const msgDiv = document.getElementById('orderStatusMessage');
-            try {
-                const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ order_status, shipping_tracking_number: shipping_tracking_number || null })
+                const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
+                const method = productId ? 'PUT' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
-                const data = await response.json();
+                const data = await res.json();
+
                 if (data.success) {
                     msgDiv.className = 'message success';
-                    msgDiv.innerHTML = '<i class="fas fa-check-circle"></i> Estado actualizado correctamente';
-                    setTimeout(() => { closeOrderStatusModal(); loadSales(); }, 1500);
+                    msgDiv.innerHTML = '<i class="fas fa-check-circle"></i> ¡Guardado correctamente!';
+                    setTimeout(() => { closeModal(); loadProducts(); }, 1200);
                 } else {
                     msgDiv.className = 'message error';
-                    msgDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.error;
-                    setTimeout(() => { msgDiv.className = 'message'; }, 3000);
+                    msgDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${data.error}`;
                 }
-            } catch (error) {
+            } catch (err) {
                 msgDiv.className = 'message error';
-                msgDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error: ' + error.message;
-                setTimeout(() => { msgDiv.className = 'message'; }, 3000);
+                msgDiv.innerHTML = `<i class="fas fa-wifi"></i> Error de conexión: ${err.message}`;
             }
         });
-        
-        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-        
-        document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('reshop_cart'); localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html'; });
-        
+
+        function esc(text) {
+            const d = document.createElement('div');
+            d.textContent = text || '';
+            return d.innerHTML;
+        }
+
+        // Inicializar
         loadProducts();
     </script>
+
+    <!-- JS Móvil -->
+    <script src="js/mobile.js"></script>
+
 </body>
 </html>
