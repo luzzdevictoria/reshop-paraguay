@@ -731,6 +731,8 @@ DESCRIPCION: Panel del vendedor.
         // ============================================================
         // CÁMARA
         // ============================================================
+        let useFrontCamera = false;  // false = trasera, true = frontal
+
         async function startCamera() {
             const overlay = document.getElementById('cameraOverlay');
             const video = document.getElementById('cameraVideo');
@@ -739,13 +741,51 @@ DESCRIPCION: Panel del vendedor.
                 if (currentStream) {
                     currentStream.getTracks().forEach(track => track.stop());
                 }
-                currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                
+                // Elegir cámara según preferencia
+                const facingMode = useFrontCamera ? "user" : "environment";
+                const constraints = {
+                    video: { facingMode: { exact: facingMode } }
+                };
+                
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = currentStream;
                 overlay.classList.add('is-open');
+                
+                // Agregar botón de cambio de cámara si no existe
+                addCameraSwitchButton();
+                
             } catch (error) {
                 console.error('Error accediendo a la cámara:', error);
-                alert('No se pudo acceder a la cámara. Verifica los permisos.');
+                // Fallback: cualquier cámara
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = currentStream;
+                    overlay.classList.add('is-open');
+                } catch (fallbackError) {
+                    alert('No se pudo acceder a la cámara. Verifica los permisos.');
+                }
             }
+        }
+        
+        function addCameraSwitchButton() {
+            // Verificar si ya existe el botón
+            if (document.getElementById('switchCameraBtn')) return;
+            
+            const controls = document.querySelector('.camera-controls');
+            if (!controls) return;
+            
+            const switchBtn = document.createElement('button');
+            switchBtn.id = 'switchCameraBtn';
+            switchBtn.className = 'btn btn-secondary';
+            switchBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Cambiar cámara';
+            switchBtn.onclick = switchCamera;
+            controls.appendChild(switchBtn);
+        }
+        
+        async function switchCamera() {
+            useFrontCamera = !useFrontCamera;
+            await startCamera();  // Reiniciar con la otra cámara
         }
 
         function stopCamera() {
@@ -754,6 +794,10 @@ DESCRIPCION: Panel del vendedor.
                 currentStream = null;
             }
             document.getElementById('cameraOverlay').classList.remove('is-open');
+            
+            // 🆕 Remover el botón de cambio de cámara al cerrar
+            const switchBtn = document.getElementById('switchCameraBtn');
+            if (switchBtn) switchBtn.remove();
         }
 
         function capturePhoto() {
