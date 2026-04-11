@@ -2,13 +2,14 @@
 ================================================================================
 ARCHIVO: server.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.4.1 - ADDED SELLER PRODUCTS ENDPOINT
+VERSION: 3.5.0 - CLOUDINARY INTEGRATION (SIN ELIMINAR NADA)
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: API REST principal de ReShop Paraguay.
              Inicializa Express, middlewares, rutas y endpoints.
+             AGREGADO: Cloudinary para imágenes (sin eliminar Supabase Storage)
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial del servidor
@@ -23,6 +24,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Endpoint GET /api/seller/orders para que vendedores vean sus ventas
 2026-04-11 - [ADD] Endpoints de reseñas: GET/POST /api/products/:id/reviews, GET /api/products/:id/rating
 2026-04-11 - [ADD] Endpoint GET /api/products/seller/:sellerId para productos por vendedor
+2026-04-11 - [ADD] Cloudinary para imágenes (endpoint /api/upload-image, compresión automática)
 ================================================================================
 */
 
@@ -33,12 +35,23 @@ const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const crypto = require('crypto');
-const uuidv4 = () => crypto.randomUUID();
+const cloudinary = require('cloudinary').v2; // ✅ AGREGADO
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ============================================================
+// CONFIGURACIÓN CLOUDINARY (NUEVO)
+// ============================================================
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+console.log('✅ Cloudinary configurado:', cloudinary.config().cloud_name);
 
 // ============================================================
 // CONFIGURACIÓN MULTER PARA SUBIR IMÁGENES
@@ -69,6 +82,7 @@ const supabaseAdmin = createClient(
 );
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
+const uuidv4 = () => crypto.randomUUID();
 
 // ============================================================
 // MIDDLEWARE DE AUTENTICACIÓN GENERAL
@@ -178,18 +192,59 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         name: 'ReShop Paraguay API', 
-        version: '3.4.1', 
+        version: '3.5.0', 
         status: 'active',
         endpoints: {
             health: 'GET /api/health',
             products: 'GET /api/products',
             productsBySeller: 'GET /api/products/seller/:sellerId',
+            uploadImage: 'POST /api/upload-image (Cloudinary)',
             reviews: 'GET/POST /api/products/:id/reviews, GET /api/products/:id/rating',
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
             seller: 'GET /api/seller/orders'
         }
     });
+});
+
+// ============================================================
+// 🆕 NUEVO ENDPOINT: SUBIR IMAGEN A CLOUDINARY
+// ============================================================
+app.post('/api/upload-image', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No se envió ninguna imagen' });
+        }
+
+        const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `reshop-products/${req.user.id}`,
+                    transformation: [
+                        { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                        { fetch_format: 'webp' }
+                    ]
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            uploadStream.end(req.file.buffer);
+        });
+
+        res.json({ 
+            success: true, 
+            url: result.secure_url, 
+            public_id: result.public_id,
+            format: result.format,
+            width: result.width,
+            height: result.height
+        });
+    } catch (error) {
+        console.error('❌ Error subiendo imagen a Cloudinary:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // ============================================================
@@ -362,7 +417,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // ============================================================
-// CREAR PRODUCTO (autenticado)
+// CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY
 // ============================================================
 app.post('/api/products', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -373,20 +428,27 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
         }
         
         let imageUrls = [];
+        
+        // ✅ PRIORIDAD: Cloudinary si hay archivos
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const fileName = `${uuidv4()}-${file.originalname}`;
-                const { data, error } = await supabase.storage
-                    .from('products')
-                    .upload(fileName, file.buffer, { contentType: file.mimetype });
-                
-                if (error) throw error;
-                
-                const { data: urlData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(fileName);
-                
-                imageUrls.push(urlData.publicUrl);
+                const result = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: `reshop-products/${req.user.id}`,
+                            transformation: [
+                                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                                { fetch_format: 'webp' }
+                            ]
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    uploadStream.end(file.buffer);
+                });
+                imageUrls.push(result.secure_url);
             }
         }
         
@@ -422,7 +484,7 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
 });
 
 // ============================================================
-// ACTUALIZAR PRODUCTO
+// ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY
 // ============================================================
 app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -446,18 +508,23 @@ app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const fileName = `${uuidv4()}-${file.originalname}`;
-                const { error } = await supabase.storage
-                    .from('products')
-                    .upload(fileName, file.buffer, { contentType: file.mimetype });
-                
-                if (error) throw error;
-                
-                const { data: urlData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(fileName);
-                
-                imageUrls.push(urlData.publicUrl);
+                const result = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: `reshop-products/${req.user.id}`,
+                            transformation: [
+                                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                                { fetch_format: 'webp' }
+                            ]
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    uploadStream.end(file.buffer);
+                });
+                imageUrls.push(result.secure_url);
             }
         }
         
@@ -911,10 +978,12 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.4.1');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.5.0');
+    console.log('  ☁️  Cloudinary integrado para imágenes');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
+    console.log(`📸 Upload: POST /api/upload-image`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`👤 Seller Products: http://localhost:${PORT}/api/products/seller/:sellerId`);
     console.log(`⭐ Reviews: GET/POST /api/products/:id/reviews`);
@@ -924,6 +993,7 @@ app.listen(PORT, () => {
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
     console.log('✅ Endpoint /api/products/seller/:sellerId agregado');
+    console.log('✅ Cloudinary listo | Compresión automática 800x800 | WebP');
     console.log('');
 });
 
