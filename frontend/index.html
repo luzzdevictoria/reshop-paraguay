@@ -123,21 +123,24 @@ HISTORIAL DE MODIFICACIONES:
                 <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
             </div>
         </div>
-        <div class="header-menu">
-            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
-            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-            <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
-            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
-            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
-            <span id="authLinks">
-                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
-                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
-            </span>
-            <span id="userMenu" style="display: none;" class="user-menu">
-                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
-                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-            </span>
-        </div>
+<div class="header-menu">
+    <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+    <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+    <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+    <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+    <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
+    <button id="installAppBtn" style="display: none; background: #E8B86B; color: #333; border: none; border-radius: 8px; padding: 5px 12px; cursor: pointer;">
+        <i class="fas fa-download"></i> Instalar App
+    </button>
+    <span id="authLinks">
+        <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+        <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+    </span>
+    <span id="userMenu" style="display: none;" class="user-menu">
+        <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+        <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    </span>
+</div>
     </div>
     
     <div class="container">
@@ -544,6 +547,34 @@ HISTORIAL DE MODIFICACIONES:
             loadProducts();
             translatePage();
         });
+		
+		// ============================================================
+// INSTALACIÓN DE PWA
+// ============================================================
+let deferredPrompt;
+const installBtn = document.getElementById('installAppBtn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'inline-block';
+});
+
+installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Usuario ${outcome === 'accepted' ? 'aceptó' : 'rechazó'} la instalación`);
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+    }
+});
+
+// Ocultar botón si ya está instalada
+window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    console.log('App instalada exitosamente');
+});
     </script>
 </body>
 </html>
