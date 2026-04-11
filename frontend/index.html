@@ -291,7 +291,7 @@
                 authLinks.style.display = 'none';
                 userMenu.style.display = 'inline-block';
                 userName.innerHTML = user.full_name || user.email;
-                if (dashboardLink && user.role === 'seller') dashboardLink.style.display = 'inline';
+                if (dashboardLink && (user.role === 'seller' || user.role === 'admin')) {dashboardLink.style.display = 'inline';}
                 if (adminLink && user.role === 'admin') adminLink.style.display = 'inline';
             } else {
                 authLinks.style.display = 'inline';
