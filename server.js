@@ -303,11 +303,50 @@ app.get('/api/products', async (req, res) => {
     try {
         console.log('📦 Consultando productos en Supabase...');
         
-        const { data: products, error } = await supabase
+        // Obtener parámetros de consulta (query params)
+        const { category, condition, origin, minPrice, maxPrice, search } = req.query;
+        
+        // Construir la consulta base
+        let query = supabase
             .from('products')
             .select('*')
-            .eq('status', 'active')
-            .order('created_at', { ascending: false });
+            .eq('status', 'active');
+        
+        // 🆕 FILTRO POR ORIGEN (código de 3 letras: PAR, ARG, BRA, USA, etc.)
+        if (origin && origin !== 'todos') {
+            query = query.eq('origin', origin.toUpperCase());
+            console.log(`🔍 Filtrando por origen: ${origin}`);
+        }
+        
+        // Filtro por categoría
+        if (category && category !== 'todos') {
+            query = query.eq('category', category);
+        }
+        
+        // Filtro por condición
+        if (condition && condition !== 'todas') {
+            query = query.eq('condition', condition);
+        }
+        
+        // Filtro por precio mínimo
+        if (minPrice) {
+            query = query.gte('price', parseFloat(minPrice));
+        }
+        
+        // Filtro por precio máximo
+        if (maxPrice) {
+            query = query.lte('price', parseFloat(maxPrice));
+        }
+        
+        // Búsqueda por título
+        if (search && search.trim() !== '') {
+            query = query.ilike('title', `%${search}%`);
+        }
+        
+        // Ordenar por más reciente primero
+        query = query.order('created_at', { ascending: false });
+        
+        const { data: products, error } = await query;
 
         if (error) throw error;
 
@@ -316,7 +355,8 @@ app.get('/api/products', async (req, res) => {
         res.json({ 
             success: true, 
             products: products || [],
-            count: products?.length || 0
+            count: products?.length || 0,
+            filters: { category, condition, origin, minPrice, maxPrice, search } // útil para debugging
         });
     } catch (error) {
         console.error('❌ Error en /api/products:', error.message);
@@ -334,15 +374,25 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/seller/:sellerId', async (req, res) => {
     try {
         const { sellerId } = req.params;
+        const { origin } = req.query; // 🆕 Filtro opcional por origen
         
         console.log(`📦 Buscando productos del vendedor: ${sellerId}`);
         
-        const { data: products, error } = await supabase
+        let query = supabase
             .from('products')
             .select('*')
             .eq('seller_id', sellerId)
-            .eq('status', 'active')
-            .order('created_at', { ascending: false });
+            .eq('status', 'active');
+        
+        // 🆕 Filtrar por origen si viene en la query
+        if (origin && origin !== 'todos') {
+            query = query.eq('origin', origin.toUpperCase());
+            console.log(`🔍 Filtrando por origen: ${origin}`);
+        }
+        
+        query = query.order('created_at', { ascending: false });
+        
+        const { data: products, error } = await query;
 
         if (error) throw error;
         
