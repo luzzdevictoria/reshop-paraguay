@@ -174,6 +174,12 @@
                 <a href="my-orders.html" class="mobile-menu-drawer__link ${currentPage === 'my-orders.html' ? 'active' : ''}">
                     <i class="fas fa-history"></i> Mis Pedidos
                 </a>
+				<a href="messages.html" class="mobile-menu-drawer__link ${currentPage === 'messages.html' ? 'active' : ''}">
+    <i class="fas fa-envelope"></i> Mensajes
+</a>
+<a href="help.html" class="mobile-menu-drawer__link ${currentPage === 'help.html' ? 'active' : ''}">
+    <i class="fas fa-question-circle"></i> Ayuda
+</a>
                 ${roleLinks}
                 ${authSection}
             </div>
