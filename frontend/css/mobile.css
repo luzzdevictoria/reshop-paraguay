@@ -1300,3 +1300,74 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         display: none !important;
     }
 }
+
+/* ============================================================
+   BOTÓN "BUSCAR CERCA DE MÍ"  (v1.1.0)
+   ============================================================ */
+@media (max-width: 768px) {
+
+    .btn-near-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #E8B86B;
+        color: #333;
+        border: none;
+        border-radius: 24px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(232, 184, 107, 0.4);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 0 auto 12px;
+        min-height: 44px;
+    }
+
+    .btn-near-me:hover {
+        background: #d4a050;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(232, 184, 107, 0.5);
+    }
+
+    .btn-near-me:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Estado activo: verde cuando el filtro está aplicado */
+    .btn-near-me.is-active {
+        background: #28a745;
+        color: white;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-near-me.is-active:hover {
+        background: #218838;
+    }
+
+    /* Badge de distancia sobre la imagen de cada tarjeta */
+    .distance-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(42, 92, 110, 0.88);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        backdrop-filter: blur(4px);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .distance-badge i {
+        font-size: 0.65rem;
+        color: #E8B86B;
+    }
+}

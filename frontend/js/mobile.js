@@ -1,84 +1,250 @@
 /**
- * ARCHIVO: js/mobile.js
+ * ARCHIVO: frontend/js/mobile.js
  * PROYECTO: ReShop Paraguay
- * VERSION: 1.0.0
- * CREADO: 2026-04-11
+ * VERSION: 1.1.0
+ * ACTUALIZADO: 2026-04-11
  * AUTOR: Pedro José Pirovani
- * DESCRIPCION: Lógica para interfaz móvil.
- *   - Header hamburguesa con drawer
- *   - Panel de filtros deslizable
- *   - Bottom navigation bar
- *   - Badge del carrito en tiempo real
- *   - Detección de página activa
+ *
+ * CHANGELOG v1.1.0:
+ * [+] Botón "Buscar cerca de mí" con geolocalización real
+ *     → usa JOIN products + users (latitude/longitude en tabla users)
+ *     → filtra por address_visible = true
+ *     → calcula distancia Haversine en el cliente
+ * [+] Enlace "Mensajes" en el drawer (visible para todos)
+ * [+] Enlace "Ayuda" en el drawer (visible para todos)
  */
 
 (function () {
     'use strict';
 
-    // ============================================================
-    // UTILIDADES
-    // ============================================================
+    const API_URL = 'https://reshop-backend.vercel.app';
+    const NEAR_ME_RADIUS_KM = 10;
 
-    /**
-     * Detecta si estamos en móvil (<=768px)
-     */
-    function isMobile() {
-        return window.innerWidth <= 768;
-    }
+    // ── Utilidades ─────────────────────────────────────────────
+    function isMobile() { return window.innerWidth <= 768; }
 
-    /**
-     * Obtiene el nombre del archivo actual de la URL
-     */
     function getCurrentPage() {
-        const path = window.location.pathname;
-        const filename = path.split('/').pop() || 'index.html';
-        return filename;
+        return window.location.pathname.split('/').pop() || 'index.html';
     }
 
-    /**
-     * Cuenta items en el carrito
-     */
     function getCartCount() {
         try {
-            const cart = JSON.parse(localStorage.getItem('reshop_cart') || '[]');
-            return cart.reduce((total, item) => total + (item.quantity || 1), 0);
-        } catch {
-            return 0;
-        }
+            return JSON.parse(localStorage.getItem('reshop_cart') || '[]')
+                .reduce((t, i) => t + (i.quantity || 1), 0);
+        } catch { return 0; }
     }
 
-    /**
-     * Obtiene usuario del localStorage
-     */
     function getUser() {
-        try {
-            return JSON.parse(localStorage.getItem('user') || 'null');
-        } catch {
-            return null;
+        try { return JSON.parse(localStorage.getItem('user') || 'null'); }
+        catch { return null; }
+    }
+
+    // ── Haversine ──────────────────────────────────────────────
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2)**2 +
+                  Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) *
+                  Math.sin(dLon/2)**2;
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // ── Fetch productos cercanos ───────────────────────────────
+    async function fetchProductsNearMe(userLat, userLng, radiusKm) {
+        const res = await fetch(`${API_URL}/api/products?limit=200`);
+        if (!res.ok) throw new Error('Error al consultar productos');
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.products)) return [];
+
+        return data.products
+            .filter(p => {
+                const lat = p.seller?.latitude ?? null;
+                const lng = p.seller?.longitude ?? null;
+                if (!lat || !lng) return false;
+                if (p.seller?.address_visible === false) return false;
+                const dist = calculateDistance(userLat, userLng, lat, lng);
+                p._distanceKm = dist;
+                return dist <= radiusKm;
+            })
+            .sort((a, b) => a._distanceKm - b._distanceKm);
+    }
+
+    // ── Render productos cercanos ──────────────────────────────
+    function renderNearbyProducts(products) {
+        const grid = document.getElementById('productsGrid');
+        if (!grid) return;
+
+        if (products.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:#666;">
+                    <i class="fas fa-map-marker-alt" style="font-size:2.5rem;color:#2A5C6E;display:block;margin-bottom:14px;"></i>
+                    <p style="font-size:1rem;font-weight:600;margin-bottom:6px;">Sin resultados cercanos</p>
+                    <p style="font-size:.85rem;">No hay vendedores dentro de ${NEAR_ME_RADIUS_KM} km.</p>
+                    <button onclick="window.mobileNearMe.reset()"
+                            style="margin-top:16px;padding:10px 22px;background:#2A5C6E;color:white;border:none;border-radius:24px;cursor:pointer;font-size:.9rem;">
+                        <i class="fas fa-undo"></i> Ver todos
+                    </button>
+                </div>`;
+            return;
         }
+
+        if (typeof renderProducts === 'function') {
+            renderProducts(products);
+            setTimeout(() => addDistanceBadges(products), 60);
+            return;
+        }
+
+        const fmt = n => new Intl.NumberFormat('es-PY').format(n);
+        const esc = t => { const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; };
+        const condMap = {
+            new_with_tags:'Nuevo c/etiqueta', new_without_tags:'Nuevo s/etiqueta',
+            very_good:'Muy bueno', good:'Bueno', acceptable:'Aceptable'
+        };
+
+        grid.innerHTML = products.map(p => `
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+                <div class="product-card__img-wrapper" style="position:relative;">
+                    <img src="${p.images_urls?.[0]||'https://placehold.co/400x400/f0f0f0/999?text=Sin+foto'}"
+                         alt="${esc(p.title)}" loading="lazy"
+                         onerror="this.src='https://placehold.co/400x400/f0f0f0/999?text=Sin+foto'">
+                    ${p._distanceKm ? `<span class="distance-badge"><i class="fas fa-location-dot"></i> ${p._distanceKm.toFixed(1)} km</span>` : ''}
+                </div>
+                <div class="product-card__content">
+                    <h3 class="product-card__title">${esc(p.title)}</h3>
+                    <p class="product-card__price">${fmt(p.price)} Gs</p>
+                    <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(p.seller?.store_name||p.seller?.full_name||'Vendedor')}</p>
+                    <span class="product-card__condition">${condMap[p.condition]||''}</span>
+                    <button class="product-card__button"
+                            onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">
+                        <i class="fas fa-eye"></i> Ver producto
+                    </button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    /**
-     * Obtiene token del localStorage
-     */
-    function getToken() {
-        return localStorage.getItem('token');
+    function addDistanceBadges(products) {
+        document.querySelectorAll('#productsGrid .product-card').forEach((card, i) => {
+            const p = products[i];
+            if (!p?._distanceKm) return;
+            const wrapper = card.querySelector('.product-card__img-wrapper, .product-card__image');
+            if (!wrapper || wrapper.querySelector('.distance-badge')) return;
+            wrapper.style.position = 'relative';
+            const b = document.createElement('span');
+            b.className = 'distance-badge';
+            b.innerHTML = `<i class="fas fa-location-dot"></i> ${p._distanceKm.toFixed(1)} km`;
+            wrapper.appendChild(b);
+        });
     }
 
-    // ============================================================
-    // HEADER MÓVIL - INYECCIÓN EN EL DOM
-    // ============================================================
+    // ── Toast ──────────────────────────────────────────────────
+    function showToast(msg, type = 'info') {
+        document.getElementById('nearMeToast')?.remove();
+        const colors = { success:'#28a745', error:'#D95A41', info:'#2A5C6E' };
+        const t = document.createElement('div');
+        t.id = 'nearMeToast';
+        t.style.cssText = `
+            position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+            background:${colors[type]};color:white;padding:10px 20px;border-radius:24px;
+            font-size:.85rem;font-weight:500;z-index:2000;box-shadow:0 4px 16px rgba(0,0,0,.25);
+            opacity:0;transition:opacity .3s,transform .3s;max-width:90vw;text-align:center;
+        `;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        requestAnimationFrame(() => {
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(0)';
+        });
+        setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(-50%) translateY(20px)';
+            setTimeout(() => t.remove(), 350);
+        }, 3500);
+    }
 
+    // ── Botón "Buscar cerca de mí" ────────────────────────────
+    function buildNearMeButton(referenceNode) {
+        if (document.getElementById('nearMeBtn')) return;
+        const grid = document.querySelector('#productsGrid, .products-grid');
+        if (!grid) return;
+
+        const btn = document.createElement('button');
+        btn.id = 'nearMeBtn';
+        btn.className = 'btn-near-me';
+        btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+
+        if (referenceNode?.parentNode) {
+            referenceNode.parentNode.insertBefore(btn, referenceNode.nextSibling);
+        } else {
+            grid.parentNode?.insertBefore(btn, grid);
+        }
+
+        let active = false;
+
+        window.mobileNearMe = {
+            reset() {
+                active = false;
+                btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                btn.classList.remove('is-active');
+                btn.disabled = false;
+                if (typeof loadProducts === 'function') loadProducts();
+            }
+        };
+
+        btn.addEventListener('click', async () => {
+            if (active) { window.mobileNearMe.reset(); return; }
+            if (!navigator.geolocation) {
+                showToast('Tu dispositivo no soporta geolocalización.', 'error');
+                return;
+            }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+
+            navigator.geolocation.getCurrentPosition(
+                async ({ coords: { latitude, longitude } }) => {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Buscando productos...';
+                    try {
+                        const products = await fetchProductsNearMe(latitude, longitude, NEAR_ME_RADIUS_KM);
+                        active = true;
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-location-dot"></i> Cerca (${products.length}) ✕`;
+                        btn.classList.add('is-active');
+                        renderNearbyProducts(products);
+                        showToast(
+                            products.length > 0
+                                ? `${products.length} producto${products.length!==1?'s':''} a menos de ${NEAR_ME_RADIUS_KM} km`
+                                : 'Sin resultados en tu zona',
+                            products.length > 0 ? 'success' : 'info'
+                        );
+                    } catch (err) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                        showToast('Error al buscar productos cercanos.', 'error');
+                    }
+                },
+                (err) => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                    const msgs = {
+                        1:'Permiso de ubicación denegado.',
+                        2:'No se pudo determinar tu ubicación.',
+                        3:'Se agotó el tiempo de espera.'
+                    };
+                    showToast(msgs[err.code] || 'Error al obtener ubicación.', 'error');
+                },
+                { timeout: 10000, maximumAge: 120000, enableHighAccuracy: false }
+            );
+        });
+    }
+
+    // ── Header móvil ───────────────────────────────────────────
     function buildMobileHeader() {
-        if (document.querySelector('.mobile-header')) return; // ya existe
-
-        const user = getUser();
-        const cartCount = getCartCount();
-        const currentPage = getCurrentPage();
-
-        const header = document.createElement('header');
-        header.className = 'mobile-header';
-        header.innerHTML = `
+        if (document.querySelector('.mobile-header')) return;
+        const count = getCartCount();
+        const h = document.createElement('header');
+        h.className = 'mobile-header';
+        h.innerHTML = `
             <a href="index.html" class="mobile-header__logo">
                 <img src="assets/images/logo.png" alt="ReShop" onerror="this.style.display='none'">
                 <span class="mobile-header__title">ReShop PY</span>
@@ -86,61 +252,37 @@
             <div class="mobile-header__actions">
                 <a href="cart.html" class="mobile-header__cart-btn" aria-label="Carrito">
                     <i class="fas fa-shopping-bag"></i>
-                    ${cartCount > 0 ? `<span class="cart-badge" id="headerCartBadge">${cartCount}</span>` : `<span class="cart-badge" id="headerCartBadge" style="display:none">${cartCount}</span>`}
+                    <span class="cart-badge" id="headerCartBadge" style="${count>0?'':'display:none'}">${count}</span>
                 </a>
                 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú" aria-expanded="false">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span></span><span></span><span></span>
                 </button>
-            </div>
-        `;
-
-        // Insertar al principio del body
-        document.body.insertBefore(header, document.body.firstChild);
+            </div>`;
+        document.body.insertBefore(h, document.body.firstChild);
     }
 
-    // ============================================================
-    // DRAWER DEL MENÚ
-    // ============================================================
-
+    // ── Drawer menú (con Mensajes y Ayuda) ─────────────────────
     function buildMenuDrawer() {
         if (document.querySelector('.mobile-menu-overlay')) return;
-
         const user = getUser();
-        const currentPage = getCurrentPage();
+        const page = getCurrentPage();
 
-        // Construir links según rol
         let roleLinks = '';
-        if (user) {
-            if (user.role === 'seller' || user.role === 'admin') {
-                roleLinks += `
-                    <a href="dashboard-vendedor.html" class="mobile-menu-drawer__link ${currentPage === 'dashboard-vendedor.html' ? 'active' : ''}">
-                        <i class="fas fa-chart-line"></i> Mi Panel
-                    </a>`;
-            }
-            if (user.role === 'admin') {
-                roleLinks += `
-                    <a href="admin-dashboard.html" class="mobile-menu-drawer__link ${currentPage === 'admin-dashboard.html' ? 'active' : ''}">
-                        <i class="fas fa-crown"></i> Administración
-                    </a>`;
-            }
+        if (user?.role === 'seller' || user?.role === 'admin') {
+            roleLinks += `<a href="dashboard-vendedor.html" class="mobile-menu-drawer__link ${page==='dashboard-vendedor.html'?'active':''}"><i class="fas fa-chart-line"></i> Mi Panel</a>`;
+        }
+        if (user?.role === 'admin') {
+            roleLinks += `<a href="admin-dashboard.html" class="mobile-menu-drawer__link ${page==='admin-dashboard.html'?'active':''}"><i class="fas fa-crown"></i> Administración</a>`;
         }
 
         const authSection = user ? `
             <div class="mobile-menu-drawer__divider"></div>
             <button class="mobile-menu-drawer__logout" id="drawerLogoutBtn">
                 <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </button>
-        ` : `
+            </button>` : `
             <div class="mobile-menu-drawer__divider"></div>
-            <a href="login.html" class="mobile-menu-drawer__link ${currentPage === 'login.html' ? 'active' : ''}">
-                <i class="fas fa-key"></i> Iniciar Sesión
-            </a>
-            <a href="register.html" class="mobile-menu-drawer__link ${currentPage === 'register.html' ? 'active' : ''}">
-                <i class="fas fa-user-plus"></i> Registrarse
-            </a>
-        `;
+            <a href="login.html" class="mobile-menu-drawer__link ${page==='login.html'?'active':''}"><i class="fas fa-key"></i> Iniciar Sesión</a>
+            <a href="register.html" class="mobile-menu-drawer__link ${page==='register.html'?'active':''}"><i class="fas fa-user-plus"></i> Registrarse</a>`;
 
         const overlay = document.createElement('div');
         overlay.className = 'mobile-menu-overlay';
@@ -149,161 +291,69 @@
         const drawer = document.createElement('nav');
         drawer.className = 'mobile-menu-drawer';
         drawer.id = 'menuDrawer';
-        drawer.setAttribute('aria-label', 'Menú de navegación');
         drawer.innerHTML = `
             <div class="mobile-menu-drawer__header">
                 <div class="mobile-menu-drawer__avatar">
-                    <i class="fas fa-${user ? 'user' : 'store'}"></i>
+                    <i class="fas fa-${user?'user':'store'}"></i>
                 </div>
                 <div>
-                    <div class="mobile-menu-drawer__user-name">
-                        ${user ? (user.full_name || user.email) : 'ReShop Paraguay'}
-                    </div>
-                    <div class="mobile-menu-drawer__user-role">
-                        ${user ? (user.role === 'seller' ? '🏪 Vendedor' : user.role === 'admin' ? '⚙️ Admin' : '🛍️ Comprador') : 'Shopping Virtual'}
-                    </div>
+                    <div class="mobile-menu-drawer__user-name">${user?(user.full_name||user.email):'ReShop Paraguay'}</div>
+                    <div class="mobile-menu-drawer__user-role">${user?(user.role==='seller'?'🏪 Vendedor':user.role==='admin'?'⚙️ Admin':'🛍️ Comprador'):'Shopping Virtual'}</div>
                 </div>
             </div>
             <div class="mobile-menu-drawer__links">
-                <a href="index.html" class="mobile-menu-drawer__link ${(currentPage === 'index.html' || currentPage === '') ? 'active' : ''}">
-                    <i class="fas fa-home"></i> Inicio
-                </a>
-                <a href="cart.html" class="mobile-menu-drawer__link ${currentPage === 'cart.html' ? 'active' : ''}">
-                    <i class="fas fa-shopping-bag"></i> Mi Carrito
-                </a>
-                <a href="my-orders.html" class="mobile-menu-drawer__link ${currentPage === 'my-orders.html' ? 'active' : ''}">
-                    <i class="fas fa-history"></i> Mis Pedidos
-                </a>
-				<a href="messages.html" class="mobile-menu-drawer__link ${currentPage === 'messages.html' ? 'active' : ''}">
-    <i class="fas fa-envelope"></i> Mensajes
-</a>
-<a href="help.html" class="mobile-menu-drawer__link ${currentPage === 'help.html' ? 'active' : ''}">
-    <i class="fas fa-question-circle"></i> Ayuda
-</a>
+                <a href="index.html" class="mobile-menu-drawer__link ${(page==='index.html'||page==='')?'active':''}"><i class="fas fa-home"></i> Inicio</a>
+                <a href="cart.html" class="mobile-menu-drawer__link ${page==='cart.html'?'active':''}"><i class="fas fa-shopping-bag"></i> Mi Carrito</a>
+                <a href="my-orders.html" class="mobile-menu-drawer__link ${page==='my-orders.html'?'active':''}"><i class="fas fa-history"></i> Mis Pedidos</a>
+                <a href="messages.html" class="mobile-menu-drawer__link ${page==='messages.html'?'active':''}"><i class="fas fa-comment-dots"></i> Mensajes</a>
+                <a href="help.html" class="mobile-menu-drawer__link ${page==='help.html'?'active':''}"><i class="fas fa-circle-question"></i> Ayuda</a>
                 ${roleLinks}
                 ${authSection}
-            </div>
-        `;
+            </div>`;
 
         document.body.appendChild(overlay);
         document.body.appendChild(drawer);
 
-        // Eventos del drawer
-        const hamburgerBtn = document.getElementById('hamburgerBtn');
-        const menuOverlay = document.getElementById('menuOverlay');
-        const menuDrawer = document.getElementById('menuDrawer');
-
-        function openMenu() {
-            menuOverlay.classList.add('is-open');
-            menuDrawer.classList.add('is-open');
-            hamburgerBtn?.classList.add('is-open');
-            hamburgerBtn?.setAttribute('aria-expanded', 'true');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeMenu() {
-            menuOverlay.classList.remove('is-open');
-            menuDrawer.classList.remove('is-open');
-            hamburgerBtn?.classList.remove('is-open');
-            hamburgerBtn?.setAttribute('aria-expanded', 'false');
-            document.body.style.overflow = '';
-        }
-
-        hamburgerBtn?.addEventListener('click', () => {
-            const isOpen = menuDrawer.classList.contains('is-open');
-            isOpen ? closeMenu() : openMenu();
-        });
-
-        menuOverlay.addEventListener('click', closeMenu);
-
-        // Cerrar sesión desde el drawer
-        const logoutBtn = document.getElementById('drawerLogoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'index.html';
-            });
-        }
-
-        // Cerrar con tecla Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeMenu();
-        });
+        const hbtn = document.getElementById('hamburgerBtn');
+        const open  = () => { overlay.classList.add('is-open'); drawer.classList.add('is-open'); hbtn?.classList.add('is-open'); hbtn?.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+        const close = () => { overlay.classList.remove('is-open'); drawer.classList.remove('is-open'); hbtn?.classList.remove('is-open'); hbtn?.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+        hbtn?.addEventListener('click', () => drawer.classList.contains('is-open') ? close() : open());
+        overlay.addEventListener('click', close);
+        document.getElementById('drawerLogoutBtn')?.addEventListener('click', () => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href='index.html'; });
+        document.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
     }
 
-    // ============================================================
-    // BOTTOM NAVIGATION BAR
-    // ============================================================
-
+    // ── Bottom nav ─────────────────────────────────────────────
     function buildBottomNav() {
         if (document.querySelector('.bottom-nav')) return;
-
-        const currentPage = getCurrentPage();
-        const cartCount = getCartCount();
-        const user = getUser();
-
+        const page  = getCurrentPage();
+        const count = getCartCount();
+        const user  = getUser();
         const nav = document.createElement('nav');
         nav.className = 'bottom-nav';
-        nav.setAttribute('aria-label', 'Navegación principal');
-
         const items = [
-            {
-                href: 'index.html',
-                icon: 'fas fa-home',
-                label: 'Inicio',
-                pages: ['index.html', '']
-            },
-            {
-                href: 'my-orders.html',
-                icon: 'fas fa-receipt',
-                label: 'Pedidos',
-                pages: ['my-orders.html', 'order-detail.html']
-            },
-            {
-                href: 'cart.html',
-                icon: 'fas fa-shopping-bag',
-                label: 'Carrito',
-                pages: ['cart.html', 'checkout.html'],
-                badge: cartCount
-            },
-            {
-                href: user ? (user.role === 'seller' || user.role === 'admin' ? 'dashboard-vendedor.html' : 'my-orders.html') : 'login.html',
-                icon: user ? 'fas fa-user-circle' : 'fas fa-sign-in-alt',
-                label: user ? 'Mi Perfil' : 'Entrar',
-                pages: ['login.html', 'register.html', 'profile.html', 'dashboard-vendedor.html', 'admin-dashboard.html']
-            }
+            { href:'index.html',    icon:'fas fa-home',         label:'Inicio',   pages:['index.html',''] },
+            { href:'my-orders.html',icon:'fas fa-receipt',      label:'Pedidos',  pages:['my-orders.html','order-detail.html'] },
+            { href:'cart.html',     icon:'fas fa-shopping-bag', label:'Carrito',  pages:['cart.html','checkout.html'], badge:count },
+            { href: user?(user.role==='seller'||user.role==='admin'?'dashboard-vendedor.html':'my-orders.html'):'login.html',
+              icon: user?'fas fa-user-circle':'fas fa-sign-in-alt', label: user?'Mi Perfil':'Entrar',
+              pages:['login.html','register.html','profile.html','dashboard-vendedor.html','admin-dashboard.html'] }
         ];
-
-        nav.innerHTML = items.map(item => {
-            const isActive = item.pages.includes(currentPage);
-            const badgeHtml = item.badge > 0
-                ? `<span class="bottom-nav__badge" id="bottomNavCartBadge">${item.badge > 99 ? '99+' : item.badge}</span>`
-                : item.href === 'cart.html' ? `<span class="bottom-nav__badge" id="bottomNavCartBadge" style="display:none">0</span>` : '';
-
-            return `
-                <a href="${item.href}" class="bottom-nav__item ${isActive ? 'active' : ''}" aria-label="${item.label}">
-                    <i class="${item.icon}"></i>
-                    ${badgeHtml}
-                    <span>${item.label}</span>
-                </a>
-            `;
+        nav.innerHTML = items.map(it => {
+            const active = it.pages.includes(page);
+            const badge  = it.badge>0
+                ? `<span class="bottom-nav__badge" id="bottomNavCartBadge">${it.badge>99?'99+':it.badge}</span>`
+                : it.href==='cart.html'
+                    ? `<span class="bottom-nav__badge" id="bottomNavCartBadge" style="display:none">0</span>` : '';
+            return `<a href="${it.href}" class="bottom-nav__item ${active?'active':''}" aria-label="${it.label}"><i class="${it.icon}"></i>${badge}<span>${it.label}</span></a>`;
         }).join('');
-
         document.body.appendChild(nav);
     }
 
-    // ============================================================
-    // PANEL DE FILTROS DESLIZABLE (para index.html)
-    // ============================================================
-
+    // ── Filtros drawer ─────────────────────────────────────────
     function buildFiltersDrawer() {
-        // Solo en páginas con sidebar de filtros
         const sidebar = document.querySelector('.sidebar');
         if (!sidebar || document.querySelector('.filters-drawer')) return;
-
-        // Clonar el contenido del sidebar
-        const sidebarContent = sidebar.innerHTML;
 
         const overlay = document.createElement('div');
         overlay.className = 'filters-overlay';
@@ -314,354 +364,156 @@
         drawer.id = 'filtersDrawer';
         drawer.innerHTML = `
             <div class="filters-drawer__header">
-                <div class="filters-drawer__title">
-                    <i class="fas fa-sliders-h"></i> Filtros
-                </div>
-                <button class="filters-drawer__close" id="filtersCloseBtn" aria-label="Cerrar filtros">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="filters-drawer__title"><i class="fas fa-sliders-h"></i> Filtros</div>
+                <button class="filters-drawer__close" id="filtersCloseBtn"><i class="fas fa-times"></i></button>
             </div>
-            <div class="filters-drawer__body" id="filtersDrawerBody">
-                <!-- Contenido generado dinámicamente -->
+            <div class="filters-drawer__body">
+                <div class="filters-drawer__group"><label class="filters-drawer__label">Categoría</label>
+                    <select class="filters-drawer__select" id="drawerFilterCategory">
+                        <option value="">Todas</option>
+                        <option value="pantalones">Pantalones</option>
+                        <option value="camisas">Camisas</option>
+                        <option value="vestidos">Vestidos</option>
+                        <option value="chaquetas">Chaquetas</option>
+                        <option value="calzado">Calzado</option>
+                        <option value="accesorios">Accesorios</option>
+                    </select>
+                </div>
+                <div class="filters-drawer__group"><label class="filters-drawer__label">Talla</label>
+                    <select class="filters-drawer__select" id="drawerFilterSize">
+                        <option value="">Todas</option>
+                        <option value="XS">XS</option><option value="S">S</option>
+                        <option value="M">M</option><option value="L">L</option>
+                        <option value="XL">XL</option><option value="XXL">XXL</option>
+                    </select>
+                </div>
+                <div class="filters-drawer__group"><label class="filters-drawer__label">Estado</label>
+                    <select class="filters-drawer__select" id="drawerFilterCondition">
+                        <option value="">Cualquier estado</option>
+                        <option value="new_with_tags">Nuevo c/ etiqueta</option>
+                        <option value="new_without_tags">Nuevo s/ etiqueta</option>
+                        <option value="very_good">Muy bueno</option>
+                        <option value="good">Bueno</option>
+                        <option value="acceptable">Aceptable</option>
+                    </select>
+                </div>
+                <div class="filters-drawer__group"><label class="filters-drawer__label">Precio (Gs)</label>
+                    <div class="filters-drawer__price-row">
+                        <input type="number" class="filters-drawer__input" id="drawerFilterMinPrice" placeholder="Mínimo">
+                        <input type="number" class="filters-drawer__input" id="drawerFilterMaxPrice" placeholder="Máximo">
+                    </div>
+                </div>
             </div>
             <div class="filters-drawer__footer">
-                <button class="btn-filters-clear" id="filtersClearBtn">
-                    <i class="fas fa-undo"></i> Limpiar
-                </button>
-                <button class="btn-filters-apply" id="filtersApplyBtn">
-                    <i class="fas fa-check"></i> Aplicar
-                </button>
-            </div>
-        `;
-
-        // Construir filtros en el drawer
-        const body = drawer.querySelector('#filtersDrawerBody');
-        body.innerHTML = `
-            <div class="filters-drawer__group">
-                <label class="filters-drawer__label">
-                    <i class="fas fa-tshirt"></i> Categoría
-                </label>
-                <select class="filters-drawer__select" id="drawerFilterCategory">
-                    <option value="">Todas las categorías</option>
-                    <option value="pantalones">Pantalones</option>
-                    <option value="camisas">Camisas</option>
-                    <option value="vestidos">Vestidos</option>
-                    <option value="chaquetas">Chaquetas</option>
-                    <option value="calzado">Calzado</option>
-                    <option value="accesorios">Accesorios</option>
-                </select>
-            </div>
-            <div class="filters-drawer__group">
-                <label class="filters-drawer__label">
-                    <i class="fas fa-ruler"></i> Talla
-                </label>
-                <select class="filters-drawer__select" id="drawerFilterSize">
-                    <option value="">Todas las tallas</option>
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                </select>
-            </div>
-            <div class="filters-drawer__group">
-                <label class="filters-drawer__label">
-                    <i class="fas fa-star"></i> Estado
-                </label>
-                <select class="filters-drawer__select" id="drawerFilterCondition">
-                    <option value="">Cualquier estado</option>
-                    <option value="new_with_tags">Nuevo con etiqueta</option>
-                    <option value="new_without_tags">Nuevo sin etiqueta</option>
-                    <option value="very_good">Muy bueno</option>
-                    <option value="good">Bueno</option>
-                    <option value="acceptable">Aceptable</option>
-                </select>
-            </div>
-            <div class="filters-drawer__group">
-                <label class="filters-drawer__label">
-                    <i class="fas fa-dollar-sign"></i> Rango de Precio (Gs)
-                </label>
-                <div class="filters-drawer__price-row">
-                    <input type="number" class="filters-drawer__input" id="drawerFilterMinPrice" placeholder="Mínimo">
-                    <input type="number" class="filters-drawer__input" id="drawerFilterMaxPrice" placeholder="Máximo">
-                </div>
-            </div>
-            <div class="filters-drawer__group">
-                <label class="filters-drawer__label">
-                    <i class="fas fa-sort-amount-down"></i> Ordenar por
-                </label>
-                <select class="filters-drawer__select" id="drawerFilterSort">
-                    <option value="newest">Más recientes</option>
-                    <option value="price_asc">Precio: menor a mayor</option>
-                    <option value="price_desc">Precio: mayor a menor</option>
-                    <option value="most_viewed">Más vistos</option>
-                </select>
-            </div>
-        `;
+                <button class="btn-filters-clear" id="filtersClearBtn"><i class="fas fa-undo"></i> Limpiar</button>
+                <button class="btn-filters-apply" id="filtersApplyBtn"><i class="fas fa-check"></i> Aplicar</button>
+            </div>`;
 
         document.body.appendChild(overlay);
         document.body.appendChild(drawer);
 
-        // Botón flotante para abrir filtros
         const floatingBtn = document.createElement('button');
         floatingBtn.className = 'floating-filter-btn';
         floatingBtn.id = 'floatingFilterBtn';
-        floatingBtn.innerHTML = `
-            <i class="fas fa-sliders-h"></i>
-            Filtrar y ordenar
-            <span class="filters-active-dot"></span>
-        `;
+        floatingBtn.innerHTML = `<i class="fas fa-sliders-h"></i> Filtrar y ordenar <span class="filters-active-dot"></span>`;
 
-        // Insertar el botón antes de la grilla de productos
-        const productsGrid = document.querySelector('#productsGrid, .products-grid');
-        if (productsGrid) {
-            productsGrid.parentNode.insertBefore(floatingBtn, productsGrid);
-        }
+        const grid = document.querySelector('#productsGrid, .products-grid');
+        if (grid) grid.parentNode.insertBefore(floatingBtn, grid);
 
-        // Funciones abrir/cerrar filtros
-        function openFilters() {
-            overlay.classList.add('is-open');
-            drawer.classList.add('is-open');
-            document.body.style.overflow = 'hidden';
-        }
+        // Botón near-me después del de filtros
+        buildNearMeButton(floatingBtn);
 
-        function closeFilters() {
-            overlay.classList.remove('is-open');
-            drawer.classList.remove('is-open');
-            document.body.style.overflow = '';
-        }
+        const open  = () => { overlay.classList.add('is-open'); drawer.classList.add('is-open'); document.body.style.overflow='hidden'; };
+        const close = () => { overlay.classList.remove('is-open'); drawer.classList.remove('is-open'); document.body.style.overflow=''; };
 
-        floatingBtn.addEventListener('click', openFilters);
-        overlay.addEventListener('click', closeFilters);
-        document.getElementById('filtersCloseBtn').addEventListener('click', closeFilters);
+        floatingBtn.addEventListener('click', open);
+        overlay.addEventListener('click', close);
+        document.getElementById('filtersCloseBtn').addEventListener('click', close);
 
-        // Sincronizar con filtros del sidebar original
         document.getElementById('filtersApplyBtn').addEventListener('click', () => {
-            // Sincronizar valores al sidebar original si existe
-            const catSidebar = document.getElementById('filterCategory');
-            const sizeSidebar = document.getElementById('filterSize');
-            const condSidebar = document.getElementById('filterCondition');
-            const minSidebar = document.getElementById('filterMinPrice');
-            const maxSidebar = document.getElementById('filterMaxPrice');
-
-            if (catSidebar) catSidebar.value = document.getElementById('drawerFilterCategory').value;
-            if (sizeSidebar) sizeSidebar.value = document.getElementById('drawerFilterSize').value;
-            if (condSidebar) condSidebar.value = document.getElementById('drawerFilterCondition').value;
-            if (minSidebar) minSidebar.value = document.getElementById('drawerFilterMinPrice').value;
-            if (maxSidebar) maxSidebar.value = document.getElementById('drawerFilterMaxPrice').value;
-
-            // Disparar el botón de aplicar filtros del sidebar
-            const applyBtn = document.getElementById('applyFilters');
-            if (applyBtn) applyBtn.click();
-            else if (typeof loadProducts === 'function') {
-                // Si los filtros son gestionados por JS directamente
-                if (typeof currentFilters !== 'undefined') {
-                    currentFilters.category = document.getElementById('drawerFilterCategory').value;
-                    currentFilters.size = document.getElementById('drawerFilterSize').value;
-                    currentFilters.condition = document.getElementById('drawerFilterCondition').value;
-                    currentFilters.min_price = document.getElementById('drawerFilterMinPrice').value;
-                    currentFilters.max_price = document.getElementById('drawerFilterMaxPrice').value;
-                    currentFilters.page = 1;
-                }
-                loadProducts();
-            }
-
-            // Marcar filtros activos en botón
-            const hasFilters = [
-                document.getElementById('drawerFilterCategory').value,
-                document.getElementById('drawerFilterSize').value,
-                document.getElementById('drawerFilterCondition').value,
-                document.getElementById('drawerFilterMinPrice').value,
-                document.getElementById('drawerFilterMaxPrice').value
-            ].some(v => v !== '');
-
-            floatingBtn.classList.toggle('has-filters', hasFilters);
-            closeFilters();
+            [['filterCategory','drawerFilterCategory'],['filterSize','drawerFilterSize'],
+             ['filterCondition','drawerFilterCondition'],['filterMinPrice','drawerFilterMinPrice'],
+             ['filterMaxPrice','drawerFilterMaxPrice']].forEach(([sid, did]) => {
+                const s = document.getElementById(sid), d = document.getElementById(did);
+                if (s && d) s.value = d.value;
+            });
+            document.getElementById('applyFilters')?.click();
+            const hasF = ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+                          'drawerFilterMinPrice','drawerFilterMaxPrice']
+                .some(id => (document.getElementById(id)?.value||'')!=='');
+            floatingBtn.classList.toggle('has-filters', hasF);
+            close();
         });
 
         document.getElementById('filtersClearBtn').addEventListener('click', () => {
-            document.getElementById('drawerFilterCategory').value = '';
-            document.getElementById('drawerFilterSize').value = '';
-            document.getElementById('drawerFilterCondition').value = '';
-            document.getElementById('drawerFilterMinPrice').value = '';
-            document.getElementById('drawerFilterMaxPrice').value = '';
+            ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+             'drawerFilterMinPrice','drawerFilterMaxPrice'].forEach(id => {
+                const el = document.getElementById(id); if(el) el.value='';
+            });
             floatingBtn.classList.remove('has-filters');
         });
 
-        // Cerrar con Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeFilters();
-        });
+        document.addEventListener('keydown', e => { if(e.key==='Escape' && drawer.classList.contains('is-open')) close(); });
     }
 
-    // ============================================================
-    // BARRA DE BÚSQUEDA MÓVIL (para index.html)
-    // ============================================================
-
+    // ── Búsqueda móvil ─────────────────────────────────────────
     function buildMobileSearch() {
-        const productsGrid = document.querySelector('#productsGrid, .products-grid');
-        if (!productsGrid || document.querySelector('.mobile-search')) return;
-
-        const searchBar = document.createElement('div');
-        searchBar.className = 'mobile-search';
-        searchBar.innerHTML = `
-            <input type="search" id="mobileSearchInput" placeholder="🔍 Buscar ropa, marcas..." autocomplete="off">
-            <button id="mobileSearchBtn"><i class="fas fa-search"></i></button>
-        `;
-
-        productsGrid.parentNode.insertBefore(searchBar, productsGrid);
-
-        const mobileInput = document.getElementById('mobileSearchInput');
-        const mobileBtn = document.getElementById('mobileSearchBtn');
-
-        function doSearch() {
-            const q = mobileInput.value.trim();
-            // Sincronizar con el input del header/sidebar
-            const sidebarInput = document.getElementById('searchInput');
-            if (sidebarInput) {
-                sidebarInput.value = q;
-                const searchBtn = document.getElementById('searchBtn');
-                if (searchBtn) searchBtn.click();
-            } else if (typeof loadProducts === 'function') {
-                if (typeof currentFilters !== 'undefined') {
-                    currentFilters.search = q;
-                    currentFilters.page = 1;
-                }
-                loadProducts();
-            }
-        }
-
-        mobileBtn.addEventListener('click', doSearch);
-        mobileInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') doSearch();
-        });
+        const grid = document.querySelector('#productsGrid, .products-grid');
+        if (!grid || document.querySelector('.mobile-search')) return;
+        const bar = document.createElement('div');
+        bar.className = 'mobile-search';
+        bar.innerHTML = `<input type="search" id="mobileSearchInput" placeholder="🔍 Buscar ropa, marcas..." autocomplete="off"><button id="mobileSearchBtn"><i class="fas fa-search"></i></button>`;
+        grid.parentNode.insertBefore(bar, grid);
+        const run = () => {
+            const q = document.getElementById('mobileSearchInput').value.trim();
+            const si = document.getElementById('searchInput');
+            if (si) { si.value=q; document.getElementById('searchBtn')?.click(); }
+            else { if(typeof currentFilters!=='undefined'){currentFilters.search=q;currentFilters.page=1;} if(typeof loadProducts==='function') loadProducts(); }
+        };
+        document.getElementById('mobileSearchBtn').addEventListener('click', run);
+        document.getElementById('mobileSearchInput').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
     }
 
-    // ============================================================
-    // ACTUALIZAR BADGES DEL CARRITO
-    // ============================================================
-
+    // ── Cart badges ────────────────────────────────────────────
     function updateCartBadges() {
-        const count = getCartCount();
-
-        // Badge en header
-        const headerBadge = document.getElementById('headerCartBadge');
-        if (headerBadge) {
-            headerBadge.textContent = count > 99 ? '99+' : count;
-            headerBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
-
-        // Badge en bottom nav
-        const navBadge = document.getElementById('bottomNavCartBadge');
-        if (navBadge) {
-            navBadge.textContent = count > 99 ? '99+' : count;
-            navBadge.style.display = count > 0 ? 'flex' : 'none';
-        }
+        const n = getCartCount();
+        [document.getElementById('headerCartBadge'), document.getElementById('bottomNavCartBadge')]
+            .forEach(b => { if(!b) return; b.textContent=n>99?'99+':n; b.style.display=n>0?'flex':'none'; });
     }
 
-    // ============================================================
-    // SWIPE TO CLOSE DRAWER (soporte táctil)
-    // ============================================================
-
-    function addSwipeToClose(drawerEl, direction = 'right') {
-        if (!drawerEl) return;
-        let startX = 0;
-        let startY = 0;
-
-        drawerEl.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, { passive: true });
-
-        drawerEl.addEventListener('touchend', (e) => {
-            const dx = e.changedTouches[0].clientX - startX;
-            const dy = Math.abs(e.changedTouches[0].clientY - startY);
-
-            // Solo swipe horizontal con poca deriva vertical
-            if (dy < 80 && Math.abs(dx) > 60) {
-                if (direction === 'right' && dx > 60) {
-                    // Swipe derecha → cerrar drawer de izquierda
-                    drawerEl.classList.remove('is-open');
-                    document.getElementById('filtersOverlay')?.classList.remove('is-open');
-                    document.body.style.overflow = '';
-                } else if (direction === 'left' && dx < -60) {
-                    // Swipe izquierda → cerrar drawer de derecha
-                    drawerEl.classList.remove('is-open');
-                    document.getElementById('menuOverlay')?.classList.remove('is-open');
-                    document.getElementById('hamburgerBtn')?.classList.remove('is-open');
-                    document.body.style.overflow = '';
-                }
+    // ── Swipe to close ─────────────────────────────────────────
+    function addSwipeToClose(el, overlayId, dir) {
+        if (!el) return;
+        let sx=0, sy=0;
+        el.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; }, {passive:true});
+        el.addEventListener('touchend', e => {
+            const dx=e.changedTouches[0].clientX-sx, dy=Math.abs(e.changedTouches[0].clientY-sy);
+            if (dy>80||Math.abs(dx)<60) return;
+            if ((dir==='left'&&dx<-60)||(dir==='right'&&dx>60)) {
+                el.classList.remove('is-open');
+                document.getElementById(overlayId)?.classList.remove('is-open');
+                document.getElementById('hamburgerBtn')?.classList.remove('is-open');
+                document.body.style.overflow='';
             }
-        }, { passive: true });
+        }, {passive:true});
     }
 
-    // ============================================================
-    // SCROLL TO TOP BUTTON
-    // ============================================================
-
+    // ── Scroll to top ──────────────────────────────────────────
     function buildScrollToTop() {
         if (document.getElementById('scrollTopBtn')) return;
-
         const btn = document.createElement('button');
-        btn.id = 'scrollTopBtn';
-        btn.setAttribute('aria-label', 'Volver arriba');
-        btn.innerHTML = '<i class="fas fa-chevron-up"></i>';
-        btn.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            right: 16px;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            z-index: 700;
-            transition: all 0.3s;
-        `;
-
+        btn.id='scrollTopBtn'; btn.setAttribute('aria-label','Volver arriba');
+        btn.innerHTML='<i class="fas fa-chevron-up"></i>';
+        btn.style.cssText='position:fixed;bottom:80px;right:16px;width:42px;height:42px;border-radius:50%;background:var(--primary,#2A5C6E);color:white;border:none;box-shadow:0 4px 12px rgba(0,0,0,.25);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:.9rem;z-index:700;transition:all .3s;';
         document.body.appendChild(btn);
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                btn.style.display = 'flex';
-            } else {
-                btn.style.display = 'none';
-            }
-        });
-
-        btn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        window.addEventListener('scroll', () => { btn.style.display=window.scrollY>300?'flex':'none'; });
+        btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
     }
 
-    // ============================================================
-    // OCULTAR HEADER ORIGINAL EN MÓVIL
-    // ============================================================
-
-    function hideOriginalHeader() {
-        // El CSS ya lo oculta con display:none, pero nos aseguramos
-        const originalHeader = document.querySelector('.header');
-        if (originalHeader && isMobile()) {
-            originalHeader.style.display = 'none';
-        }
-    }
-
-    // ============================================================
-    // INICIALIZACIÓN
-    // ============================================================
-
+    // ── Init ───────────────────────────────────────────────────
     function init() {
-        if (!isMobile()) return; // Solo en móvil
-
-        hideOriginalHeader();
+        if (!isMobile()) return;
+        document.querySelector('.header')?.style && (document.querySelector('.header').style.display='none');
         buildMobileHeader();
         buildMenuDrawer();
         buildBottomNav();
@@ -669,53 +521,19 @@
         buildMobileSearch();
         updateCartBadges();
         buildScrollToTop();
+        addSwipeToClose(document.getElementById('menuDrawer'),    'menuOverlay',    'left');
+        addSwipeToClose(document.getElementById('filtersDrawer'), 'filtersOverlay', 'right');
 
-        // Swipe gestures
-        const menuDrawer = document.getElementById('menuDrawer');
-        const filtersDrawer = document.getElementById('filtersDrawer');
-        addSwipeToClose(menuDrawer, 'left');
-        addSwipeToClose(filtersDrawer, 'right');
-
-        // Escuchar cambios en el carrito
-        const originalSetItem = localStorage.setItem.bind(localStorage);
-        localStorage.setItem = function (key, value) {
-            originalSetItem(key, value);
-            if (key === 'reshop_cart') {
-                updateCartBadges();
-            }
-        };
-
-        // Marcar página activa en la bottom nav
-        const currentPage = getCurrentPage();
-        document.querySelectorAll('.bottom-nav__item').forEach(item => {
-            const href = item.getAttribute('href') || '';
-            if (href === currentPage || (currentPage === '' && href === 'index.html')) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
+        const _set = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = (k,v) => { _set(k,v); if(k==='reshop_cart') updateCartBadges(); };
     }
 
-    // Ejecutar cuando el DOM esté listo
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+    document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', init)
+        : init();
 
-    // También ejecutar en cambios de tamaño de ventana
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            if (isMobile()) {
-                init();
-            }
-        }, 200);
-    });
-
-    // Exponer función de actualización de carrito globalmente
+    let _rt;
+    window.addEventListener('resize', () => { clearTimeout(_rt); _rt=setTimeout(()=>{ if(isMobile()) init(); },200); });
     window.updateMobileCartBadge = updateCartBadges;
 
 })();
