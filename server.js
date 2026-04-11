@@ -203,6 +203,7 @@ app.get('/', (req, res) => {
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
             seller: 'GET /api/seller/orders'
+			messages: 'GET /api/conversations, GET/POST /api/messages, GET /api/messages/unread/count'
         }
     });
 });
@@ -969,6 +970,210 @@ app.use((err, req, res, next) => {
         success: false, 
         error: 'Error interno del servidor' 
     });
+});
+
+// ============================================================
+// ENDPOINTS DE MENSAJERÍA
+// ============================================================
+
+// Obtener o crear conversación
+app.post('/api/conversations', authenticateToken, async (req, res) => {
+    try {
+        const { product_id, seller_id } = req.body;
+        const buyer_id = req.user.id;
+
+        // Verificar que el producto existe
+        const { data: product, error: productError } = await supabase
+            .from('products')
+            .select('id, title')
+            .eq('id', product_id)
+            .single();
+
+        if (productError || !product) {
+            return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+        }
+
+        // Buscar conversación existente
+        let { data: conversation, error: findError } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('product_id', product_id)
+            .eq('buyer_id', buyer_id)
+            .eq('seller_id', seller_id)
+            .single();
+
+        // Si no existe, crearla
+        if (!conversation) {
+            const { data: newConversation, error: createError } = await supabase
+                .from('conversations')
+                .insert({
+                    product_id: parseInt(product_id),
+                    buyer_id: buyer_id,
+                    seller_id: seller_id,
+                    last_message: null,
+                    last_message_at: new Date().toISOString()
+                })
+                .select()
+                .single();
+
+            if (createError) throw createError;
+            conversation = newConversation;
+        }
+
+        res.json({ success: true, conversation });
+    } catch (error) {
+        console.error('Error en conversación:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Enviar mensaje
+app.post('/api/messages', authenticateToken, async (req, res) => {
+    try {
+        const { conversation_id, receiver_id, message } = req.body;
+        const sender_id = req.user.id;
+
+        if (!message || message.trim() === '') {
+            return res.status(400).json({ success: false, error: 'El mensaje no puede estar vacío' });
+        }
+
+        // Insertar mensaje
+        const { data: newMessage, error: messageError } = await supabase
+            .from('messages')
+            .insert({
+                conversation_id: conversation_id,
+                sender_id: sender_id,
+                receiver_id: receiver_id,
+                message: message.trim(),
+                is_read: false,
+                created_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (messageError) throw messageError;
+
+        // Actualizar último mensaje en conversación
+        await supabase
+            .from('conversations')
+            .update({
+                last_message: message.trim(),
+                last_message_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', conversation_id);
+
+        res.json({ success: true, message: newMessage });
+    } catch (error) {
+        console.error('Error enviando mensaje:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Obtener mensajes de una conversación
+app.get('/api/messages/:conversationId', authenticateToken, async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user.id;
+
+        // Verificar que el usuario pertenece a la conversación
+        const { data: conversation, error: convError } = await supabase
+            .from('conversations')
+            .select('buyer_id, seller_id')
+            .eq('id', conversationId)
+            .single();
+
+        if (convError || !conversation) {
+            return res.status(404).json({ success: false, error: 'Conversación no encontrada' });
+        }
+
+        if (conversation.buyer_id !== userId && conversation.seller_id !== userId) {
+            return res.status(403).json({ success: false, error: 'No tienes acceso a esta conversación' });
+        }
+
+        // Obtener mensajes
+        const { data: messages, error: msgError } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .order('created_at', { ascending: true });
+
+        if (msgError) throw msgError;
+
+        // Marcar mensajes como leídos (si el usuario es el receptor)
+        const unreadMessages = messages.filter(m => m.receiver_id === userId && !m.is_read);
+        if (unreadMessages.length > 0) {
+            await supabase
+                .from('messages')
+                .update({ is_read: true })
+                .in('id', unreadMessages.map(m => m.id));
+        }
+
+        res.json({ success: true, messages: messages || [] });
+    } catch (error) {
+        console.error('Error obteniendo mensajes:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Obtener todas las conversaciones del usuario
+app.get('/api/conversations', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const { data: conversations, error } = await supabase
+            .from('conversations')
+            .select(`
+                *,
+                product:product_id(id, title, images_urls),
+                buyer:buyer_id(id, email, full_name),
+                seller:seller_id(id, email, full_name, store_name)
+            `)
+            .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+            .order('last_message_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Contar mensajes no leídos por conversación
+        const conversationsWithUnread = await Promise.all((conversations || []).map(async (conv) => {
+            const { count, error: countError } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('conversation_id', conv.id)
+                .eq('receiver_id', userId)
+                .eq('is_read', false);
+
+            return {
+                ...conv,
+                unread_count: countError ? 0 : count
+            };
+        }));
+
+        res.json({ success: true, conversations: conversationsWithUnread });
+    } catch (error) {
+        console.error('Error obteniendo conversaciones:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Obtener contador de mensajes no leídos
+app.get('/api/messages/unread/count', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const { count, error } = await supabase
+            .from('messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('receiver_id', userId)
+            .eq('is_read', false);
+
+        if (error) throw error;
+
+        res.json({ success: true, unread_count: count || 0 });
+    } catch (error) {
+        console.error('Error contando mensajes no leídos:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // ============================================================
