@@ -576,6 +576,21 @@ window.addEventListener('appinstalled', () => {
     installBtn.style.display = 'none';
     console.log('App instalada exitosamente');
 });
+
+// Inicializar funciones móviles
+if (window.innerWidth <= 768) {
+    setTimeout(() => {
+        // Crear menú hamburguesa manualmente
+        const hamburger = document.createElement('button');
+        hamburger.className = 'hamburger';
+        hamburger.innerHTML = '<span></span><span></span><span></span>';
+        document.body.appendChild(hamburger);
+        
+        hamburger.addEventListener('click', () => {
+            alert('Menú clickeado');
+        });
+    }, 1000);
+}
     </script>
 	<script src="js/mobile.js?v=2"></script>
 </body>
