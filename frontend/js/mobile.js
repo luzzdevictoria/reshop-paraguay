@@ -147,3 +147,22 @@ document.addEventListener('DOMContentLoaded', () => {
         initDarkMode();
     }
 });
+
+// Re-conectar los filtros después de que mobile.js los haya afectado
+setTimeout(() => {
+    const catFilter = document.getElementById('categoryFilter');
+    const condFilter = document.getElementById('conditionFilter');
+    const sizeFilter = document.getElementById('sizeFilter');
+    const minPrice = document.getElementById('minPriceFilter');
+    const maxPrice = document.getElementById('maxPriceFilter');
+    const originFilter = document.getElementById('originFilter');
+    
+    if (catFilter) catFilter.addEventListener('change', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    if (condFilter) condFilter.addEventListener('change', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    if (sizeFilter) sizeFilter.addEventListener('input', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    if (minPrice) minPrice.addEventListener('input', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    if (maxPrice) maxPrice.addEventListener('input', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    if (originFilter) originFilter.addEventListener('change', () => { if (typeof applyFilters === 'function') applyFilters(); });
+    
+    console.log('Filtros reconectados en móvil');
+}, 500);
