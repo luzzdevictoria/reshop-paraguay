@@ -375,8 +375,10 @@
 
     // ── Filtros drawer ─────────────────────────────────────────
     function buildFiltersDrawer() {
-        const sidebar = document.querySelector('.sidebar');
-        if (!sidebar || document.querySelector('.filters-drawer')) return;
+        // No depender del sidebar - crear drawer siempre que no exista
+        if (document.querySelector('.filters-drawer')) return;
+
+        console.log('🎨 Construyendo drawer de filtros en móvil...');
 
         const overlay = document.createElement('div');
         overlay.className = 'filters-overlay';
@@ -420,7 +422,7 @@
                         <option value="acceptable">Aceptable</option>
                     </select>
                 </div>
-				<div class="filters-drawer__group"><label class="filters-drawer__label"><i class="fas fa-globe-americas"></i> Origen</label>
+                <div class="filters-drawer__group"><label class="filters-drawer__label"><i class="fas fa-globe-americas"></i> Origen</label>
                     <select class="filters-drawer__select" id="drawerFilterOrigin">
                         <option value="">Todos los orígenes</option>
                         <option value="PAR">🇵🇾 Paraguay</option>
@@ -456,13 +458,19 @@
         document.body.appendChild(overlay);
         document.body.appendChild(drawer);
 
+        // Crear botón flotante de filtros
         const floatingBtn = document.createElement('button');
         floatingBtn.className = 'floating-filter-btn';
         floatingBtn.id = 'floatingFilterBtn';
         floatingBtn.innerHTML = `<i class="fas fa-sliders-h"></i> Filtrar y ordenar <span class="filters-active-dot"></span>`;
 
         const grid = document.querySelector('#productsGrid, .products-grid');
-        if (grid) grid.parentNode.insertBefore(floatingBtn, grid);
+        if (grid) {
+            grid.parentNode.insertBefore(floatingBtn, grid);
+            console.log('✅ Botón flotante de filtros agregado');
+        } else {
+            console.warn('⚠️ No se encontró el grid de productos');
+        }
 
         // Botón near-me después del de filtros
         buildNearMeButton(floatingBtn);
