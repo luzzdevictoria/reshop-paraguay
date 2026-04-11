@@ -598,14 +598,27 @@
         updateCartBadges();
         buildScrollToTop();
         
-        // 🆕 Crear botón "Buscar cerca de mí" independientemente
-        // Esperar un poco para que el DOM esté listo
+        // 🆕 Manejar botón "Buscar cerca de mí"
         setTimeout(() => {
-            if (!document.getElementById('nearMeBtn')) {
-                console.log('📍 Creando botón "Buscar cerca de mí" directamente...');
+            const existingBtn = document.getElementById('nearMeBtn');
+            if (existingBtn) {
+                // El botón HTML ya existe, solo asegurar que sea visible en móvil
+                existingBtn.style.display = 'flex';
+                existingBtn.style.margin = '0 auto 16px';
+                console.log('✅ Botón nearMe reutilizado del HTML');
+                
+                // Mover el botón al contenedor correcto en móvil
+                const grid = document.querySelector('#productsGrid, .products-grid');
+                if (grid && grid.parentNode && existingBtn.parentNode !== grid.parentNode) {
+                    // Mover el botón antes del grid
+                    grid.parentNode.insertBefore(existingBtn, grid);
+                    console.log('📦 Botón nearMe reposicionado antes del grid');
+                }
+            } else {
+                console.log('📍 Botón nearMe no existe en HTML, creándolo...');
                 buildNearMeButton(null);
             }
-        }, 500);
+        }, 100);
         
         addSwipeToClose(document.getElementById('menuDrawer'),    'menuOverlay',    'left');
         addSwipeToClose(document.getElementById('filtersDrawer'), 'filtersOverlay', 'right');
