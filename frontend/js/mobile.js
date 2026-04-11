@@ -40,34 +40,21 @@ function initHamburgerMenu() {
     overlay.className = 'drawer-overlay';
     document.body.appendChild(overlay);
     
-function openDrawer() {
-    drawer.classList.add('open');
-    overlay.classList.add('active');
-    // Cambiar botón manualmente
-    hamburger.style.opacity = '0';
-    hamburger.style.pointerEvents = 'none';
-    // Cambiar las líneas del botón manualmente
-    const spans = hamburger.querySelectorAll('span');
-    if (spans.length === 3) {
-        spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-        spans[1].style.opacity = '0';
-        spans[2].style.transform = 'rotate(-45deg) translate(7px, -7px)';
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('active');
+        hamburger.classList.remove('active');
+        hamburger.style.opacity = '';
+        hamburger.style.pointerEvents = '';
     }
-}
-
-function closeDrawer() {
-    drawer.classList.remove('open');
-    overlay.classList.remove('active');
-    // Restaurar botón manualmente
-    hamburger.style.opacity = '';
-    hamburger.style.pointerEvents = '';
-    const spans = hamburger.querySelectorAll('span');
-    if (spans.length === 3) {
-        spans[0].style.transform = '';
-        spans[1].style.opacity = '';
-        spans[2].style.transform = '';
+    
+    function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('active');
+        hamburger.classList.add('active');
+        hamburger.style.opacity = '0';
+        hamburger.style.pointerEvents = 'none';
     }
-}
     
     hamburger.addEventListener('click', () => {
         if (drawer.classList.contains('open')) {
