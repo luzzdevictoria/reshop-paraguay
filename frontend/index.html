@@ -1,28 +1,3 @@
-<!--
-================================================================================
-ARCHIVO: index.html
-PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.3.0 - MEJORAS MÓVILES COMPLETAS
-CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-11
-RESPONSABLE: Pedro José Pirovani
-PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Página principal de la tienda con buscador, filtros y paginación.
-================================================================================
-HISTORIAL DE MODIFICACIONES:
-2026-04-09 - Creacion inicial
-2026-04-10 - [ADD] Logo y header profesional
-2026-04-11 - [ADD] Buscador por título
-2026-04-11 - [ADD] Filtros por categoría, precio, talla, estado
-2026-04-11 - [ADD] Paginación (10 productos por página)
-2026-04-11 - [ADD] Filtro por Origen de la prenda (HTML + JS)
-2026-04-11 - [IMPROVE] Diseño responsive de filtros
-2026-04-11 - [ADD] Selector de idiomas (es/en/pt)
-2026-04-11 - [ADD] Filtro por distancia (cerca de mí)
-2026-04-11 - [FIX] Eliminado código duplicado del menú hamburguesa
-2026-04-11 - [FIX] z-index del header para móviles
-================================================================================
--->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,6 +15,9 @@ HISTORIAL DE MODIFICACIONES:
     <meta name="theme-color" content="#2A5C6E">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/mobile.css?v=4">
+    <script src="js/mobile.js?v=4" defer></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
@@ -110,8 +88,6 @@ HISTORIAL DE MODIFICACIONES:
             .products-grid { gap: 15px; }
         }
     </style>
-    <link rel="stylesheet" href="css/mobile.css?v=3">
-    <script src="js/mobile.js?v=3" defer></script>
 </head>
 <body>
     <div class="header">
@@ -234,7 +210,6 @@ HISTORIAL DE MODIFICACIONES:
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
-
     <script>
         const API_URL = 'https://reshop-backend.vercel.app';
         let allProducts = [];
@@ -244,84 +219,31 @@ HISTORIAL DE MODIFICACIONES:
         let userLongitude = null;
         let distanceEnabled = false;
         
-        // ============================================================
-        // TRADUCCIONES
-        // ============================================================
         const translations = {
-            es: {
-                searchPlaceholder: "🔍 Buscar productos...",
-                searchBtn: "Buscar",
-                category: "Categoría",
-                condition: "Estado",
-                size: "Talla",
-                minPrice: "Precio mínimo",
-                maxPrice: "Precio máximo",
-                origin: "Origen",
-                distance: "Cerca de mí",
-                clearFilters: "Limpiar filtros",
-                noResults: "No se encontraron productos"
-            },
-            en: {
-                searchPlaceholder: "🔍 Search products...",
-                searchBtn: "Search",
-                category: "Category",
-                condition: "Condition",
-                size: "Size",
-                minPrice: "Min price",
-                maxPrice: "Max price",
-                origin: "Origin",
-                distance: "Near me",
-                clearFilters: "Clear filters",
-                noResults: "No products found"
-            },
-            pt: {
-                searchPlaceholder: "🔍 Buscar produtos...",
-                searchBtn: "Buscar",
-                category: "Categoria",
-                condition: "Condição",
-                size: "Tamanho",
-                minPrice: "Preço mínimo",
-                maxPrice: "Preço máximo",
-                origin: "Origem",
-                distance: "Perto de mim",
-                clearFilters: "Limpar filtros",
-                noResults: "Nenhum produto encontrado"
-            }
+            es: { searchPlaceholder: "🔍 Buscar productos...", searchBtn: "Buscar", category: "Categoría", condition: "Estado", size: "Talla", minPrice: "Precio mínimo", maxPrice: "Precio máximo", origin: "Origen", distance: "Cerca de mí", clearFilters: "Limpiar filtros", noResults: "No se encontraron productos" },
+            en: { searchPlaceholder: "🔍 Search products...", searchBtn: "Search", category: "Category", condition: "Condition", size: "Size", minPrice: "Min price", maxPrice: "Max price", origin: "Origin", distance: "Near me", clearFilters: "Clear filters", noResults: "No products found" },
+            pt: { searchPlaceholder: "🔍 Buscar produtos...", searchBtn: "Buscar", category: "Categoria", condition: "Condição", size: "Tamanho", minPrice: "Preço mínimo", maxPrice: "Preço máximo", origin: "Origem", distance: "Perto de mim", clearFilters: "Limpar filtros", noResults: "Nenhum produto encontrado" }
         };
         
         let currentLang = localStorage.getItem('language') || 'es';
         
-        function setLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('language', lang);
-            translatePage();
-        }
-        
+        function setLanguage(lang) { currentLang = lang; localStorage.setItem('language', lang); translatePage(); }
         function translatePage() {
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[currentLang][key]) {
-                    if (el.tagName === 'INPUT' && el.placeholder) {
-                        el.placeholder = translations[currentLang][key];
-                    } else if (el.tagName === 'BUTTON') {
-                        el.innerHTML = translations[currentLang][key];
-                    } else {
-                        el.innerHTML = translations[currentLang][key];
-                    }
+                    if (el.tagName === 'INPUT' && el.placeholder) el.placeholder = translations[currentLang][key];
+                    else if (el.tagName === 'BUTTON') el.innerHTML = translations[currentLang][key];
+                    else el.innerHTML = translations[currentLang][key];
                 }
             });
         }
         
-        // ============================================================
-        // GEOLOCALIZACIÓN
-        // ============================================================
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             return R * c;
         }
@@ -337,32 +259,19 @@ HISTORIAL DE MODIFICACIONES:
                         document.getElementById('enableDistanceBtn').style.display = 'none';
                         applyFilters();
                     },
-                    (error) => {
-                        let errorMsg = 'Error al obtener ubicación';
-                        if (error.code === error.PERMISSION_DENIED) {
-                            errorMsg = 'Permiso de ubicación denegado. Actívalo en la configuración de tu navegador.';
-                        }
-                        alert(errorMsg);
-                    }
+                    (error) => { alert('Error al obtener ubicación: ' + error.message); }
                 );
-            } else {
-                alert('Tu navegador no soporta geolocalización');
-            }
+            } else { alert('Tu navegador no soporta geolocalización'); }
         }
         
-        // ============================================================
-        // AUTENTICACION
-        // ============================================================
         function updateUserMenu() {
-            const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user') || 'null');
             const authLinks = document.getElementById('authLinks');
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
             const dashboardLink = document.getElementById('dashboardLink');
             const adminLink = document.getElementById('adminLink');
-
-            if (token && user) {
+            if (user) {
                 authLinks.style.display = 'none';
                 userMenu.style.display = 'inline-block';
                 userName.innerHTML = user.full_name || user.email;
@@ -375,7 +284,7 @@ HISTORIAL DE MODIFICACIONES:
                 if (adminLink) adminLink.style.display = 'none';
             }
         }
-
+        
         function setupLogout() {
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
@@ -389,14 +298,7 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
         
-        // ============================================================
-        // FILTROS
-        // ============================================================
-        function applyFilters() {
-            currentPage = 1;
-            renderProducts();
-        }
-        
+        function applyFilters() { currentPage = 1; renderProducts(); }
         function clearFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('categoryFilter').value = '';
@@ -417,7 +319,6 @@ HISTORIAL DE MODIFICACIONES:
             const maxPrice = parseInt(document.getElementById('maxPriceFilter').value) || Infinity;
             const origin = document.getElementById('originFilter').value;
             const maxDistance = distanceEnabled ? parseInt(document.getElementById('distanceFilter').value) : 0;
-            
             return allProducts.filter(product => {
                 if (searchTerm && !product.title.toLowerCase().includes(searchTerm)) return false;
                 if (category && product.category !== category) return false;
@@ -427,56 +328,37 @@ HISTORIAL DE MODIFICACIONES:
                 if (product.price > maxPrice) return false;
                 if (origin && product.origin !== origin) return false;
                 if (distanceEnabled && maxDistance > 0 && userLatitude && product.seller_latitude && product.seller_longitude) {
-                    const distance = calculateDistance(userLatitude, userLongitude, product.seller_latitude, product.seller_longitude);
-                    if (distance > maxDistance) return false;
+                    if (calculateDistance(userLatitude, userLongitude, product.seller_latitude, product.seller_longitude) > maxDistance) return false;
                 }
                 return true;
             });
         }
         
-        // ============================================================
-        // RENDERIZADO
-        // ============================================================
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             const filtered = getFilteredProducts();
             const totalPages = Math.ceil(filtered.length / itemsPerPage);
             const start = (currentPage - 1) * itemsPerPage;
             const paginatedProducts = filtered.slice(start, start + itemsPerPage);
-            
             if (paginatedProducts.length === 0) {
                 grid.innerHTML = `<div class="no-results"><i class="fas fa-box-open"></i> ${translations[currentLang].noResults}<br><br>¡Vuelve a intentarlo con otros filtros!</div>`;
                 document.getElementById('pagination').innerHTML = '';
                 return;
             }
-            
             let html = '';
             for (const product of paginatedProducts) {
                 const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
-                const conditionText = {
-                    'new_with_tag': 'Nuevo con etiqueta',
-                    'new_without_tag': 'Nuevo sin etiqueta',
-                    'very_good': 'Muy bueno',
-                    'good': 'Bueno',
-                    'acceptable': 'Aceptable'
-                }[product.condition] || product.condition;
-                
-                const originFlag = {
-                    'PAR': '🇵🇾', 'USA': '🇺🇸', 'BRA': '🇧🇷', 'EU': '🇪🇺',
-                    'CHN': '🇨🇳', 'JPN': '🇯🇵', 'KOR': '🇰🇷', 'ARG': '🇦🇷', 'MEX': '🇲🇽'
-                }[product.origin] || '';
+                const conditionText = { 'new_with_tag': 'Nuevo con etiqueta', 'new_without_tag': 'Nuevo sin etiqueta', 'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable' }[product.condition] || product.condition;
+                const originFlag = { 'PAR': '🇵🇾', 'USA': '🇺🇸', 'BRA': '🇧🇷', 'EU': '🇪🇺', 'CHN': '🇨🇳', 'JPN': '🇯🇵', 'KOR': '🇰🇷', 'ARG': '🇦🇷', 'MEX': '🇲🇽' }[product.origin] || '';
                 const originText = product.origin ? `${originFlag} ${product.origin}` : '';
-                
-                html += `
-                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
-                        <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
-                        <p>${escapeHtml(product.description || 'Sin descripción')}</p>
-                        <div class="price">${priceFormatted} ₲</div>
-                        <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
-                        <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
-                        ${originText ? `<div class="product-origin"><i class="fas fa-globe-americas"></i> ${originText}</div>` : ''}
-                    </div>
-                `;
+                html += `<div class="product-card" onclick="window.location.href='product-detail.html?id=${product.id}'">
+                    <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
+                    <p>${escapeHtml(product.description || 'Sin descripción')}</p>
+                    <div class="price">${priceFormatted} ₲</div>
+                    <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
+                    <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
+                    ${originText ? `<div class="product-origin"><i class="fas fa-globe-americas"></i> ${originText}</div>` : ''}
+                </div>`;
             }
             grid.innerHTML = html;
             renderPagination(totalPages);
@@ -484,10 +366,7 @@ HISTORIAL DE MODIFICACIONES:
         
         function renderPagination(totalPages) {
             const container = document.getElementById('pagination');
-            if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
+            if (totalPages <= 1) { container.innerHTML = ''; return; }
             let html = `<button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left"></i></button>`;
             html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-left"></i></button>`;
             for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
@@ -498,15 +377,8 @@ HISTORIAL DE MODIFICACIONES:
             container.innerHTML = html;
         }
         
-        function goToPage(page) {
-            currentPage = page;
-            renderProducts();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        function goToPage(page) { currentPage = page; renderProducts(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
         
-        // ============================================================
-        // CARGA DE PRODUCTOS
-        // ============================================================
         async function loadProducts() {
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
@@ -521,18 +393,12 @@ HISTORIAL DE MODIFICACIONES:
                     document.getElementById('pagination').innerHTML = '';
                 }
             } catch (error) {
-                console.error('Error:', error);
                 grid.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> Error al cargar productos: ${error.message}</div>`;
             }
         }
         
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         
-        // Eventos
         document.getElementById('enableDistanceBtn').addEventListener('click', getUserLocation);
         document.getElementById('distanceFilter')?.addEventListener('change', applyFilters);
         document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') applyFilters(); });
@@ -543,43 +409,18 @@ HISTORIAL DE MODIFICACIONES:
         document.getElementById('maxPriceFilter').addEventListener('input', applyFilters);
         document.getElementById('originFilter').addEventListener('change', applyFilters);
         
-        // ============================================================
-        // INICIALIZACION
-        // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
             updateUserMenu();
             setupLogout();
             loadProducts();
             translatePage();
-            
         });
         
-        // ============================================================
-        // INSTALACIÓN DE PWA
-        // ============================================================
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'inline-block';
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`Usuario ${outcome === 'accepted' ? 'aceptó' : 'rechazó'} la instalación`);
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installBtn.style.display = 'none';
-            console.log('App instalada exitosamente');
-        });
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'inline-block'; });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; console.log(`Usuario ${outcome === 'accepted' ? 'aceptó' : 'rechazó'} la instalación`); deferredPrompt = null; installBtn.style.display = 'none'; } });
+        window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; console.log('App instalada exitosamente'); });
     </script>
 </body>
 </html>
