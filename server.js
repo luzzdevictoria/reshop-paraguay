@@ -21,7 +21,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [ADD] Endpoint /api/admin/orders
 2026-04-10 - [ADD] Endpoint /api/admin/decode-token para debugging
 2026-04-11 - [ADD] Endpoint GET /api/seller/orders para que vendedores vean sus ventas
-2026-04-11 - [ADD] Endpoints de reseñas: GET/POST /api/products/:id/reviews
+2026-04-11 - [ADD] Endpoints de reseñas: GET/POST /api/products/:id/reviews, GET /api/products/:id/rating
 2026-04-11 - [ADD] Endpoint GET /api/products/seller/:sellerId para productos por vendedor
 ================================================================================
 */
@@ -31,11 +31,27 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ============================================================
+// CONFIGURACIÓN MULTER PARA SUBIR IMÁGENES
+// ============================================================
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (allowedTypes.includes(file.mimetype)) cb(null, true);
+        else cb(new Error('Tipo de archivo no permitido'), false);
+    }
+});
 
 // ============================================================
 // INICIALIZAR SUPABASE
@@ -54,9 +70,8 @@ const supabaseAdmin = createClient(
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
 // ============================================================
-// MIDDLEWARES
+// MIDDLEWARE DE AUTENTICACIÓN GENERAL
 // ============================================================
-
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -86,9 +101,14 @@ const authenticateToken = async (req, res, next) => {
     }
 };
 
+// ============================================================
+// MIDDLEWARE DE AUTENTICACIÓN ADMIN
+// ============================================================
 const verifyAdmin = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
+    
+    console.log('🔍 Verificando admin - Token:', token ? 'Presente' : 'Ausente');
     
     if (!token) {
         return res.status(401).json({ success: false, error: 'Token requerido' });
@@ -96,6 +116,7 @@ const verifyAdmin = async (req, res, next) => {
     
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('✅ Token decodificado:', { email: decoded.email, role: decoded.role });
         
         const { data: dbUser, error: dbError } = await supabaseAdmin
             .from('users')
@@ -103,25 +124,44 @@ const verifyAdmin = async (req, res, next) => {
             .eq('email', decoded.email)
             .single();
         
+        console.log('📋 Usuario DB encontrado:', dbUser ? 'Sí' : 'No');
+        
         if (dbError || !dbUser) {
-            return res.status(403).json({ success: false, error: 'Usuario no encontrado' });
+            console.error('❌ Error en verifyAdmin:', dbError?.message || 'Usuario no encontrado');
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Usuario no encontrado en la base de datos' 
+            });
         }
         
         if (dbUser.role !== 'admin') {
-            return res.status(403).json({ success: false, error: 'Acceso denegado - No eres administrador' });
+            console.warn('⚠️ Acceso denegado: role =', dbUser.role);
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Acceso denegado - No eres administrador' 
+            });
         }
         
         if (!dbUser.is_active) {
-            return res.status(403).json({ success: false, error: 'Cuenta desactivada' });
+            console.warn('⚠️ Cuenta desactivada:', dbUser.email);
+            return res.status(403).json({ 
+                success: false, 
+                error: 'Cuenta desactivada' 
+            });
         }
         
+        console.log('✅ Acceso concedido a admin:', dbUser.email);
         req.user = dbUser;
         next();
     } catch (error) {
+        console.error('❌ Error en verifyAdmin:', error.message);
         res.status(403).json({ success: false, error: 'Token inválido o expirado' });
     }
 };
 
+// ============================================================
+// MIDDLEWARES GLOBALES
+// ============================================================
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -152,11 +192,13 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================
-// RUTA DE PRODUCTOS
+// RUTA DE PRODUCTOS (CONSULTA SUPABASE)
 // ============================================================
 
 app.get('/api/products', async (req, res) => {
     try {
+        console.log('📦 Consultando productos en Supabase...');
+        
         const { data: products, error } = await supabase
             .from('products')
             .select('*')
@@ -164,14 +206,27 @@ app.get('/api/products', async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
+
+        console.log(`✅ Encontrados ${products?.length || 0} productos`);
         
-        res.json({ success: true, products: products || [], count: products?.length || 0 });
+        res.json({ 
+            success: true, 
+            products: products || [],
+            count: products?.length || 0
+        });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message, products: [] });
+        console.error('❌ Error en /api/products:', error.message);
+        res.status(500).json({ 
+            success: false, 
+            error: error.message,
+            products: []
+        });
     }
 });
 
-// ✅ NUEVO ENDPOINT: Productos por vendedor
+// ============================================================
+// 🆕 ENDPOINT: PRODUCTOS POR VENDEDOR (para dashboard vendedor/admin)
+// ============================================================
 app.get('/api/products/seller/:sellerId', async (req, res) => {
     try {
         const { sellerId } = req.params;
@@ -233,6 +288,7 @@ app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
             res.json({ success: true, action: 'added', message: 'Agregado a favoritos' });
         }
     } catch (error) {
+        console.error('Error en toggle favorito:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -241,7 +297,10 @@ app.get('/api/favorites', authenticateToken, async (req, res) => {
     try {
         const { data: favorites, error } = await supabase
             .from('favorites')
-            .select(`product_id, products(*)`)
+            .select(`
+                product_id,
+                products (*)
+            `)
             .eq('user_id', req.user.id)
             .order('created_at', { ascending: false });
         
@@ -250,6 +309,7 @@ app.get('/api/favorites', authenticateToken, async (req, res) => {
         const products = favorites?.map(f => f.products) || [];
         res.json({ success: true, products });
     } catch (error) {
+        console.error('Error obteniendo favoritos:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -295,6 +355,173 @@ app.get('/api/products/:id', async (req, res) => {
         
         res.json({ success: true, product });
     } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// CREAR PRODUCTO (autenticado)
+// ============================================================
+app.post('/api/products', authenticateToken, upload.array('images', 5), async (req, res) => {
+    try {
+        const { title, description, price, category, size, condition, brand, color, origin } = req.body;
+        
+        if (!title || !price) {
+            return res.status(400).json({ success: false, error: 'Título y precio son requeridos' });
+        }
+        
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const fileName = `${uuidv4()}-${file.originalname}`;
+                const { data, error } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+                
+                if (error) throw error;
+                
+                const { data: urlData } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(fileName);
+                
+                imageUrls.push(urlData.publicUrl);
+            }
+        }
+        
+        const newProduct = {
+            seller_id: req.user.id,
+            title,
+            description: description || null,
+            price: parseFloat(price),
+            category: category || null,
+            size: size || null,
+            condition: condition || 'good',
+            brand: brand || null,
+            color: color || null,
+            origin: origin || null,
+            images_urls: imageUrls,
+            status: 'active',
+            created_at: new Date().toISOString()
+        };
+        
+        const { data, error } = await supabase
+            .from('products')
+            .insert(newProduct)
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        res.json({ success: true, product: data });
+    } catch (error) {
+        console.error('Error creando producto:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// ACTUALIZAR PRODUCTO
+// ============================================================
+app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, price, category, size, condition, brand, color, origin } = req.body;
+        
+        const { data: existing, error: findError } = await supabase
+            .from('products')
+            .select('seller_id')
+            .eq('id', id)
+            .single();
+        
+        if (findError || !existing) {
+            return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+        }
+        
+        if (existing.seller_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'No tienes permiso para editar este producto' });
+        }
+        
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const fileName = `${uuidv4()}-${file.originalname}`;
+                const { error } = await supabase.storage
+                    .from('products')
+                    .upload(fileName, file.buffer, { contentType: file.mimetype });
+                
+                if (error) throw error;
+                
+                const { data: urlData } = supabase.storage
+                    .from('products')
+                    .getPublicUrl(fileName);
+                
+                imageUrls.push(urlData.publicUrl);
+            }
+        }
+        
+        const updateData = {
+            title,
+            description: description || null,
+            price: parseFloat(price),
+            category: category || null,
+            size: size || null,
+            condition: condition || 'good',
+            brand: brand || null,
+            color: color || null,
+            origin: origin || null,
+            updated_at: new Date().toISOString()
+        };
+        
+        if (imageUrls.length > 0) updateData.images_urls = imageUrls;
+        
+        const { data, error } = await supabase
+            .from('products')
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+        
+        if (error) throw error;
+        
+        res.json({ success: true, product: data });
+    } catch (error) {
+        console.error('Error actualizando producto:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// ELIMINAR PRODUCTO
+// ============================================================
+app.delete('/api/products/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const { data: existing, error: findError } = await supabase
+            .from('products')
+            .select('seller_id, title')
+            .eq('id', id)
+            .single();
+        
+        if (findError || !existing) {
+            return res.status(404).json({ success: false, error: 'Producto no encontrado' });
+        }
+        
+        if (existing.seller_id !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'No tienes permiso para eliminar este producto' });
+        }
+        
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
+        
+        if (error) throw error;
+        
+        res.json({ success: true, message: 'Producto eliminado exitosamente' });
+    } catch (error) {
+        console.error('Error eliminando producto:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -309,7 +536,10 @@ app.get('/api/products/:id/reviews', async (req, res) => {
         
         const { data: reviews, error } = await supabase
             .from('reviews')
-            .select(`*, reviewer:reviewer_id(id, full_name, email)`)
+            .select(`
+                *,
+                reviewer:reviewer_id(id, full_name, email)
+            `)
             .eq('product_id', id)
             .order('created_at', { ascending: false });
         
@@ -317,6 +547,7 @@ app.get('/api/products/:id/reviews', async (req, res) => {
         
         res.json({ success: true, reviews: reviews || [] });
     } catch (error) {
+        console.error('Error al obtener reseñas:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -375,6 +606,7 @@ app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
         
         res.json({ success: true, message: 'Reseña agregada exitosamente', review });
     } catch (error) {
+        console.error('Error al crear reseña:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -391,7 +623,11 @@ app.get('/api/products/:id/rating', async (req, res) => {
         
         if (error) throw error;
         
-        res.json({ success: true, rating: product?.rating || 0, count: product?.reviews_count || 0 });
+        res.json({ 
+            success: true, 
+            rating: product?.rating || 0,
+            count: product?.reviews_count || 0
+        });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -403,6 +639,8 @@ app.get('/api/products/:id/rating', async (req, res) => {
 
 app.get('/api/admin/users', verifyAdmin, async (req, res) => {
     try {
+        console.log('👥 Admin solicitando lista de usuarios:', req.user?.email);
+        
         const { data: users, error } = await supabaseAdmin
             .from('users')
             .select('id, email, full_name, role, is_active, created_at, store_name')
@@ -410,14 +648,23 @@ app.get('/api/admin/users', verifyAdmin, async (req, res) => {
 
         if (error) throw error;
         
-        res.json({ success: true, users: users || [], count: users?.length || 0 });
+        console.log(`✅ Usuarios encontrados: ${users?.length || 0}`);
+        
+        res.json({ 
+            success: true, 
+            users: users || [], 
+            count: users?.length || 0
+        });
     } catch (error) {
+        console.error('❌ Error en /api/admin/users:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
 app.get('/api/admin/products', verifyAdmin, async (req, res) => {
     try {
+        console.log('📦 Admin solicitando todos los productos:', req.user?.email);
+        
         const { data: products, error } = await supabaseAdmin
             .from('products')
             .select('*')
@@ -425,14 +672,23 @@ app.get('/api/admin/products', verifyAdmin, async (req, res) => {
 
         if (error) throw error;
         
-        res.json({ success: true, products: products || [], count: products?.length || 0 });
+        console.log(`✅ Productos encontrados: ${products?.length || 0}`);
+        
+        res.json({ 
+            success: true, 
+            products: products || [], 
+            count: products?.length || 0
+        });
     } catch (error) {
+        console.error('❌ Error en /api/admin/products:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
 app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
     try {
+        console.log('📦 Admin solicitando todas las órdenes:', req.user?.email);
+        
         const { data: orders, error } = await supabaseAdmin
             .from('orders')
             .select('*, buyer:buyer_id(id, email, full_name)')
@@ -440,8 +696,15 @@ app.get('/api/admin/orders', verifyAdmin, async (req, res) => {
 
         if (error) throw error;
         
-        res.json({ success: true, orders: orders || [], count: orders?.length || 0 });
+        console.log(`✅ Órdenes encontradas: ${orders?.length || 0}`);
+        
+        res.json({ 
+            success: true, 
+            orders: orders || [], 
+            count: orders?.length || 0
+        });
     } catch (error) {
+        console.error('❌ Error en /api/admin/orders:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -469,7 +732,10 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
                 .neq('id', id);
             
             if (otherAdmins?.length === 0) {
-                return res.status(400).json({ success: false, error: 'No se puede desactivar el último administrador' });
+                return res.status(400).json({ 
+                    success: false, 
+                    error: 'No se puede desactivar el último administrador' 
+                });
             }
         }
         
@@ -480,8 +746,14 @@ app.put('/api/admin/users/:id/toggle', verifyAdmin, async (req, res) => {
         
         if (error) throw error;
         
-        res.json({ success: true, message: `Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}` });
+        console.log(`✅ Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}`);
+        
+        res.json({ 
+            success: true, 
+            message: `Usuario ${user.email} ${!user.is_active ? 'activado' : 'desactivado'}`
+        });
     } catch (error) {
+        console.error('❌ Error en toggle usuario:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -493,7 +765,10 @@ app.put('/api/admin/products/:id/status', verifyAdmin, async (req, res) => {
         
         const validStatuses = ['active', 'inactive', 'archived', 'sold'];
         if (!validStatuses.includes(status)) {
-            return res.status(400).json({ success: false, error: `Estado inválido. Permitidos: ${validStatuses.join(', ')}` });
+            return res.status(400).json({ 
+                success: false, 
+                error: `Estado inválido. Permitidos: ${validStatuses.join(', ')}` 
+            });
         }
         
         const { error } = await supabaseAdmin
@@ -503,8 +778,11 @@ app.put('/api/admin/products/:id/status', verifyAdmin, async (req, res) => {
         
         if (error) throw error;
         
+        console.log(`✅ Producto ${id} actualizado a estado: ${status}`);
+        
         res.json({ success: true, message: 'Estado actualizado', product: { id, status } });
     } catch (error) {
+        console.error('❌ Error en actualizar estado:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -530,8 +808,11 @@ app.delete('/api/admin/products/:id', verifyAdmin, async (req, res) => {
         
         if (error) throw error;
         
+        console.log(`✅ Producto "${product.title}" eliminado`);
+        
         res.json({ success: true, message: `Producto "${product.title}" eliminado`, id });
     } catch (error) {
+        console.error('❌ Error en eliminar producto:', error.message);
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -545,22 +826,31 @@ app.get('/api/seller/orders', authenticateToken, async (req, res) => {
             return res.status(403).json({ success: false, error: 'Acceso denegado. Solo vendedores.' });
         }
         
+        console.log(`📋 Vendedor ${req.user.email} solicitando sus ventas...`);
+        
         const { data: orders, error } = await supabaseAdmin
             .from('orders')
-            .select(`*, buyer:buyer_id(id, email, full_name, phone), items:order_items(*)`)
+            .select(`
+                *,
+                buyer:buyer_id(id, email, full_name, phone),
+                items:order_items(*)
+            `)
             .eq('seller_id', req.user.id)
             .order('created_at', { ascending: false });
         
         if (error) throw error;
         
+        console.log(`✅ Encontradas ${orders?.length || 0} ventas para ${req.user.email}`);
+        
         res.json({ success: true, orders: orders || [] });
     } catch (error) {
+        console.error('❌ Error obteniendo ventas del vendedor:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
 // ============================================================
-// DEBUG
+// DEBUG: Decodificar Token
 // ============================================================
 
 app.get('/api/admin/decode-token', async (req, res) => {
@@ -580,11 +870,15 @@ app.get('/api/admin/decode-token', async (req, res) => {
 });
 
 // ============================================================
-// RUTAS EXTERNAS
+// RUTAS DE AUTENTICACIÓN
 // ============================================================
 
 const authRoutes = require('./src/routes/authRoutes');
 app.use('/api/auth', authRoutes);
+
+// ============================================================
+// RUTAS DE ÓRDENES
+// ============================================================
 
 const ordersRoutes = require('./src/routes/orders');
 app.use('/api/orders', ordersRoutes);
@@ -594,12 +888,19 @@ app.use('/api/orders', ordersRoutes);
 // ============================================================
 
 app.use((req, res) => {
-    res.status(404).json({ success: false, error: 'Ruta no encontrada', path: req.originalUrl });
+    res.status(404).json({ 
+        success: false, 
+        error: 'Ruta no encontrada', 
+        path: req.originalUrl 
+    });
 });
 
 app.use((err, req, res, next) => {
     console.error('[ERROR GLOBAL]', err.message);
-    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+    res.status(500).json({ 
+        success: false, 
+        error: 'Error interno del servidor' 
+    });
 });
 
 // ============================================================
