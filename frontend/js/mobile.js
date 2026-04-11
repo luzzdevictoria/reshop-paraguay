@@ -598,27 +598,107 @@
         updateCartBadges();
         buildScrollToTop();
         
-        // 🆕 Manejar botón "Buscar cerca de mí"
+        // 🆕 FORZAR CREACIÓN DEL BOTÓN "BUSCAR CERCA DE MÍ"
         setTimeout(() => {
-            const existingBtn = document.getElementById('nearMeBtn');
-            if (existingBtn) {
-                // El botón HTML ya existe, solo asegurar que sea visible en móvil
-                existingBtn.style.display = 'flex';
-                existingBtn.style.margin = '0 auto 16px';
-                console.log('✅ Botón nearMe reutilizado del HTML');
+            // Eliminar cualquier botón existente
+            const oldBtn = document.getElementById('nearMeBtn');
+            if (oldBtn) oldBtn.remove();
+            
+            // Crear el botón desde cero
+            const grid = document.querySelector('#productsGrid, .products-grid');
+            if (grid && grid.parentNode) {
+                const btn = document.createElement('button');
+                btn.id = 'nearMeBtn';
+                btn.className = 'btn-near-me';
+                btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
                 
-                // Mover el botón al contenedor correcto en móvil
-                const grid = document.querySelector('#productsGrid, .products-grid');
-                if (grid && grid.parentNode && existingBtn.parentNode !== grid.parentNode) {
-                    // Mover el botón antes del grid
-                    grid.parentNode.insertBefore(existingBtn, grid);
-                    console.log('📦 Botón nearMe reposicionado antes del grid');
-                }
+                // Estilos inline para asegurar visibilidad
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.gap = '8px';
+                btn.style.backgroundColor = '#E8B86B';
+                btn.style.color = '#333';
+                btn.style.border = 'none';
+                btn.style.borderRadius = '24px';
+                btn.style.padding = '12px 18px';
+                btn.style.fontSize = '0.9rem';
+                btn.style.fontWeight = '600';
+                btn.style.cursor = 'pointer';
+                btn.style.width = 'calc(100% - 32px)';
+                btn.style.margin = '0 auto 16px';
+                btn.style.boxShadow = '0 4px 12px rgba(232, 184, 107, 0.4)';
+                
+                // Insertar antes del grid
+                grid.parentNode.insertBefore(btn, grid);
+                console.log('✅ Botón nearMe creado FORZOSAMENTE');
+                
+                // Agregar evento click
+                let active = false;
+                btn.addEventListener('click', async () => {
+                    if (active) {
+                        // Reset
+                        active = false;
+                        btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                        btn.style.backgroundColor = '#E8B86B';
+                        btn.style.color = '#333';
+                        if (typeof loadProducts === 'function') loadProducts();
+                        console.log('🔄 Filtro "cerca de mí" desactivado');
+                        return;
+                    }
+                    
+                    if (!navigator.geolocation) {
+                        alert('Tu dispositivo no soporta geolocalización.');
+                        return;
+                    }
+                    
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        async ({ coords: { latitude, longitude } }) => {
+                            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Buscando productos...';
+                            try {
+                                const products = await fetchProductsNearMe(latitude, longitude, NEAR_ME_RADIUS_KM);
+                                active = true;
+                                btn.disabled = false;
+                                btn.innerHTML = `<i class="fas fa-location-dot"></i> Cerca (${products.length}) ✕`;
+                                btn.style.backgroundColor = '#28a745';
+                                btn.style.color = 'white';
+                                renderNearbyProducts(products);
+                                showToast(
+                                    products.length > 0
+                                        ? `${products.length} producto${products.length!==1?'s':''} a menos de ${NEAR_ME_RADIUS_KM} km`
+                                        : 'Sin resultados en tu zona',
+                                    products.length > 0 ? 'success' : 'info'
+                                );
+                            } catch (err) {
+                                btn.disabled = false;
+                                btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                                btn.style.backgroundColor = '#E8B86B';
+                                btn.style.color = '#333';
+                                showToast('Error al buscar productos cercanos.', 'error');
+                            }
+                        },
+                        (err) => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                            btn.style.backgroundColor = '#E8B86B';
+                            btn.style.color = '#333';
+                            const msgs = {
+                                1: 'Permiso de ubicación denegado.',
+                                2: 'No se pudo determinar tu ubicación.',
+                                3: 'Se agotó el tiempo de espera.'
+                            };
+                            showToast(msgs[err.code] || 'Error al obtener ubicación.', 'error');
+                        },
+                        { timeout: 10000, enableHighAccuracy: false }
+                    );
+                });
             } else {
-                console.log('📍 Botón nearMe no existe en HTML, creándolo...');
-                buildNearMeButton(null);
+                console.warn('⚠️ No se encontró el grid para insertar el botón');
             }
-        }, 100);
+        }, 300);
         
         addSwipeToClose(document.getElementById('menuDrawer'),    'menuOverlay',    'left');
         addSwipeToClose(document.getElementById('filtersDrawer'), 'filtersOverlay', 'right');
