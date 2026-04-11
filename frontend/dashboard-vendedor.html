@@ -175,6 +175,7 @@ DESCRIPCION: Panel del vendedor.
         <div style="margin-top: 10px;">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+			<a href="messages.html"><i class="fas fa-envelope"></i> Mensajes <span id="headerUnreadBadge" class="unread-badge" style="display: none; background: #D95A41; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; margin-left: 5px;">0</span></a>
             <a href="#" id="logoutBtnHeader"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
     </div>
@@ -550,6 +551,25 @@ DESCRIPCION: Panel del vendedor.
             currentConversationId = null;
             currentReceiverId = null;
         }
+		
+		        // Actualizar badge de mensajes no leídos en el header
+        async function updateHeaderUnreadBadge() {
+            try {
+                const response = await fetch(`${API_URL}/api/messages/unread/count`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                const badge = document.getElementById('headerUnreadBadge');
+                if (data.success && data.unread_count > 0) {
+                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error actualizando badge:', error);
+            }
+        }
 
         // ============================================================
         // MANEJO DE IMÁGENES CON CLOUDINARY
@@ -902,8 +922,10 @@ DESCRIPCION: Panel del vendedor.
             return d.innerHTML;
         }
 
-        // Inicializar
+                // Inicializar
         loadProducts();
+        updateHeaderUnreadBadge();  // Actualizar badge del header
+        setInterval(() => updateHeaderUnreadBadge(), 30000);  // Actualizar cada 30 segundos
         
         // Cerrar modal de mensajes con Escape
         document.addEventListener('keydown', (e) => {
