@@ -206,6 +206,7 @@ function initButtonFeedback() {
 // ============================================================
 // INICIALIZAR TODO
 // ============================================================
+// Inicializar funciones móviles cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth <= 768) {
         initHamburgerMenu();
