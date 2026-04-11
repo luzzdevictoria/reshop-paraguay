@@ -2,11 +2,14 @@
 ================================================================================
 ARCHIVO: frontend/dashboard-vendedor.html
 PROYECTO: ReShop Paraguay
-VERSION: 2.0.0 (Mobile-First)
+VERSION: 2.1.0 (Mobile-First + Cámara + Cloudinary)
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
-DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
-             botones táctiles grandes, pestañas responsivas.
+DESCRIPCION: Panel del vendedor. 
+             - Tablas convertidas a tarjetas en móvil
+             - Botones táctiles grandes
+             - Captura de fotos con cámara del dispositivo
+             - Subida directa a Cloudinary
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -44,14 +47,16 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
         .panel-header h2 { color: var(--primary); font-size: 1.3rem; }
 
         /* Buttons */
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: #1e4452; }
         .btn-danger { background: var(--accent); color: white; }
         .btn-danger:hover { background: #c04a33; }
         .btn-secondary { background: var(--secondary); color: #333; }
         .btn-secondary:hover { background: #d4a050; }
-        .btn i { margin-right: 6px; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+        .btn i { margin-right: 0; }
 
         /* Table (desktop) */
         .products-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: var(--shadow); }
@@ -71,10 +76,30 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
         .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.95rem; }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
+        
+        /* Image upload area */
+        .image-upload-area { border: 2px dashed var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+        .image-upload-area:hover { border-color: var(--primary); background: rgba(42,92,110,0.05); }
+        .image-upload-area i { font-size: 2rem; color: var(--text-light); margin-bottom: 8px; }
+        .image-upload-area p { font-size: 0.85rem; color: var(--text-light); margin: 0; }
+        
+        .camera-buttons { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+        .camera-buttons .btn { flex: 1; justify-content: center; }
+        
         .image-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .image-preview img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); }
+        .image-preview-item { position: relative; width: 76px; height: 76px; }
+        .image-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); }
+        .image-preview-item .remove-image { position: absolute; top: -8px; right: -8px; background: var(--accent); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem; }
+        
+        /* Video de cámara */
+        .camera-container { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .camera-container.is-open { display: flex; }
+        .camera-video { width: 100%; max-width: 100%; height: auto; background: #000; }
+        .camera-controls { position: absolute; bottom: 30px; display: flex; gap: 20px; }
+        .camera-controls .btn { padding: 14px 24px; font-size: 1.1rem; }
+
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-actions .btn { flex: 1; }
+        .modal-actions .btn { flex: 1; justify-content: center; }
 
         /* Status badge */
         .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
@@ -95,16 +120,16 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
         /* Footer */
         .footer { background: var(--primary); color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
 
-        /* Stat cards (resumen rápido) */
+        /* Stat cards */
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
         .stat-mini { background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: var(--shadow); }
         .stat-mini__num { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
         .stat-mini__label { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
 
-        /* Tablet */
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .stats-row { grid-template-columns: 1fr 1fr; }
+            .camera-controls .btn { padding: 12px 20px; }
         }
     </style>
 </head>
@@ -214,11 +239,32 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
                         <input type="text" id="color" placeholder="Azul, Negro...">
                     </div>
                 </div>
+                
+                <!-- Área de imágenes con soporte para cámara -->
                 <div class="form-group">
                     <label>Imágenes del producto (máx. 5)</label>
-                    <input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp" style="padding: 8px;">
+                    
+                    <div class="camera-buttons">
+                        <button type="button" class="btn btn-outline" id="openCameraBtn">
+                            <i class="fas fa-camera"></i> Tomar foto
+                        </button>
+                        <button type="button" class="btn btn-outline" id="uploadFileBtn">
+                            <i class="fas fa-folder-open"></i> Subir archivos
+                        </button>
+                    </div>
+                    
+                    <div id="fileInputArea" style="display: none;">
+                        <div class="image-upload-area" onclick="document.getElementById('images').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Haz clic para seleccionar imágenes</p>
+                            <p style="font-size: 0.7rem;">JPG, PNG o WEBP (máx. 5MB)</p>
+                        </div>
+                        <input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp" style="display: none;">
+                    </div>
+                    
                     <div id="imagePreview" class="image-preview" style="margin-top: 10px;"></div>
                 </div>
+                
                 <div id="modalMessage"></div>
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">
@@ -229,6 +275,22 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         CÁMARA OVERLAY
+    ========================================================= -->
+    <div id="cameraOverlay" class="camera-container">
+        <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        <div class="camera-controls">
+            <button class="btn btn-danger" id="closeCameraBtn">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn btn-primary" id="capturePhotoBtn">
+                <i class="fas fa-camera"></i> Capturar
+            </button>
         </div>
     </div>
 
@@ -243,6 +305,10 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user') || 'null');
 
+        // Variables para imágenes
+        let uploadedImageUrls = [];  // URLs de Cloudinary
+        let currentStream = null;
+
         if (!token || !user) window.location.href = 'login.html';
 
         // Cerrar sesión
@@ -253,20 +319,190 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
             window.location.href = 'index.html';
         });
 
-        // Preview de imágenes
-        document.getElementById('images').addEventListener('change', function (e) {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
-            Array.from(e.target.files).forEach(file => {
+        // ── MANEJO DE IMÁGENES CON CLOUDINARY ──────────────────
+        
+        // Subir imagen a Cloudinary
+        async function uploadImageToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/upload-image`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    return data.url;
+                } else {
+                    console.error('Error subiendo imagen:', data.error);
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error en upload:', error);
+                return null;
+            }
+        }
+
+        // Procesar archivos seleccionados
+        async function processFiles(files) {
+            if (uploadedImageUrls.length + files.length > 5) {
+                alert('Máximo 5 imágenes por producto');
+                return;
+            }
+            
+            const msgDiv = document.getElementById('modalMessage');
+            msgDiv.className = 'message loading';
+            msgDiv.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Subiendo imágenes...';
+            
+            for (const file of files) {
+                if (!file.type.startsWith('image/')) continue;
+                
+                // Mostrar preview
                 const reader = new FileReader();
-                reader.onload = ev => {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    preview.appendChild(img);
+                reader.onload = (e) => {
+                    addImagePreview(e.target.result, null);
                 };
                 reader.readAsDataURL(file);
+                
+                // Subir a Cloudinary
+                const url = await uploadImageToCloudinary(file);
+                if (url) {
+                    uploadedImageUrls.push(url);
+                    updateImagePreviewsWithUrls();
+                }
+            }
+            
+            msgDiv.className = '';
+            msgDiv.innerHTML = '';
+        }
+
+        // Agregar preview temporal
+        function addImagePreview(src, url) {
+            const preview = document.getElementById('imagePreview');
+            const item = document.createElement('div');
+            item.className = 'image-preview-item';
+            item.setAttribute('data-url', url || '');
+            item.innerHTML = `
+                <img src="${src}">
+                <span class="remove-image" onclick="removeImageFromPreview(this)">×</span>
+            `;
+            preview.appendChild(item);
+        }
+
+        // Actualizar previews con URLs reales
+        function updateImagePreviewsWithUrls() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            uploadedImageUrls.forEach((url, index) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item';
+                item.setAttribute('data-url', url);
+                item.innerHTML = `
+                    <img src="${url}">
+                    <span class="remove-image" onclick="removeImageFromPreview(this)">×</span>
+                `;
+                preview.appendChild(item);
             });
+        }
+
+        // Eliminar imagen del preview
+        window.removeImageFromPreview = function(element) {
+            const item = element.closest('.image-preview-item');
+            const url = item.getAttribute('data-url');
+            if (url) {
+                const index = uploadedImageUrls.indexOf(url);
+                if (index !== -1) uploadedImageUrls.splice(index, 1);
+            }
+            item.remove();
+        };
+
+        // ── CÁMARA ─────────────────────────────────────────────
+        
+        async function startCamera() {
+            const overlay = document.getElementById('cameraOverlay');
+            const video = document.getElementById('cameraVideo');
+            
+            try {
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+                currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = currentStream;
+                overlay.classList.add('is-open');
+            } catch (error) {
+                console.error('Error accediendo a la cámara:', error);
+                alert('No se pudo acceder a la cámara. Verifica los permisos.');
+            }
+        }
+
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            document.getElementById('cameraOverlay').classList.remove('is-open');
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(async (blob) => {
+                if (uploadedImageUrls.length >= 5) {
+                    alert('Máximo 5 imágenes por producto');
+                    stopCamera();
+                    return;
+                }
+                
+                // Mostrar preview inmediato
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    addImagePreview(e.target.result, null);
+                };
+                reader.readAsDataURL(blob);
+                
+                // Subir a Cloudinary
+                const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const url = await uploadImageToCloudinary(file);
+                if (url) {
+                    uploadedImageUrls.push(url);
+                    updateImagePreviewsWithUrls();
+                }
+                
+                stopCamera();
+            }, 'image/jpeg', 0.9);
+        }
+
+        // ── EVENTOS DE CÁMARA ─────────────────────────────────
+        document.getElementById('openCameraBtn').addEventListener('click', startCamera);
+        document.getElementById('closeCameraBtn').addEventListener('click', stopCamera);
+        document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
+        
+        // Mostrar/ocultar input file
+        document.getElementById('uploadFileBtn').addEventListener('click', () => {
+            const fileArea = document.getElementById('fileInputArea');
+            fileArea.style.display = fileArea.style.display === 'none' ? 'block' : 'none';
         });
+        
+        // Input file change
+        document.getElementById('images').addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            await processFiles(files);
+            this.value = ''; // Limpiar para permitir seleccionar más después
+        });
+
+        // Preview de imágenes existentes (al editar)
+        function loadExistingImages(urls) {
+            uploadedImageUrls = [...urls];
+            updateImagePreviewsWithUrls();
+        }
 
         // ── Cargar productos ──────────────────────────────────
         async function loadProducts() {
@@ -280,7 +516,6 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
                 const data = await res.json();
 
                 if (data.success && data.products?.length > 0) {
-                    // Actualizar stats
                     document.getElementById('statsTotal').textContent = data.products.length;
                     document.getElementById('statsActive').textContent = data.products.filter(p => p.status === 'active').length;
                     document.getElementById('statsSold').textContent = data.products.filter(p => p.status === 'sold').length;
@@ -289,39 +524,18 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
                         <div style="overflow-x:auto;">
                             <table class="products-table">
                                 <thead>
-                                    <tr>
-                                        <th>Imagen</th>
-                                        <th>Título</th>
-                                        <th>Precio</th>
-                                        <th>Categoría</th>
-                                        <th>Estado</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
+                                    <tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead>
                                 <tbody>
                                     ${data.products.map(p => `
                                         <tr>
-                                            <td>
-                                                ${p.images_urls?.[0]
-                                                    ? `<img src="${p.images_urls[0]}" class="product-image" alt="${esc(p.title)}" loading="lazy">`
-                                                    : `<div class="no-image"><i class="fas fa-image"></i></div>`
-                                                }
-                                            </td>
+                                            <td>${p.images_urls?.[0] ? `<img src="${p.images_urls[0]}" class="product-image" alt="${esc(p.title)}" loading="lazy">` : `<div class="no-image"><i class="fas fa-image"></i></div>`}</td>
                                             <td><strong>${esc(p.title)}</strong></td>
                                             <td style="color: var(--accent); font-weight: 700;">${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
                                             <td><span style="text-transform: capitalize;">${p.category}</span></td>
+                                            <td><span class="status-badge status-${p.status}">${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}</span></td>
                                             <td>
-                                                <span class="status-badge status-${p.status}">
-                                                    ${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-secondary" onclick="editProduct(${p.id})" style="margin-right: 6px;">
-                                                    <i class="fas fa-edit"></i> Editar
-                                                </button>
-                                                <button class="btn btn-danger" onclick="deleteProduct(${p.id})">
-                                                    <i class="fas fa-trash-alt"></i> Eliminar
-                                                </button>
+                                                <button class="btn btn-secondary" onclick="editProduct(${p.id})" style="margin-right: 6px;"><i class="fas fa-edit"></i> Editar</button>
+                                                <button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button>
                                             </td>
                                         </tr>
                                     `).join('')}
@@ -350,15 +564,17 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
 
         // ── Crear / editar ────────────────────────────────────
         function showCreateModal() {
+            uploadedImageUrls = [];
             document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Nuevo Producto';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
             document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('modalMessage').innerHTML = '';
+            document.getElementById('fileInputArea').style.display = 'none';
             document.getElementById('productModal').classList.add('is-open');
         }
 
-        async function editProduct(id) {
+        window.editProduct = async function(id) {
             try {
                 const res = await fetch(`${API_URL}/api/products/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -378,22 +594,18 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
                 document.getElementById('brand').value = p.brand || '';
                 document.getElementById('color').value = p.color || '';
                 document.getElementById('modalMessage').innerHTML = '';
-
-                const preview = document.getElementById('imagePreview');
-                preview.innerHTML = '';
-                p.images_urls?.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    preview.appendChild(img);
-                });
-
+                document.getElementById('fileInputArea').style.display = 'none';
+                
+                // Cargar imágenes existentes
+                loadExistingImages(p.images_urls || []);
+                
                 document.getElementById('productModal').classList.add('is-open');
             } catch (err) {
                 alert('Error al cargar: ' + err.message);
             }
-        }
+        };
 
-        async function deleteProduct(id) {
+        window.deleteProduct = async function(id) {
             if (!confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return;
             try {
                 const res = await fetch(`${API_URL}/api/products/${id}`, {
@@ -409,14 +621,14 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
             } catch (err) {
                 alert('Error: ' + err.message);
             }
-        }
+        };
 
         function closeModal() {
+            stopCamera();
             document.getElementById('productModal').classList.remove('is-open');
         }
 
-        // Cerrar modal al hacer clic afuera
-        document.getElementById('productModal').addEventListener('click', function (e) {
+        document.getElementById('productModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
@@ -437,8 +649,9 @@ DESCRIPCION: Panel del vendedor. Tablas convertidas a tarjetas en móvil,
             formData.append('condition', document.getElementById('condition').value);
             formData.append('brand', document.getElementById('brand').value.trim());
             formData.append('color', document.getElementById('color').value.trim());
-            const images = document.getElementById('images').files;
-            for (let i = 0; i < images.length; i++) formData.append('images', images[i]);
+            
+            // Enviar URLs de Cloudinary como JSON
+            formData.append('images_urls', JSON.stringify(uploadedImageUrls));
 
             try {
                 const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
