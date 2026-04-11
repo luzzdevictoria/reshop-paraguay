@@ -188,19 +188,33 @@
 
     // ── Botón "Buscar cerca de mí" ────────────────────────────
     function buildNearMeButton(referenceNode) {
-        if (document.getElementById('nearMeBtn')) return;
+        if (document.getElementById('nearMeBtn')) {
+            console.log('✅ Botón near-me ya existe');
+            return;
+        }
+        
         const grid = document.querySelector('#productsGrid, .products-grid');
-        if (!grid) return;
+        if (!grid) {
+            console.warn('⚠️ buildNearMeButton: No se encontró el grid de productos');
+            return;
+        }
+
+        console.log('📍 Creando botón "Buscar cerca de mí"');
 
         const btn = document.createElement('button');
         btn.id = 'nearMeBtn';
         btn.className = 'btn-near-me';
         btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
 
-        if (referenceNode?.parentNode) {
+        // Insertar el botón
+        if (referenceNode && referenceNode.parentNode) {
+            // Insertar después del botón de referencia
             referenceNode.parentNode.insertBefore(btn, referenceNode.nextSibling);
+            console.log('✅ Botón near-me insertado después de referencia');
         } else {
+            // Insertar antes del grid
             grid.parentNode?.insertBefore(btn, grid);
+            console.log('✅ Botón near-me insertado antes del grid');
         }
 
         let active = false;
@@ -212,11 +226,15 @@
                 btn.classList.remove('is-active');
                 btn.disabled = false;
                 if (typeof loadProducts === 'function') loadProducts();
+                console.log('🔄 Filtro "cerca de mí" desactivado');
             }
         };
 
         btn.addEventListener('click', async () => {
-            if (active) { window.mobileNearMe.reset(); return; }
+            if (active) { 
+                window.mobileNearMe.reset(); 
+                return; 
+            }
             if (!navigator.geolocation) {
                 showToast('Tu dispositivo no soporta geolocalización.', 'error');
                 return;
@@ -241,6 +259,7 @@
                             products.length > 0 ? 'success' : 'info'
                         );
                     } catch (err) {
+                        console.error('Error en fetchProductsNearMe:', err);
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
                         showToast('Error al buscar productos cercanos.', 'error');
@@ -255,6 +274,7 @@
                         3:'Se agotó el tiempo de espera.'
                     };
                     showToast(msgs[err.code] || 'Error al obtener ubicación.', 'error');
+                    console.error('Error de geolocalización:', err);
                 },
                 { timeout: 10000, maximumAge: 120000, enableHighAccuracy: false }
             );
@@ -565,7 +585,11 @@
     // ── Init ───────────────────────────────────────────────────
     function init() {
         if (!isMobile()) return;
+        
+        console.log('📱 Inicializando modo móvil...');
+        
         document.querySelector('.header')?.style && (document.querySelector('.header').style.display='none');
+        
         buildMobileHeader();
         buildMenuDrawer();
         buildBottomNav();
@@ -573,6 +597,16 @@
         buildMobileSearch();
         updateCartBadges();
         buildScrollToTop();
+        
+        // 🆕 Crear botón "Buscar cerca de mí" independientemente
+        // Esperar un poco para que el DOM esté listo
+        setTimeout(() => {
+            if (!document.getElementById('nearMeBtn')) {
+                console.log('📍 Creando botón "Buscar cerca de mí" directamente...');
+                buildNearMeButton(null);
+            }
+        }, 500);
+        
         addSwipeToClose(document.getElementById('menuDrawer'),    'menuOverlay',    'left');
         addSwipeToClose(document.getElementById('filtersDrawer'), 'filtersOverlay', 'right');
 
