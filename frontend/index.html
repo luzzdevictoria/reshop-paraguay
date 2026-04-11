@@ -552,16 +552,6 @@ HISTORIAL DE MODIFICACIONES:
             loadProducts();
             translatePage();
             
-            // Probar botón hamburguesa manualmente
-            if (window.innerWidth <= 768) {
-                console.log('Modo móvil detectado');
-                // Crear botón de prueba
-                const testBtn = document.createElement('button');
-                testBtn.className = 'hamburger';
-                testBtn.innerHTML = '<span></span><span></span><span></span>';
-                document.body.appendChild(testBtn);
-                console.log('Botón agregado al DOM');
-            }
         });
         
         // ============================================================
