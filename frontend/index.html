@@ -260,6 +260,11 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
 
             <!-- Grilla de productos -->
             <div class="products-grid-wrapper">
+                <!-- 🆕 BOTÓN BUSCAR CERCA DE MÍ (visible en desktop y móvil) -->
+                <button id="nearMeBtn" class="btn-near-me" style="background: #E8B86B; color: #333; width: 100%; padding: 12px; border-radius: 24px; font-weight: 600; border: none; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fas fa-location-dot"></i> Buscar cerca de mí
+                </button>
+                
                 <!-- Búsqueda desktop (dentro del layout, duplica el del header en móvil) -->
                 <div id="productsGrid" class="products-grid">
                     <div class="loading">
@@ -268,9 +273,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                     </div>
                 </div>
             </div>
-
-        </div>
-    </div>
 
     <!-- ========================================================
          FOOTER
@@ -483,6 +485,98 @@ if (nearMeBtn) {
         }
     });
 }
+        // ── Botón Buscar cerca de mí (evento directo) ────────────
+        const nearMeBtn = document.getElementById('nearMeBtn');
+        if (nearMeBtn) {
+            let active = false;
+            nearMeBtn.addEventListener('click', () => {
+                if (active) {
+                    active = false;
+                    nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                    nearMeBtn.classList.remove('is-active');
+                    nearMeBtn.style.background = '#E8B86B';
+                    nearMeBtn.style.color = '#333';
+                    loadProducts();
+                    return;
+                }
+                
+                if (!navigator.geolocation) {
+                    alert('Tu navegador no soporta geolocalización');
+                    return;
+                }
+                
+                nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Buscando productos cercanos...';
+                        
+                        try {
+                            const res = await fetch(`${API_URL}/api/products?limit=200`);
+                            const data = await res.json();
+                            
+                            if (data.success && data.products) {
+                                // Filtrar productos cercanos (simplificado)
+                                const nearby = data.products.filter(p => {
+                                    const lat = p.seller?.latitude;
+                                    const lng = p.seller?.longitude;
+                                    if (!lat || !lng) return false;
+                                    // Distancia aproximada
+                                    const dist = Math.sqrt(Math.pow(lat - latitude, 2) + Math.pow(lng - longitude, 2)) * 111;
+                                    return dist <= 10;
+                                });
+                                
+                                if (nearby.length > 0) {
+                                    active = true;
+                                    nearMeBtn.innerHTML = `<i class="fas fa-location-dot"></i> Cerca (${nearby.length}) ✕`;
+                                    nearMeBtn.classList.add('is-active');
+                                    nearMeBtn.style.background = '#28a745';
+                                    nearMeBtn.style.color = 'white';
+                                    renderNearbyProducts(nearby);
+                                } else {
+                                    nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                                    alert('No hay productos cerca de tu ubicación');
+                                }
+                            }
+                        } catch (err) {
+                            nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                            alert('Error al buscar productos');
+                        }
+                    },
+                    (err) => {
+                        nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                        alert('No se pudo obtener tu ubicación');
+                    }
+                );
+            });
+        }
+        
+        function renderNearbyProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+            // Renderizar productos (usar la misma lógica que loadProducts)
+            grid.innerHTML = products.map(p => {
+                const img = p.images_urls?.[0] || 'https://placehold.co/400x400/f0f0f0/999?text=Sin+foto';
+                const priceStr = new Intl.NumberFormat('es-PY').format(p.price);
+                return `
+                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+                        <div class="product-card__img-wrapper">
+                            <img src="${img}" alt="${esc(p.title)}" loading="lazy">
+                        </div>
+                        <div class="product-card__content">
+                            <h3 class="product-card__title">${esc(p.title)}</h3>
+                            <p class="product-card__price">${priceStr} Gs</p>
+                            <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(p.seller?.store_name || p.seller?.full_name || 'Vendedor')}</p>
+                            <span class="product-card__condition">${p.condition || 'Buen estado'}</span>
+                            <button class="product-card__button" onclick="event.stopPropagation(); window.location.href='product-detail.html?id=${p.id}'">
+                                <i class="fas fa-eye"></i> Ver producto
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
     </script>
 
     <!-- JS Móvil (carga al final) -->
