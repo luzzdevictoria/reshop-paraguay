@@ -209,6 +209,94 @@ app.get('/api/products', async (req, res) => {
 });
 
 // ============================================================
+// ENDPOINTS DE FAVORITOS
+// ============================================================
+
+// Agregar o quitar favorito
+app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
+    try {
+        const { product_id } = req.body;
+        
+        if (!product_id) {
+            return res.status(400).json({ success: false, error: 'Producto requerido' });
+        }
+        
+        // Verificar si ya existe
+        const { data: existing } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', req.user.id)
+            .eq('product_id', product_id)
+            .single();
+        
+        if (existing) {
+            // Eliminar favorito
+            const { error } = await supabase
+                .from('favorites')
+                .delete()
+                .eq('user_id', req.user.id)
+                .eq('product_id', product_id);
+            
+            if (error) throw error;
+            res.json({ success: true, action: 'removed', message: 'Eliminado de favoritos' });
+        } else {
+            // Agregar favorito
+            const { error } = await supabase
+                .from('favorites')
+                .insert({ user_id: req.user.id, product_id: product_id });
+            
+            if (error) throw error;
+            res.json({ success: true, action: 'added', message: 'Agregado a favoritos' });
+        }
+    } catch (error) {
+        console.error('Error en toggle favorito:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Obtener favoritos del usuario
+app.get('/api/favorites', authenticateToken, async (req, res) => {
+    try {
+        const { data: favorites, error } = await supabase
+            .from('favorites')
+            .select(`
+                product_id,
+                products (*)
+            `)
+            .eq('user_id', req.user.id)
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const products = favorites?.map(f => f.products) || [];
+        res.json({ success: true, products });
+    } catch (error) {
+        console.error('Error obteniendo favoritos:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Verificar si un producto está en favoritos
+app.get('/api/favorites/check/:productId', authenticateToken, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        
+        const { data: favorite, error } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', req.user.id)
+            .eq('product_id', productId)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        res.json({ success: true, isFavorite: !!favorite });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
 // RUTA DE PRODUCTO POR ID
 // ============================================================
 

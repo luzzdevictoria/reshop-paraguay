@@ -2,12 +2,12 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.0.0 - CON RESEÑAS Y CALIFICACIONES
+VERSION: 2.1.0 - CON FAVORITOS Y CALIFICACIONES
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Página de detalle de producto con reseñas y calificaciones.
+DESCRIPCION: Página de detalle de producto con reseñas, calificaciones y favoritos.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial
@@ -16,6 +16,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Listado de reseñas de otros compradores
 2026-04-11 - [ADD] Formulario para agregar reseña (solo compradores verificados)
 2026-04-11 - [ADD] Validación: solo se puede reseñar después de comprar
+2026-04-11 - [ADD] Botón de favoritos con toggle y verificación de estado
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -24,14 +25,14 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle del Producto - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -99,6 +100,10 @@ HISTORIAL DE MODIFICACIONES:
         .btn-primary:hover { background: #1e4452; }
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
+        .btn-fav { background: #E8B86B; color: #333; }
+        .btn-fav:hover { background: #d4a050; }
+        .btn-fav.active { background: #D95A41; color: white; }
+        .btn-fav.active:hover { background: #c44a32; }
         
         .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
         .error { text-align: center; padding: 50px; font-size: 1.2rem; color: #D95A41; }
@@ -117,6 +122,8 @@ HISTORIAL DE MODIFICACIONES:
             .product-price { font-size: 1.3rem; }
             .product-info label { width: 100px; }
             .review-header { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .product-actions { flex-direction: column; }
+            .product-actions .btn { width: 100%; margin-right: 0; margin-bottom: 8px; }
         }
     </style>
 </head>
@@ -232,6 +239,8 @@ HISTORIAL DE MODIFICACIONES:
                     currentProduct = data.product;
                     renderProduct(data.product); 
                     loadReviews();
+                    // Verificar favoritos después de renderizar
+                    setTimeout(() => checkFavorite(), 100);
                 } else { 
                     container.innerHTML = '<div class="error"><i class="fas fa-search"></i> Producto no encontrado</div>'; 
                 }
@@ -245,7 +254,7 @@ HISTORIAL DE MODIFICACIONES:
             const container = document.getElementById('productDetail');
             const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
             const conditionText = { 
-                'new_with_ta?': 'Nuevo con etiqueta', 'new_without_ta?': 'Nuevo sin etiqueta',
+                'new_with_tags': 'Nuevo con etiqueta', 'new_without_tags': 'Nuevo sin etiqueta',
                 'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable'
             }[product.condition] || product.condition;
             const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
@@ -270,9 +279,16 @@ HISTORIAL DE MODIFICACIONES:
                 <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
                 <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
                 <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
-                <div>
-                    <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})"><i class="fas fa-cart-plus"></i> Agregar al Carrito</button>
-                    <button class="btn btn-secondary" onclick="buyNow(${product.id})"><i class="fas fa-bolt"></i> Comprar Ahora</button>
+                <div class="product-actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
+                        <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                    </button>
+                    <button class="btn btn-secondary" onclick="buyNow(${product.id})">
+                        <i class="fas fa-bolt"></i> Comprar Ahora
+                    </button>
+                    <button class="btn btn-fav" id="favBtn" onclick="toggleFavorite()">
+                        <i class="far fa-heart"></i> Favorito
+                    </button>
                 </div>
                 <div id="message" class="message"></div>
             `;
@@ -422,7 +438,7 @@ HISTORIAL DE MODIFICACIONES:
                         body: JSON.stringify({
                             rating: selectedRating,
                             comment: comment,
-                            order_id: null // Por ahora null, idealmente pasar el order_id
+                            order_id: null
                         })
                     });
                     const data = await response.json();
@@ -455,6 +471,107 @@ HISTORIAL DE MODIFICACIONES:
                 }, 5000);
             }
         }
+
+        // ============================================================
+        // FAVORITOS
+        // ============================================================
+        async function checkFavorite() {
+            const token = localStorage.getItem('token');
+            if (!token || !productId) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/favorites/check/${productId}`, {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                const favBtn = document.getElementById('favBtn');
+                if (favBtn && data.isFavorite) {
+                    favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorito';
+                    favBtn.classList.add('active');
+                    favBtn.style.background = '#D95A41';
+                }
+            } catch (error) {
+                console.error('Error checking favorite:', error);
+            }
+        }
+
+        async function toggleFavorite() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('⚠️ Inicia sesión para agregar a favoritos');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const favBtn = document.getElementById('favBtn');
+            if (!favBtn) return;
+            
+            // Feedback visual inmediato
+            const originalContent = favBtn.innerHTML;
+            favBtn.disabled = true;
+            favBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> ...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/favorites/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.action === 'added') {
+                        favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorito';
+                        favBtn.classList.add('active');
+                        favBtn.style.background = '#D95A41';
+                        showMessage('✨ Producto agregado a tus favoritos', 'success');
+                    } else {
+                        favBtn.innerHTML = '<i class="far fa-heart"></i> Favorito';
+                        favBtn.classList.remove('active');
+                        favBtn.style.background = '#E8B86B';
+                        showMessage('🗑️ Producto removido de favoritos', 'success');
+                    }
+                } else {
+                    // Revertir en caso de error
+                    favBtn.innerHTML = originalContent;
+                    favBtn.disabled = false;
+                    showMessage(data.error || 'Error al actualizar favoritos', 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                favBtn.innerHTML = originalContent;
+                favBtn.disabled = false;
+                showMessage('Error de conexión: ' + error.message, 'error');
+            }
+        }
+
+        // Función auxiliar para mostrar mensajes temporales
+        function showMessage(msg, type) {
+            let messageDiv = document.getElementById('favMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'favMessage';
+                messageDiv.className = 'message';
+                const productDetail = document.getElementById('productDetail');
+                if (productDetail) {
+                    productDetail.appendChild(messageDiv);
+                }
+            }
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.className = 'message';
+                messageDiv.style.display = 'none';
+            }, 4000);
+        }
         
         // ============================================================
         // CARRITO
@@ -468,7 +585,7 @@ HISTORIAL DE MODIFICACIONES:
             localStorage.setItem('reshop_cart', JSON.stringify(cart));
             const messageDiv = document.getElementById('message');
             messageDiv.className = 'message success';
-            messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${quantity}x "${title}" agregado al carrito! <a href="cart.html" style="color:#155724;"><i class="fas fa-shopping-bag"></i> Ver carrito →</a>`;
+            messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${quantity}x "${escapeHtml(title)}" agregado al carrito! <a href="cart.html" style="color:#155724;"><i class="fas fa-shopping-bag"></i> Ver carrito →</a>`;
             setTimeout(() => { messageDiv.className = 'message'; messageDiv.innerHTML = ''; }, 3000);
         }
         

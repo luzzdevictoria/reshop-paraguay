@@ -1,1 +1,258 @@
-<!DOCTYPE html> 
+<!--
+================================================================================
+ARCHIVO: favorites.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 1.0.0
+CREADO: 2026-04-11
+ACTUALIZADO: 2026-04-11
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Página de productos favoritos del usuario.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Favoritos - ReShop Paraguay</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        
+        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
+        .header i { margin-right: 6px; }
+        
+        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .logo-img:hover { transform: scale(1.02); }
+        .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header-title h1 i { margin-right: 8px; color: #E8B86B; }
+        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .user-menu { display: inline-block; margin-left: 15px; }
+        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        
+        .product-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; position: relative; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        .product-card h3 { color: #2A5C6E; margin-bottom: 8px; font-size: 1.1rem; }
+        .product-card h3 i { margin-right: 6px; color: #E8B86B; }
+        .product-card p { color: #666; margin-bottom: 10px; font-size: 0.85rem; line-height: 1.4; }
+        .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
+        .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
+        .product-category { font-size: 0.75rem; color: #888; margin-top: 8px; }
+        .remove-fav { position: absolute; top: 10px; right: 10px; background: #D95A41; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+        .remove-fav:hover { background: #c04a33; transform: scale(1.05); }
+        
+        .loading, .empty { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
+        .error { color: #D95A41; }
+        
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 40px; font-size: 0.8rem; }
+        
+        @media (max-width: 600px) {
+            .logo-img { height: 55px; }
+            .header-title h1 { font-size: 1.2rem; }
+            .products-grid { gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
+            </div>
+        </div>
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="favorites.html"><i class="fas fa-heart"></i> Favoritos</a>
+            <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
+            <span id="authLinks">
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+            </span>
+            <span id="userMenu" style="display: none;" class="user-menu">
+                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-heart"></i> Mis Favoritos</h2>
+        <div id="favoritesGrid" class="products-grid">
+            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando favoritos...</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://reshop-backend.vercel.app';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = 'login.html?redirect=favorites.html';
+        }
+        
+        // ============================================================
+        // AUTENTICACION
+        // ============================================================
+        function updateUserMenu() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const authLinks = document.getElementById('authLinks');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+            const dashboardLink = document.getElementById('dashboardLink');
+            const adminLink = document.getElementById('adminLink');
+
+            if (token && user) {
+                authLinks.style.display = 'none';
+                userMenu.style.display = 'inline-block';
+                userName.innerHTML = user.full_name || user.email;
+                if (dashboardLink && user.role === 'seller') dashboardLink.style.display = 'inline';
+                if (adminLink && user.role === 'admin') adminLink.style.display = 'inline';
+            } else {
+                authLinks.style.display = 'inline';
+                userMenu.style.display = 'none';
+                if (dashboardLink) dashboardLink.style.display = 'none';
+                if (adminLink) adminLink.style.display = 'none';
+            }
+        }
+
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('reshop_cart');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+        
+        // ============================================================
+        // FAVORITOS
+        // ============================================================
+        async function loadFavorites() {
+            const container = document.getElementById('favoritesGrid');
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando favoritos...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.products && data.products.length > 0) {
+                    let html = '';
+                    for (const product of data.products) {
+                        const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
+                        const conditionText = {
+                            'new_with_tag': 'Nuevo con etiqueta',
+                            'new_without_tag': 'Nuevo sin etiqueta',
+                            'very_good': 'Muy bueno',
+                            'good': 'Bueno',
+                            'acceptable': 'Aceptable'
+                        }[product.condition] || product.condition;
+                        
+                        html += `
+                            <div class="product-card" data-id="${product.id}">
+                                <button class="remove-fav" onclick="removeFavorite(event, ${product.id})"><i class="fas fa-trash-alt"></i></button>
+                                <div onclick="window.location.href='product-detail.html?id=${product.id}'">
+                                    <h3><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h3>
+                                    <p>${escapeHtml(product.description || 'Sin descripción')}</p>
+                                    <div class="price">${priceFormatted} ₲</div>
+                                    <div class="badge"><i class="fas fa-star"></i> ${conditionText}</div>
+                                    <div class="product-category"><i class="fas fa-tshirt"></i> ${product.category} | <i class="fas fa-ruler"></i> ${product.size || 'Talla única'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div class="empty"><i class="fas fa-heart-broken"></i> No tienes productos favoritos.<br><br><a href="index.html" style="color: #2A5C6E;">Explorar productos →</a></div>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> Error al cargar favoritos: ${error.message}</div>`;
+            }
+        }
+        
+        async function removeFavorite(event, productId) {
+            event.stopPropagation();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/favorites/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Eliminar la tarjeta del DOM
+                    const card = document.querySelector(`.product-card[data-id="${productId}"]`);
+                    if (card) card.remove();
+                    
+                    // Si no quedan favoritos, mostrar mensaje
+                    const remaining = document.querySelectorAll('.product-card').length;
+                    if (remaining === 0) {
+                        document.getElementById('favoritesGrid').innerHTML = '<div class="empty"><i class="fas fa-heart-broken"></i> No tienes productos favoritos.<br><br><a href="index.html" style="color: #2A5C6E;">Explorar productos →</a></div>';
+                    }
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================================
+        // INICIALIZACION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserMenu();
+            setupLogout();
+            loadFavorites();
+        });
+    </script>
+</body>
+</html>
