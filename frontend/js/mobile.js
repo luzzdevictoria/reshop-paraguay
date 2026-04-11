@@ -6,6 +6,7 @@ function initHamburgerMenu() {
     const hamburger = document.createElement('button');
     hamburger.className = 'hamburger';
     hamburger.innerHTML = '<span></span><span></span><span></span>';
+	hamburger.style.backgroundColor = '#2A5C6E';
     document.body.appendChild(hamburger);
 
     const drawer = document.createElement('div');
