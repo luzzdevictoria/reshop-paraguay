@@ -2,18 +2,21 @@
 ================================================================================
 ARCHIVO: profile.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.1.0
+VERSION: 1.2.0 - CON GEOLOCALIZACIÓN DE TIENDA
 CREADO: 2026-04-11
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Perfil de usuario. Permite ver y editar información personal,
-             incluyendo número de cédula (document_id), dirección, y datos de tienda.
+             incluyendo número de cédula (document_id), dirección, y datos de tienda
+             con geolocalización opcional.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-11 - Creacion inicial del perfil de usuario
 2026-04-11 - [ADD] Campo document_id (Cédula de Identidad / CI)
 2026-04-11 - [ADD] Carga y edición de document_id desde API
+2026-04-11 - [ADD] Geolocalización de tienda (latitud/longitud)
+2026-04-11 - [ADD] Opción para mostrar dirección pública
 2026-04-11 - [FIX] Header con logo y navegación profesional
 ================================================================================
 -->
@@ -23,14 +26,16 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -68,6 +73,8 @@ HISTORIAL DE MODIFICACIONES:
         .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .btn-primary { background: #2A5C6E; color: white; width: 100%; }
         .btn-primary:hover { background: #1e4452; }
+        .btn-secondary { background: #E8B86B; color: #333; }
+        .btn-secondary:hover { background: #d4a050; }
         
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
@@ -76,6 +83,10 @@ HISTORIAL DE MODIFICACIONES:
         
         .seller-fields { border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; }
         .seller-fields h3 { color: #2A5C6E; margin-bottom: 15px; }
+        
+        .location-btn { width: 100%; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input { width: auto; }
         
         .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
         
@@ -115,9 +126,7 @@ HISTORIAL DE MODIFICACIONES:
     <div class="container">
         <div class="profile-card">
             <div class="profile-header">
-                <div class="profile-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
+                <div class="profile-avatar"><i class="fas fa-user"></i></div>
                 <div class="profile-title">
                     <h2 id="profileName">Cargando...</h2>
                     <p id="profileRole"></p>
@@ -168,6 +177,23 @@ HISTORIAL DE MODIFICACIONES:
                         <label><i class="fas fa-align-left"></i> Descripción de la tienda</label>
                         <textarea id="storeDescription" placeholder="Describe tu tienda..."></textarea>
                     </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Ubicación de la tienda</label>
+                        <button type="button" class="btn btn-secondary location-btn" onclick="getCurrentLocation()">
+                            <i class="fas fa-location-dot"></i> Usar mi ubicación actual
+                        </button>
+                        <input type="hidden" id="latitude">
+                        <input type="hidden" id="longitude">
+                        <p id="locationDisplay" style="font-size:0.8rem; color:#666; margin-top:5px;"></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="addressVisible"> 
+                            <span>Mostrar dirección pública en mi tienda</span>
+                        </label>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar cambios</button>
@@ -186,13 +212,8 @@ HISTORIAL DE MODIFICACIONES:
         const token = localStorage.getItem('token');
         let currentUser = null;
         
-        if (!token) {
-            window.location.href = 'login.html?redirect=profile.html';
-        }
+        if (!token) { window.location.href = 'login.html?redirect=profile.html'; }
         
-        // ============================================================
-        // FUNCIONES DE AUTENTICACION
-        // ============================================================
         function updateUserMenu() {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -206,13 +227,8 @@ HISTORIAL DE MODIFICACIONES:
                 authLinks.style.display = 'none';
                 userMenu.style.display = 'inline-block';
                 userName.innerHTML = user.full_name || user.email;
-                
-                if (dashboardLink && user.role === 'seller') {
-                    dashboardLink.style.display = 'inline';
-                }
-                if (adminLink && user.role === 'admin') {
-                    adminLink.style.display = 'inline';
-                }
+                if (dashboardLink && user.role === 'seller') dashboardLink.style.display = 'inline';
+                if (adminLink && user.role === 'admin') adminLink.style.display = 'inline';
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
@@ -234,16 +250,40 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
         
-        // ============================================================
-        // CARGAR PERFIL
-        // ============================================================
+        function getCurrentLocation() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            if (navigator.geolocation) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+                btn.disabled = true;
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        document.getElementById('latitude').value = lat.toFixed(6);
+                        document.getElementById('longitude').value = lng.toFixed(6);
+                        document.getElementById('locationDisplay').innerHTML = `✅ <strong>Ubicación guardada:</strong><br>📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    },
+                    (error) => {
+                        let errorMsg = 'Error al obtener ubicación';
+                        if (error.code === error.PERMISSION_DENIED) errorMsg = 'Permiso de ubicación denegado. Actívalo en la configuración de tu navegador.';
+                        else if (error.code === error.POSITION_UNAVAILABLE) errorMsg = 'Información de ubicación no disponible.';
+                        else if (error.code === error.TIMEOUT) errorMsg = 'Tiempo de espera agotado. Intenta nuevamente.';
+                        alert(errorMsg);
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else { alert('Tu navegador no soporta geolocalización. Usa Chrome, Firefox o Edge actualizado.'); }
+        }
+        
         async function loadProfile() {
             try {
-                const response = await fetch(`${API_URL}/api/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await fetch(`${API_URL}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
-                
                 if (data.success && data.user) {
                     currentUser = data.user;
                     document.getElementById('profileName').innerText = currentUser.full_name;
@@ -255,24 +295,23 @@ HISTORIAL DE MODIFICACIONES:
                     document.getElementById('address').value = currentUser.address || '';
                     document.getElementById('city').value = currentUser.city || '';
                     
-                    // Mostrar campos de vendedor
                     if (currentUser.role === 'seller' || currentUser.role === 'admin') {
                         document.getElementById('sellerFields').style.display = 'block';
                         document.getElementById('storeName').value = currentUser.store_name || '';
                         document.getElementById('storeDescription').value = currentUser.store_description || '';
+                        if (currentUser.latitude && currentUser.longitude) {
+                            document.getElementById('latitude').value = currentUser.latitude;
+                            document.getElementById('longitude').value = currentUser.longitude;
+                            document.getElementById('locationDisplay').innerHTML = `✅ <strong>Ubicación guardada:</strong><br>📍 ${currentUser.latitude}, ${currentUser.longitude}`;
+                        }
+                        if (currentUser.address_visible !== undefined) { document.getElementById('addressVisible').checked = currentUser.address_visible; }
                     }
                     
-                    // Actualizar localStorage
                     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
                     storedUser.full_name = currentUser.full_name;
                     localStorage.setItem('user', JSON.stringify(storedUser));
-                } else {
-                    showMessage('Error al cargar perfil', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('Error de conexión', 'error');
-            }
+                } else { showMessage('Error al cargar perfil', 'error'); }
+            } catch (error) { console.error('Error:', error); showMessage('Error de conexión', 'error'); }
         }
         
         function getRoleBadge(role) {
@@ -281,12 +320,8 @@ HISTORIAL DE MODIFICACIONES:
             return '<span style="background:#2A5C6E; padding:3px 10px; border-radius:15px; font-size:0.8rem;">🛍️ Comprador</span>';
         }
         
-        // ============================================================
-        // ACTUALIZAR PERFIL
-        // ============================================================
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const updateData = {
                 full_name: document.getElementById('fullName').value.trim(),
                 phone: document.getElementById('phone').value.trim(),
@@ -298,59 +333,35 @@ HISTORIAL DE MODIFICACIONES:
             if (currentUser?.role === 'seller' || currentUser?.role === 'admin') {
                 updateData.store_name = document.getElementById('storeName').value.trim();
                 updateData.store_description = document.getElementById('storeDescription').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                if (lat && lng) { updateData.latitude = parseFloat(lat); updateData.longitude = parseFloat(lng); }
+                updateData.address_visible = document.getElementById('addressVisible').checked;
             }
             
             showMessage('Actualizando perfil...', 'loading');
-            
             try {
                 const response = await fetch(`${API_URL}/api/auth/me`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(updateData)
                 });
                 const data = await response.json();
-                
                 if (data.success) {
                     showMessage('Perfil actualizado correctamente', 'success');
-                    loadProfile(); // Recargar datos
-                    setTimeout(() => {
-                        const msgDiv = document.getElementById('message');
-                        msgDiv.className = 'message';
-                    }, 3000);
-                } else {
-                    showMessage(data.error || 'Error al actualizar', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('Error de conexión', 'error');
-            }
+                    loadProfile();
+                    setTimeout(() => { const msgDiv = document.getElementById('message'); msgDiv.className = 'message'; }, 3000);
+                } else { showMessage(data.error || 'Error al actualizar', 'error'); }
+            } catch (error) { console.error('Error:', error); showMessage('Error de conexión', 'error'); }
         });
         
         function showMessage(msg, type) {
             const messageDiv = document.getElementById('message');
             messageDiv.className = `message ${type}`;
             messageDiv.innerHTML = type === 'loading' ? `<i class="fas fa-spinner fa-pulse"></i> ${msg}` : `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    if (messageDiv.className === `message ${type}`) {
-                        messageDiv.className = 'message';
-                    }
-                }, 4000);
-            }
+            if (type !== 'loading') { setTimeout(() => { if (messageDiv.className === `message ${type}`) { messageDiv.className = 'message'; } }, 4000); }
         }
         
-        // ============================================================
-        // INICIALIZACION
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            updateUserMenu();
-            setupLogout();
-            loadProfile();
-        });
+        document.addEventListener('DOMContentLoaded', () => { updateUserMenu(); setupLogout(); loadProfile(); });
     </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: dashboard-vendedor.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.0.0
+VERSION: 2.2.0
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-11
 RESPONSABLE: Pedro José Pirovani
@@ -17,6 +17,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Endpoint /api/seller/orders para cargar ventas del vendedor
 2026-04-11 - [ADD] Modal para actualizar estado de órdenes
 2026-04-11 - [ADD] Botones de acción: Pagado, Enviado, Entregado, Cancelado
+2026-04-11 - [ADD] Campo "Origen de la prenda" en formulario de productos
+2026-04-11 - [ADD] Envío de geolocalización del vendedor al crear producto
 2026-04-11 - [IMPROVE] Diseño de tabs y tablas responsive
 ================================================================================
 -->
@@ -26,14 +28,16 @@ HISTORIAL DE MODIFICACIONES:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel del Vendedor - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,13 +55,10 @@ HISTORIAL DE MODIFICACIONES:
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
         .btn-success { background: #28a745; color: white; }
-        .btn-success:hover { background: #1e7e34; }
         .btn-info { background: #17a2b8; color: white; }
-        .btn-info:hover { background: #138496; }
         
-        /* Tabs */
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 1rem; border-radius: 8px 8px 0 0; transition: all 0.2s; }
+        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 1rem; border-radius: 8px 8px 0 0; }
         .tab-btn.active { background: #2A5C6E; color: white; }
         .tab-btn:hover:not(.active) { background: #e0e0e0; }
         .tab-content { display: none; }
@@ -66,7 +67,6 @@ HISTORIAL DE MODIFICACIONES:
         .products-table, .orders-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .products-table th, .products-table td, .orders-table th, .orders-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         .products-table th, .orders-table th { background: #2A5C6E; color: white; }
-        .products-table tr:hover, .orders-table tr:hover { background: #f9f9f9; }
         .product-image { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
         .order-status { padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
         .status-pending_payment { background: #ffc107; color: #333; }
@@ -102,13 +102,11 @@ HISTORIAL DE MODIFICACIONES:
         </div>
     </div>
     <div class="container">
-        <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('products')"><i class="fas fa-box"></i> Mis Productos</button>
             <button class="tab-btn" onclick="showTab('sales')"><i class="fas fa-chart-line"></i> Mis Ventas</button>
         </div>
         
-        <!-- Tab: Mis Productos -->
         <div id="productsTab" class="tab-content active">
             <div class="panel-header">
                 <h2><i class="fas fa-boxes"></i> Mis Productos</h2>
@@ -117,7 +115,6 @@ HISTORIAL DE MODIFICACIONES:
             <div id="productsContainer"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div></div>
         </div>
         
-        <!-- Tab: Mis Ventas -->
         <div id="salesTab" class="tab-content">
             <h2><i class="fas fa-chart-line"></i> Mis Ventas</h2>
             <div id="salesContainer"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando ventas...</div></div>
@@ -132,7 +129,7 @@ HISTORIAL DE MODIFICACIONES:
                 <input type="hidden" id="productId">
                 <div class="form-group"><label>Título *</label><input type="text" id="title" required></div>
                 <div class="form-group"><label>Descripción</label><textarea id="description" rows="3"></textarea></div>
-                <div class="form-group"><label>Precio (?) *</label><input type="number" id="price" required></div>
+                <div class="form-group"><label>Precio ₲ *</label><input type="number" id="price" required></div>
                 <div class="form-group">
                     <label>Categoría *</label>
                     <select id="category" required>
@@ -149,8 +146,8 @@ HISTORIAL DE MODIFICACIONES:
                 <div class="form-group">
                     <label>Estado</label>
                     <select id="condition">
-                        <option value="new_with_ta?">Nuevo con etiqueta</option>
-                        <option value="new_without_ta?">Nuevo sin etiqueta</option>
+                        <option value="new_with_tag">Nuevo con etiqueta</option>
+                        <option value="new_without_tag">Nuevo sin etiqueta</option>
                         <option value="very_good">Muy bueno</option>
                         <option value="good">Bueno</option>
                         <option value="acceptable">Aceptable</option>
@@ -158,6 +155,21 @@ HISTORIAL DE MODIFICACIONES:
                 </div>
                 <div class="form-group"><label>Marca</label><input type="text" id="brand"></div>
                 <div class="form-group"><label>Color</label><input type="text" id="color"></div>
+                <div class="form-group">
+                    <label><i class="fas fa-globe-americas"></i> Origen de la prenda</label>
+                    <select id="origin" required>
+                        <option value="">Seleccionar origen</option>
+                        <option value="PAR">🇵🇾 Paraguay</option>
+                        <option value="USA">🇺🇸 Estados Unidos</option>
+                        <option value="BRA">🇧🇷 Brasil</option>
+                        <option value="EU">🇪🇺 Europa</option>
+                        <option value="CHN">🇨🇳 China</option>
+                        <option value="JPN">🇯🇵 Japón</option>
+                        <option value="KOR">🇰🇷 Corea</option>
+                        <option value="ARG">🇦🇷 Argentina</option>
+                        <option value="MEX">🇲🇽 México</option>
+                    </select>
+                </div>
                 <div class="form-group"><label>Imágenes del producto</label><input type="file" id="images" multiple accept="image/jpeg,image/png,image/webp"><div id="imagePreview" class="image-preview"></div></div>
                 <div id="modalMessage" class="message"></div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -209,27 +221,17 @@ HISTORIAL DE MODIFICACIONES:
         let currentUser = null;
         
         if (!token) window.location.href = 'login.html';
+        try { currentUser = JSON.parse(localStorage.getItem('user') || '{}'); } catch(e) { console.error(e); }
         
-        try {
-            currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        } catch(e) { console.error(e); }
-        
-        // ============================================================
-        // TABS
-        // ============================================================
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(`${tab}Tab`).classList.add('active');
             event.target.classList.add('active');
-            
             if (tab === 'products') loadProducts();
             if (tab === 'sales') loadSales();
         }
         
-        // ============================================================
-        // PRODUCTOS
-        // ============================================================
         document.getElementById('images').addEventListener('change', function(e) {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
@@ -247,14 +249,16 @@ HISTORIAL DE MODIFICACIONES:
                 const response = await fetch(`${API_URL}/api/products/seller/${currentUser.id}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
                 if (data.success && data.products && data.products.length > 0) {
-                    let html = `<div style="overflow-x:auto;"><table class="products-table"><thead><tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
+                    let html = `<div style="overflow-x:auto;"><table class="products-table"><thead><tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Categoría</th><th>Origen</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
                     for (const p of data.products) {
                         const firstImage = p.images_urls && p.images_urls[0] ? p.images_urls[0] : '';
+                        const originFlag = { 'PAR': '🇵🇾', 'USA': '🇺🇸', 'BRA': '🇧🇷', 'EU': '🇪🇺', 'CHN': '🇨🇳', 'JPN': '🇯🇵', 'KOR': '🇰🇷', 'ARG': '🇦🇷', 'MEX': '🇲🇽' }[p.origin] || '🌍';
                         html += `<tr>
                             <td>${firstImage ? `<img src="${firstImage}" class="product-image">` : '<i class="fas fa-image"></i>'}</td>
                             <td><i class="fas fa-tag"></i> ${escapeHtml(p.title)}</td>
                             <td>${new Intl.NumberFormat('es-PY').format(p.price)} ₲</td>
                             <td>${p.category}</td>
+                            <td>${p.origin ? `${originFlag} ${p.origin}` : '-'}</td>
                             <td>${p.status}</td>
                             <td><button class="btn btn-secondary" style="margin-right:5px;" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i> Editar</button><button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button></td>
                         </tr>`;
@@ -269,6 +273,7 @@ HISTORIAL DE MODIFICACIONES:
             document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Nuevo Producto';
             document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
+            document.getElementById('origin').value = 'PAR';
             document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('productModal').style.display = 'flex';
         }
@@ -289,6 +294,7 @@ HISTORIAL DE MODIFICACIONES:
                     document.getElementById('condition').value = p.condition || 'good';
                     document.getElementById('brand').value = p.brand || '';
                     document.getElementById('color').value = p.color || '';
+                    document.getElementById('origin').value = p.origin || 'PAR';
                     document.getElementById('imagePreview').innerHTML = '';
                     if (p.images_urls && p.images_urls.length) {
                         const preview = document.getElementById('imagePreview');
@@ -320,6 +326,7 @@ HISTORIAL DE MODIFICACIONES:
             formData.append('condition', document.getElementById('condition').value);
             formData.append('brand', document.getElementById('brand').value.trim());
             formData.append('color', document.getElementById('color').value.trim());
+            formData.append('origin', document.getElementById('origin').value);
             const images = document.getElementById('images').files;
             for (let i = 0; i < images.length; i++) formData.append('images', images[i]);
             const url = productId ? `${API_URL}/api/products/${productId}` : `${API_URL}/api/products`;
@@ -333,59 +340,35 @@ HISTORIAL DE MODIFICACIONES:
 
         function closeModal() { document.getElementById('productModal').style.display = 'none'; }
         
-        // ============================================================
-        // VENTAS (NUEVO)
-        // ============================================================
         async function loadSales() {
             const container = document.getElementById('salesContainer');
             container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando ventas...</div>';
             try {
                 const response = await fetch(`${API_URL}/api/seller/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
-                
                 if (data.success && data.orders && data.orders.length > 0) {
-                    let html = `<div style="overflow-x:auto;"><table class="orders-table"><thead>
-                        <th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Total</th><th>Comisión (10%)</th><th>Tu Ganancia</th><th>Estado</th><th>Acciones</th>
-                    </thead><tbody>`;
-                    
+                    let html = `<div style="overflow-x:auto;"><table class="orders-table"><thead><tr><th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Total</th><th>Comisión (10%)</th><th>Tu Ganancia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>`;
                     for (const order of data.orders) {
                         const statusClass = `status-${order.order_status}`;
-                        const statusText = {
-                            'pending_payment': '⏳ Pendiente pago',
-                            'paid': '✅ Pagado',
-                            'processing': '📦 Procesando',
-                            'shipped': '🚚 Enviado',
-                            'delivered': '🏠 Entregado',
-                            'cancelled': '❌ Cancelado'
-                        }[order.order_status] || order.order_status;
-                        
+                        const statusText = { 'pending_payment': '⏳ Pendiente pago', 'paid': '✅ Pagado', 'processing': '📦 Procesando', 'shipped': '🚚 Enviado', 'delivered': '🏠 Entregado', 'cancelled': '❌ Cancelado' }[order.order_status] || order.order_status;
                         html += `<tr>
                             <td>${order.order_number}</td>
                             <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
                             <td>${escapeHtml(order.buyer?.full_name || order.buyer?.email || 'N/A')}</td>
                             <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ₲</td>
                             <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ₲</td>
-                            <td><strong>${new Intl.NumberFormat('es-PY').format(order.seller_payout || order.total_amount)} ?</strong></td>
+                            <td><strong>${new Intl.NumberFormat('es-PY').format(order.seller_payout || order.total_amount)} ₲</strong></td>
                             <td><span class="order-status ${statusClass}">${statusText}</span></td>
                             <td><button class="btn btn-info btn-sm" onclick="updateOrderStatus(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar Estado</button></td>
                         </tr>`;
                     }
                     html += '</tbody></table></div>';
                     container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No tienes ventas aún.</div>';
-                }
-            } catch (error) {
-                console.error('Error cargando ventas:', error);
-                container.innerHTML = `<div class="error">Error al cargar ventas: ${error.message}</div>`;
-            }
+                } else { container.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i> No tienes ventas aún.</div>'; }
+            } catch (error) { container.innerHTML = `<div class="error">Error al cargar ventas: ${error.message}</div>`; }
         }
         
-        // ============================================================
-        // ACTUALIZAR ESTADO DE ORDEN
-        // ============================================================
         let currentOrderId = null;
-        
         function updateOrderStatus(orderId, currentStatus) {
             currentOrderId = orderId;
             document.getElementById('currentOrderId').value = orderId;
@@ -393,11 +376,7 @@ HISTORIAL DE MODIFICACIONES:
             document.getElementById('trackingNumber').value = '';
             document.getElementById('orderStatusModal').style.display = 'flex';
         }
-        
-        function closeOrderStatusModal() {
-            document.getElementById('orderStatusModal').style.display = 'none';
-            currentOrderId = null;
-        }
+        function closeOrderStatusModal() { document.getElementById('orderStatusModal').style.display = 'none'; currentOrderId = null; }
         
         document.getElementById('orderStatusForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -405,25 +384,16 @@ HISTORIAL DE MODIFICACIONES:
             const order_status = document.getElementById('orderStatus').value;
             const shipping_tracking_number = document.getElementById('trackingNumber').value.trim();
             const msgDiv = document.getElementById('orderStatusMessage');
-            
             try {
                 const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ order_status, shipping_tracking_number: shipping_tracking_number || null })
                 });
                 const data = await response.json();
-                
                 if (data.success) {
                     msgDiv.className = 'message success';
                     msgDiv.innerHTML = '<i class="fas fa-check-circle"></i> Estado actualizado correctamente';
-                    setTimeout(() => {
-                        closeOrderStatusModal();
-                        loadSales();
-                    }, 1500);
+                    setTimeout(() => { closeOrderStatusModal(); loadSales(); }, 1500);
                 } else {
                     msgDiv.className = 'message error';
                     msgDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.error;
@@ -438,15 +408,8 @@ HISTORIAL DE MODIFICACIONES:
         
         function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         
-        document.getElementById('logoutBtn').addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            localStorage.removeItem('reshop_cart');
-            localStorage.removeItem('token'); 
-            localStorage.removeItem('user'); 
-            window.location.href = 'index.html'; 
-        });
+        document.getElementById('logoutBtn').addEventListener('click', (e) => { e.preventDefault(); localStorage.removeItem('reshop_cart'); localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'index.html'; });
         
-        // Cargar productos por defecto
         loadProducts();
     </script>
 </body>
