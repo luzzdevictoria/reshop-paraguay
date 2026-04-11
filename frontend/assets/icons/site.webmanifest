@@ -1,21 +1,24 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "ReShop Paraguay",
+  "short_name": "ReShop",
+  "description": "Shopping Virtual de Ropa de Segunda Mano",
   "icons": [
     {
-      "src": "/web-app-manifest-192x192.png",
+      "src": "assets/icons/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "/web-app-manifest-512x512.png",
+      "src": "assets/icons/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  "theme_color": "#2A5C6E",
+  "background_color": "#2A5C6E",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait"
 }
