@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Ayuda - ReShop Paraguay</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <style>
+        :root {
+            --primary: #2A5C6E;
+            --secondary: #E8B86B;
+            --accent: #D95A41;
+            --bg: #f5f5f5;
+            --white: #ffffff;
+            --text: #333333;
+            --text-light: #666666;
+            --border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); }
+
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
+        .header i { margin-right: 6px; }
+        
+        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .logo-img { height: 85px; width: auto; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header-title h1 i { margin-right: 8px; color: var(--secondary); }
+        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .user-menu { display: inline-block; margin-left: 15px; }
+        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-weight: 500; }
+        .back-link:hover { text-decoration: underline; }
+        
+        .page-title { color: var(--primary); font-size: 1.8rem; margin-bottom: 10px; }
+        .page-subtitle { color: var(--text-light); margin-bottom: 30px; border-bottom: 2px solid var(--border); padding-bottom: 15px; }
+        
+        /* Search box */
+        .search-box { background: white; border-radius: 50px; padding: 5px 15px; display: flex; align-items: center; margin-bottom: 30px; box-shadow: var(--shadow); }
+        .search-box i { color: var(--text-light); font-size: 1.1rem; }
+        .search-box input { flex: 1; padding: 12px; border: none; outline: none; font-size: 1rem; background: transparent; }
+        .search-box button { background: var(--primary); color: white; border: none; border-radius: 40px; padding: 10px 25px; cursor: pointer; }
+        
+        /* Categories */
+        .help-categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .category-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.2s; }
+        .category-card:hover { transform: translateY(-5px); }
+        .category-card i { font-size: 2rem; color: var(--primary); margin-bottom: 10px; }
+        .category-card h3 { color: var(--primary); margin-bottom: 10px; }
+        .category-card p { color: var(--text-light); font-size: 0.85rem; }
+        
+        /* Content sections */
+        .help-section { display: none; background: white; border-radius: 12px; padding: 30px; box-shadow: var(--shadow); margin-bottom: 30px; }
+        .help-section.active { display: block; }
+        .help-section h2 { color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+        .help-section h3 { color: var(--primary); margin: 20px 0 10px; }
+        .help-section p { color: var(--text); line-height: 1.6; margin-bottom: 15px; }
+        .help-section ul, .help-section ol { margin: 15px 0 15px 25px; color: var(--text); line-height: 1.6; }
+        .help-section li { margin-bottom: 8px; }
+        
+        .faq-item { margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .faq-question { background: #f9f9f9; padding: 15px; cursor: pointer; font-weight: 600; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .faq-question i { transition: transform 0.3s; }
+        .faq-question.active i { transform: rotate(180deg); }
+        .faq-answer { padding: 0 15px; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
+        .faq-answer.show { padding: 15px; max-height: 500px; }
+        
+        .contact-card { background: var(--bg); border-radius: 12px; padding: 25px; text-align: center; margin-top: 30px; }
+        .contact-card h3 { color: var(--primary); margin-bottom: 15px; }
+        .contact-methods { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 20px; }
+        .contact-method { text-align: center; }
+        .contact-method i { font-size: 2rem; color: var(--primary); margin-bottom: 8px; }
+        .contact-method a { color: var(--text); text-decoration: none; }
+        .contact-method a:hover { color: var(--primary); }
+        
+        .footer { background: var(--primary); color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .page-title { font-size: 1.4rem; }
+            .help-section { padding: 20px; }
+            .contact-methods { gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
+            </div>
+        </div>
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <span id="authLinks">
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+            </span>
+            <span id="userMenu" style="display: none;" class="user-menu">
+                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </span>
+        </div>
+    </div>
+
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
+        
+        <h1 class="page-title"><i class="fas fa-question-circle"></i> Centro de Ayuda</h1>
+        <p class="page-subtitle">Encuentra respuestas a tus preguntas y aprende a usar ReShop Paraguay</p>
+        
+        <!-- Search box -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar en la ayuda... (ej: cómo comprar, devoluciones, contacto)">
+            <button onclick="searchHelp()"><i class="fas fa-search"></i> Buscar</button>
+        </div>
+        
+        <!-- Categories -->
+        <div class="help-categories">
+            <div class="category-card" onclick="showSection('buyer')">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>Para Compradores</h3>
+                <p>Cómo comprar, pagar y recibir tus productos</p>
+            </div>
+            <div class="category-card" onclick="showSection('seller')">
+                <i class="fas fa-store"></i>
+                <h3>Para Vendedores</h3>
+                <p>Cómo publicar, vender y gestionar tu tienda</p>
+            </div>
+            <div class="category-card" onclick="showSection('admin')">
+                <i class="fas fa-crown"></i>
+                <h3>Para Administradores</h3>
+                <p>Gestión de usuarios, productos y órdenes</p>
+            </div>
+            <div class="category-card" onclick="showSection('faq')">
+                <i class="fas fa-question"></i>
+                <h3>Preguntas Frecuentes</h3>
+                <p>Respuestas rápidas a tus dudas</p>
+            </div>
+            <div class="category-card" onclick="showSection('policies')">
+                <i class="fas fa-file-alt"></i>
+                <h3>Políticas</h3>
+                <p>Devoluciones, reembolsos y términos</p>
+            </div>
+            <div class="category-card" onclick="showSection('contact')">
+                <i class="fas fa-headset"></i>
+                <h3>Soporte y Contacto</h3>
+                <p>¿Necesitas ayuda? Contáctanos</p>
+            </div>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: COMPRADORES
+        ========================================================= -->
+        <div id="buyerSection" class="help-section">
+            <h2><i class="fas fa-shopping-bag"></i> Guía para Compradores</h2>
+            
+            <h3>📝 Registro e inicio de sesión</h3>
+            <p>Para comprar en ReShop Paraguay, necesitas crear una cuenta:</p>
+            <ol>
+                <li>Haz clic en <strong>"Registrarse"</strong> en el menú superior</li>
+                <li>Completa tus datos (nombre, email, contraseña)</li>
+                <li>Confirma tu email con el enlace que recibirás</li>
+                <li>¡Listo! Ya puedes empezar a comprar</li>
+            </ol>
+            
+            <h3>🔍 Buscar productos</h3>
+            <p>Puedes encontrar productos de varias formas:</p>
+            <ul>
+                <li><strong>Búsqueda:</strong> Usa la barra de búsqueda en la página principal</li>
+                <li><strong>Filtros:</strong> Filtra por categoría, talla, precio y origen</li>
+                <li><strong>Cerca de mí:</strong> Activa la ubicación para ver productos cercanos</li>
+            </ul>
+            
+            <h3>🛒 Agregar al carrito</h3>
+            <ol>
+                <li>Entra al detalle del producto que te interesa</li>
+                <li>Selecciona la cantidad deseada</li>
+                <li>Haz clic en <strong>"Agregar al Carrito"</strong></li>
+                <li>Puedes seguir comprando o ir al carrito para finalizar</li>
+            </ol>
+            
+            <h3>💳 Finalizar compra (Checkout)</h3>
+            <ol>
+                <li>Ve al <strong>Carrito</strong> y revisa tu pedido</li>
+                <li>Haz clic en <strong>"Proceder al Pago"</strong></li>
+                <li>Ingresa tu dirección de envío</li>
+                <li>Selecciona el método de pago</li>
+                <li>Confirma tu pedido</li>
+            </ol>
+            
+            <h3>💵 Métodos de pago disponibles</h3>
+            <ul>
+                <li><strong>🏦 Transferencia Bancaria</strong> - Recibirás los datos para transferir</li>
+                <li><strong>📲 QR UENO</strong> - Escanea el código QR desde la app de UENO</li>
+                <li><strong>💵 Efectivo (Contraentrega)</strong> - Pagas al recibir el producto</li>
+            </ul>
+            
+            <h3>📦 Estado de tu pedido</h3>
+            <p>Puedes seguir tu pedido desde <strong>"Mis Pedidos"</strong> en el menú. Los estados son:</p>
+            <ul>
+                <li><strong>⏳ Pendiente pago:</strong> Esperando confirmación de pago</li>
+                <li><strong>✅ Pagado:</strong> Pago confirmado, el vendedor prepara el envío</li>
+                <li><strong>📦 Procesando:</strong> El vendedor está preparando tu pedido</li>
+                <li><strong>🚚 Enviado:</strong> El producto está en camino (con número de seguimiento)</li>
+                <li><strong>🏠 Entregado:</strong> Producto recibido</li>
+                <li><strong>❌ Cancelado:</strong> Pedido cancelado</li>
+            </ul>
+            
+            <h3>⭐ Calificar productos</h3>
+            <p>Después de recibir tu producto, puedes calificarlo:</p>
+            <ol>
+                <li>Ve al detalle del producto</li>
+                <li>Selecciona la cantidad de estrellas (1 a 5)</li>
+                <li>Escribe un comentario (opcional)</li>
+                <li>Publica tu reseña</li>
+            </ol>
+            <p><strong>Nota:</strong> Solo puedes calificar productos que hayas comprado.</p>
+            
+            <h3>💬 Contactar al vendedor</h3>
+            <p>Si tienes preguntas sobre un producto:</p>
+            <ol>
+                <li>Entra al detalle del producto</li>
+                <li>Haz clic en <strong>"Contactar vendedor"</strong> (botón verde)</li>
+                <li>Escribe tu mensaje</li>
+                <li>El vendedor te responderá en la sección de mensajes</li>
+            </ol>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: VENDEDORES
+        ========================================================= -->
+        <div id="sellerSection" class="help-section">
+            <h2><i class="fas fa-store"></i> Guía para Vendedores</h2>
+            
+            <h3>📝 Registro como vendedor</h3>
+            <p>Cualquier usuario puede vender en ReShop Paraguay:</p>
+            <ol>
+                <li>Regístrate como usuario normal</li>
+                <li>Contacta al administrador para solicitar cambio de rol a "vendedor"</li>
+                <li>O regístrate directamente como vendedor desde el formulario de registro</li>
+            </ol>
+            
+            <h3>💰 Comisiones</h3>
+            <p>Actualmente, <strong>ReShop Paraguay NO cobra comisiones</strong> por publicación o venta. Es completamente GRATUITO para vendedores.</p>
+            <p><em>En el futuro podríamos implementar una comisión del 5-10% para mantener la plataforma, pero te avisaremos con anticipación.</em></p>
+            
+            <h3>📸 Publicar un producto</h3>
+            <ol>
+                <li>Ingresa a tu <strong>Panel del Vendedor</strong> (enlace en el menú)</li>
+                <li>Haz clic en <strong>"Nuevo Producto"</strong></li>
+                <li>Completa los datos: título, descripción, precio, categoría, talla, estado, marca, color</li>
+                <li>Agrega fotos del producto (máx. 5): puedes <strong>tomar fotos con la cámara</strong> o <strong>subir archivos</strong></li>
+                <li>Haz clic en <strong>"Guardar"</strong></li>
+            </ol>
+            
+            <h3>📷 Tomar fotos con la cámara</h3>
+            <p>Desde el formulario de producto:</p>
+            <ol>
+                <li>Haz clic en <strong>"Tomar foto"</strong></li>
+                <li>Permite el acceso a la cámara cuando el navegador lo solicite</li>
+                <li>Enmarca el producto y haz clic en <strong>"Capturar"</strong></li>
+                <li>La foto se subirá automáticamente a Cloudinary</li>
+                <li>Puedes tomar hasta 5 fotos por producto</li>
+            </ol>
+            
+            <h3>✏️ Editar o eliminar productos</h3>
+            <p>Desde tu panel, en la tabla de productos:</p>
+            <ul>
+                <li><strong>Editar:</strong> Haz clic en el botón "Editar" para modificar los datos</li>
+                <li><strong>Eliminar:</strong> Haz clic en "Eliminar" y confirma la acción</li>
+            </ul>
+            
+            <h3>📦 Gestionar ventas</h3>
+            <p>Cuando un comprador adquiere uno de tus productos:</p>
+            <ol>
+                <li>Ve a la pestaña <strong>"Mis Ventas"</strong> en tu panel</li>
+                <li>Verás la orden con los datos del comprador</li>
+                <li>Actualiza el estado de la orden según el progreso</li>
+                <li>Puedes agregar un número de seguimiento cuando envías el producto</li>
+            </ol>
+            
+            <h3>📨 Responder mensajes</h3>
+            <p>Los compradores pueden contactarte desde la página del producto:</p>
+            <ol>
+                <li>Ve a la pestaña <strong>"Mensajes"</strong> en tu panel</li>
+                <li>Verás todas las conversaciones activas</li>
+                <li>Los mensajes no leídos tienen un indicador rojo</li>
+                <li>Haz clic en una conversación para abrir el chat</li>
+                <li>Escribe tu respuesta y envía</li>
+            </ol>
+            
+            <h3>📋 Estados de orden (para vendedores)</h3>
+            <ul>
+                <li><strong>Pendiente pago:</strong> Esperando que el comprador pague</li>
+                <li><strong>Pagado:</strong> Pago confirmado, preparar el envío</li>
+                <li><strong>Procesando:</strong> Preparando el pedido</li>
+                <li><strong>Enviado:</strong> Producto enviado (agregar número de seguimiento)</li>
+                <li><strong>Entregado:</strong> Comprador recibió el producto</li>
+                <li><strong>Cancelado:</strong> Orden cancelada</li>
+            </ul>
+            
+            <h3>🚚 Envíos</h3>
+            <p>El costo de envío corre por cuenta del <strong>comprador</strong>. Como vendedor, debes:</p>
+            <ul>
+                <li>Coordin
+
+[Assistant]/con la empresa de envíos de tu preferencia</li>
+                <li>Proporcionar el número de seguimiento al comprador</li>
+                <li>Actualizar el estado a "Enviado" con el tracking number</li>
+            </ul>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: ADMINISTRADORES
+        ========================================================= -->
+        <div id="adminSection" class="help-section">
+            <h2><i class="fas fa-crown"></i> Guía para Administradores</h2>
+            
+            <h3>🔐 Acceso al panel de administración</h3>
+            <p>Solo usuarios con rol <strong>"admin"</strong> pueden acceder al panel de administración en <strong>admin-dashboard.html</strong></p>
+            
+            <h3>👥 Gestionar usuarios</h3>
+            <ul>
+                <li>Ver todos los usuarios registrados</li>
+                <li><strong>Activar/Desactivar</strong> usuarios (los usuarios desactivados no pueden acceder)</li>
+                <li><strong>Cambiar roles</strong> (comprador ↔ vendedor ↔ admin)</li>
+                <li><strong>Nota:</strong> No se puede desactivar al último administrador activo</li>
+            </ul>
+            
+            <h3>📦 Gestionar productos</h3>
+            <ul>
+                <li>Ver todos los productos (activos e inactivos)</li>
+                <li><strong>Cambiar estado:</strong> activo, inactivo, archivado, vendido</li>
+                <li><strong>Eliminar productos</strong> inapropiados o duplicados</li>
+            </ul>
+            
+            <h3>📋 Gestionar órdenes</h3>
+            <ul>
+                <li>Ver todas las órdenes de la plataforma</li>
+                <li>Filtrar por estado</li>
+                <li><strong>Actualizar estado</strong> de cualquier orden</li>
+                <li>Ver detalles del comprador y vendedor</li>
+            </ul>
+            
+            <h3>📊 Estadísticas</h3>
+            <p>El dashboard muestra:</p>
+            <ul>
+                <li>Total de usuarios registrados</li>
+                <li>Total de productos publicados</li>
+                <li>Total de órdenes realizadas</li>
+                <li>Cantidad de vendedores activos</li>
+            </ul>
+            
+            <h3>⚖️ Resolver disputas</h3>
+            <p>En caso de conflictos entre comprador y vendedor:</p>
+            <ol>
+                <li>Revisa la conversación en mensajes</li>
+                <li>Verifica el estado de la orden</li>
+                <li>Toma una decisión basada en las políticas de la plataforma</li>
+                <li>Puedes cancelar órdenes o ajustar estados según sea necesario</li>
+            </ol>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: PREGUNTAS FRECUENTES
+        ========================================================= -->
+        <div id="faqSection" class="help-section">
+            <h2><i class="fas fa-question"></i> Preguntas Frecuentes</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Cómo sé que mi pago es seguro?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>ReShop Paraguay no almacena información de pagos. Las transferencias se realizan directamente al vendedor. Recomendamos:</p>
+                    <ul>
+                        <li>Usar medios de pago con comprobante (transferencia bancaria, QR)</li>
+                        <li>Guardar el comprobante de pago</li>
+                        <li>Contactar al vendedor por mensajes internos para coordinar</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Qué pasa si el producto no es como lo describen?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Según la Ley N° 4868/2013 de Comercio Electrónico de Paraguay [citation:3]:</p>
+                    <ul>
+                        <li>Tienes <strong>5 días hábiles</strong> desde la recepción para solicitar un cambio o reembolso</li>
+                        <li>Contacta al vendedor a través del sistema de mensajes</li>
+                        <li>Si no hay acuerdo, contacta al administrador para mediar</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Cómo contacto al vendedor?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>En la página de detalle del producto, hay un botón verde <strong>"Contactar vendedor"</strong>. Haz clic allí, escribe tu mensaje y el vendedor te responderá en la sección de mensajes.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Puedo cancelar una compra?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, siempre que el producto no haya sido enviado. Contacta al vendedor para solicitar la cancelación. El vendedor puede actualizar el estado de la orden a "Cancelado".</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Cómo recupero mi contraseña?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>En la página de inicio de sesión, haz clic en "¿Olvidaste tu contraseña?". Recibirás un enlace para restablecerla en tu correo electrónico.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Hay costo por publicar productos?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No. Actualmente ReShop Paraguay es <strong>100% gratuito</strong> para vendedores. Puedes publicar productos sin costo alguno.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Cómo funciona el envío?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>El envío es coordinado entre comprador y vendedor. El costo corre por cuenta del comprador. El vendedor proporciona el número de seguimiento una vez enviado el producto.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    ¿Qué hago si no recibo mi producto?
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Primero, contacta al vendedor para verificar el estado del envío. Si no hay respuesta, contacta al administrador a través del soporte para mediar la situación.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: POLÍTICAS
+        ========================================================= -->
+        <div id="policiesSection" class="help-section">
+            <h2><i class="fas fa-file-alt"></i> Políticas de ReShop Paraguay</h2>
+            
+            <h3>📜 Base legal</h3>
+            <p>ReShop Paraguay cumple con la <strong>Ley N° 4868/2013 de Comercio Electrónico de Paraguay</strong> [citation:3].</p>
+            
+            <h3>🔄 Devoluciones y reembolsos</h3>
+            <p>Basado en el Artículo 7 de la Ley N° 4868/2013 [citation:3]:</p>
+            <ul>
+                <li>Los compradores tienen <strong>5 días hábiles</strong> desde la recepción del producto para solicitar devolución o reembolso</li>
+                <li>El producto debe estar en las mismas condiciones en que fue recibido</li>
+                <li>El vendedor debe proporcionar instrucciones claras para la devolución</li>
+                <li>Los gastos de envío por devolución corren por cuenta del comprador, a menos que el producto esté defectuoso</li>
+            </ul>
+            
+            <h3>🔒 Privacidad y datos</h3>
+            <p>ReShop Paraguay protege tus datos personales. No compartimos tu información con terceros sin tu consentimiento. Puedes solicitar la eliminación de tus datos contactando al soporte.</p>
+            
+            <h3>⚠️ Conducta prohibida</h3>
+            <p>No está permitido:</p>
+            <ul>
+                <li>Publicar productos falsos o ilegales</li>
+                <li>Suplantar identidad de otros usuarios</li>
+                <li>Realizar spam o acoso a través de mensajes</li>
+                <li>Intentar realizar transacciones fuera de la plataforma</li>
+            </ul>
+            
+            <h3>⚡ Modificaciones</h3>
+            <p>ReShop Paraguay se reserva el derecho de modificar estas políticas en cualquier momento. Los cambios serán notificados a través de la plataforma.</p>
+        </div>
+        
+        <!-- ========================================================
+             SECCIÓN: SOPORTE Y CONTACTO
+        ========================================================= -->
+        <div id="contactSection" class="help-section">
+            <h2><i class="fas fa-headset"></i> Soporte y Contacto</h2>
+            
+            <p>¿Necesitas ayuda? Estamos aquí para asistirte. Contamos con atención multicanal según las mejores prácticas de la industria [citation:2][citation:5].</p>
+            
+            <div class="contact-card">
+                <h3>📞 Canales de atención</h3>
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <i class="fas fa-envelope"></i>
+                        <p><strong>Email</strong></p>
+                        <a href="mailto:soporte@reshop.com.py">soporte@reshop.com.py</a>
+                    </div>
+                    <div class="contact-method">
+                        <i class="fab fa-whatsapp"></i>
+                        <p><strong>WhatsApp</strong></p>
+                        <a href="https://wa.me/595981000000">+595 981 000000</a>
+                    </div>
+                    <div class="contact-method">
+                        <i class="fas fa-comments"></i>
+                        <p><strong>Chat en línea</strong></p>
+                        <span>Disponible en la página</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-card">
+                <h3>🕐 Horario de atención</h3>
+                <p><strong>Lunes a Viernes:</strong> 8:00 - 18:00</p>
+                <p><strong>Sábados:</strong> 9:00 - 13:00</p>
+                <p><strong>Domingos y feriados:</strong> Cerrado</p>
+                <p><em>WhatsApp y chat tienen respuesta garantizada dentro de las 24 horas hábiles.</em></p>
+            </div>
+            
+            <div class="contact-card">
+                <h3>📋 Antes de contactarnos</h3>
+                <p>Revisa las preguntas frecuentes (FAQ) arriba. Muchas dudas comunes ya están respondidas.</p>
+                <p>Para consultas sobre un pedido específico, ten a mano el <strong>número de orden</strong> para agilizar la atención.</p>
+            </div>
+        </div>
+        
+        <!-- Resultados de búsqueda -->
+        <div id="searchResults" class="help-section" style="display: none;">
+            <h2><i class="fas fa-search"></i> Resultados de búsqueda</h2>
+            <div id="searchResultsContent"></div>
+            <button class="btn btn-primary" onclick="clearSearch()">Limpiar búsqueda</button>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://reshop-backend.vercel.app';
+        
+        // Autenticación
+        function updateUserMenu() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const authLinks = document.getElementById('authLinks');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+
+            if (token && user) {
+                authLinks.style.display = 'none';
+                userMenu.style.display = 'inline-block';
+                userName.innerHTML = user.full_name || user.email;
+            } else {
+                authLinks.style.display = 'inline';
+                userMenu.style.display = 'none';
+            }
+        }
+
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('reshop_cart');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+        
+        // Mostrar sección
+        function showSection(section) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.help-section').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
+            
+            // Mostrar la sección seleccionada
+            const target = document.getElementById(section + 'Section');
+            if (target) {
+                target.classList.add('active');
+                target.style.display = 'block';
+            }
+            
+            // Ocultar resultados de búsqueda
+            document.getElementById('searchResults').style.display = 'none';
+            
+            // Scroll al inicio
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Toggle FAQ
+        function toggleFaq(element) {
+            element.classList.toggle('active');
+            const answer = element.nextElementSibling;
+            answer.classList.toggle('show');
+        }
+        
+        // Buscar en la ayuda
+        function searchHelp() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) return;
+            
+            // Ocultar todas las secciones
+            document.querySelectorAll('.help-section').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
+            
+            // Buscar en todo el contenido
+            const results = [];
+            const sections = ['buyerSection', 'sellerSection', 'adminSection', 'faqSection', 'policiesSection'];
+            
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const text = section.innerText.toLowerCase();
+                    if (text.includes(query)) {
+                        results.push(sectionId);
+                    }
+                }
+            });
+            
+            // Mostrar resultados
+            const resultsContainer = document.getElementById('searchResultsContent');
+            const searchResultsDiv = document.getElementById('searchResults');
+            
+            if (results.length > 0) {
+                resultsContainer.innerHTML = `<p>Encontramos ${results.length} sección(es) relacionada(s) con "${query}":</p><ul>`;
+                results.forEach(resultId => {
+                    const section = document.getElementById(resultId);
+                    const title = section.querySelector('h2')?.innerText || resultId;
+                    const displayName = resultId.replace('Section', '').replace('buyer', 'Compradores').replace('seller', 'Vendedores').replace('admin', 'Administradores').replace('faq', 'Preguntas Frecuentes').replace('policies', 'Políticas');
+                    resultsContainer.innerHTML += `<li><a href="#" onclick="showSection('${resultId.replace('Section', '')}'); return false;">${displayName}</a></li>`;
+                });
+                resultsContainer.innerHTML += `</ul>`;
+                searchResultsDiv.style.display = 'block';
+                searchResultsDiv.classList.add('active');
+            } else {
+                resultsContainer.innerHTML = `<p>No se encontraron resultados para "${query}". Intenta con otras palabras clave.</p>`;
+                searchResultsDiv.style.display = 'block';
+                searchResultsDiv.classList.add('active');
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('searchResults').classList.remove('active');
+            
+            // Mostrar categorías nuevamente
+            const categories = document.querySelector('.help-categories');
+            categories.style.display = 'grid';
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserMenu();
+            setupLogout();
+            
+            // Por defecto, mostrar categorías (no sección)
+            document.querySelectorAll('.help-section').forEach(el => {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            });
+        });
+    </script>
+    
+    <!-- JS Móvil -->
+    <script src="js/mobile.js"></script>
+    
+</body>
+</html>
