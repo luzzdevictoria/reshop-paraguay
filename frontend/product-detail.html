@@ -135,6 +135,21 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
             .message-item { max-width: 90%; }
         }
     </style>
+	<!-- OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+            appId: "87f4597d-296a-467b-a778-10f48275d72a",
+            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+            notifyButton: {
+                enable: false
+            },
+            allowLocalhostAsSecureOrigin: true
+        });
+    });
+</script>
 </head>
 <body>
     <div class="header">
