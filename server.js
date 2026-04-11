@@ -54,6 +54,41 @@ cloudinary.config({
 console.log('✅ Cloudinary configurado:', cloudinary.config().cloud_name);
 
 // ============================================================
+// CONFIGURACIÓN ONESIGNAL (NOTIFICACIONES PUSH)
+// ============================================================
+const OneSignal = require('onesignal-node');
+
+const onesignalClient = new OneSignal.Client({
+    userAuthKey: process.env.ONESIGNAL_API_KEY,
+    appId: process.env.ONESIGNAL_APP_ID
+});
+
+console.log('✅ OneSignal configurado');
+
+// Función para enviar notificación a un usuario
+async function sendNotification(userExternalId, title, message, data = {}) {
+    try {
+        const notification = {
+            contents: { en: message },
+            headings: { en: title },
+            include_external_user_ids: [userExternalId],
+            data: data
+        };
+        const response = await onesignalClient.createNotification(notification);
+        console.log('✅ Notificación enviada a:', userExternalId);
+        return response;
+    } catch (error) {
+        console.error('❌ Error enviando notificación:', error.message);
+        return null;
+    }
+}
+
+// Función para obtener el external_id del usuario
+function getUserExternalId(userId) {
+    return `reshop_user_${userId}`;
+}
+
+// ============================================================
 // CONFIGURACIÓN MULTER PARA SUBIR IMÁGENES
 // ============================================================
 const storage = multer.memoryStorage();
@@ -672,6 +707,15 @@ app.post('/api/products/:id/reviews', authenticateToken, async (req, res) => {
         
         if (error) throw error;
         
+        // Enviar notificación push al vendedor
+        const sellerExternalId = getUserExternalId(product.seller_id);
+        await sendNotification(
+            sellerExternalId,
+            '⭐ Nueva calificación',
+            `${req.user.full_name} calificó tu producto "${product.title}" con ${rating} estrellas`,
+            { type: 'review', product_id: id, rating: rating }
+        );
+
         res.json({ success: true, message: 'Reseña agregada exitosamente', review });
     } catch (error) {
         console.error('Error al crear reseña:', error);
@@ -1027,6 +1071,15 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
                 updated_at: new Date().toISOString()
             })
             .eq('id', conversation_id);
+
+                // Enviar notificación push al receptor
+        const receiverExternalId = getUserExternalId(receiver_id);
+        await sendNotification(
+            receiverExternalId,
+            '📩 Nuevo mensaje',
+            `${req.user.full_name || req.user.email} te envió un mensaje`,
+            { type: 'message', conversation_id: conversation_id }
+        );
 
         res.json({ success: true, message: newMessage });
     } catch (error) {
