@@ -145,13 +145,144 @@ body {
     gap: 20px;
 }
 
-/* Footer */
+/* ============================================================
+   FOOTER MEJORADO - ReShop Paraguay Theme
+   ============================================================ */
 .footer {
-    background-color: var(--primary);
-    color: var(--white);
-    text-align: center;
-    padding: 20px;
+    background: var(--primary, #2A5C6E);
+    color: white;
+    padding: 40px 20px 20px;
     margin-top: 40px;
+    font-size: 0.8rem;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-section h4 {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: var(--secondary, #E8B86B);
+    position: relative;
+    display: inline-block;
+}
+
+.footer-section h4::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: var(--secondary, #E8B86B);
+}
+
+.footer-section p {
+    margin-bottom: 8px;
+    opacity: 0.85;
+    line-height: 1.5;
+}
+
+.footer-section a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 8px;
+    opacity: 0.8;
+    transition: all 0.2s;
+}
+
+.footer-section a:hover {
+    opacity: 1;
+    transform: translateX(3px);
+    color: var(--secondary, #E8B86B);
+}
+
+.footer-section i {
+    width: 25px;
+    margin-right: 8px;
+    color: var(--secondary, #E8B86B);
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.social-links a:hover {
+    background: var(--secondary, #E8B86B);
+    transform: translateY(-2px);
+}
+
+.social-links a:hover i {
+    color: var(--primary, #2A5C6E);
+}
+
+.social-links i {
+    margin: 0;
+    width: auto;
+    font-size: 1rem;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.footer-bottom p {
+    margin-bottom: 5px;
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+    .footer {
+        padding: 30px 16px 16px;
+    }
+    
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        text-align: center;
+    }
+    
+    .footer-section h4::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .footer-section a {
+        text-align: center;
+    }
+    
+    .footer-section a:hover {
+        transform: translateX(0) translateY(-2px);
+    }
 }
 
 /* Loading */
