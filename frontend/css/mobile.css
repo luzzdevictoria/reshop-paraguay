@@ -2,13 +2,14 @@
 ================================================================================
 ARCHIVO: css/mobile.css
 PROYECTO: ReShop Paraguay
-VERSION: 1.2.0
+VERSION: 1.2.1
 CREADO: 2026-04-11
-ACTUALIZADO: 2026-04-12
+ACTUALIZADO: 2026-04-13
 AUTOR: Pedro José Pirovani
 DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
              Hamburger menu, filtros deslizables, bottom navigation,
              tarjetas táctiles y tablas adaptadas a pantallas pequeñas.
+             [v1.2.1] + Eslogan en header móvil para pantallas ≤480px
 ================================================================================
 */
 
@@ -72,23 +73,45 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
+    /* 🆕 Eslogan móvil - oculto por defecto, visible solo en ≤480px */
+    .mobile-header .mobile-slogan {
+        display: none;
+        font-size: 0.62rem;
+        opacity: 0.9;
+        text-align: center;
+        width: 100%;
+        position: absolute;
+        bottom: -18px;
+        left: 0;
+        pointer-events: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 8px;
+        color: rgba(255,255,255,0.92);
+        z-index: 1;
+        font-weight: 400;
+        letter-spacing: 0.2px;
+    }
+
     .mobile-header__logo {
         display: flex;
         align-items: center;
         gap: 10px;
         text-decoration: none;
         color: white;
+        z-index: 2;
     }
 
-	.mobile-header__logo img {
-		height: 55px;
-		width: auto;  /* ← Cambiado de 36px a auto */
-		max-width: 150px;
-		border-radius: 12px;
-		background-color: white;
-		padding: 6px 10px;
-		object-fit: contain;
-	}
+    .mobile-header__logo img {
+        height: 48px;
+        width: auto;
+        max-width: 150px;
+        border-radius: 12px;
+        background-color: white;
+        padding: 6px 10px;
+        object-fit: contain;
+    }
 
     .mobile-header__title {
         font-size: 1.1rem;
@@ -100,6 +123,7 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         display: flex;
         align-items: center;
         gap: 8px;
+        z-index: 2;
     }
 
     .mobile-header__cart-btn {
@@ -182,6 +206,33 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
 
     .hamburger-btn.is-open span:nth-child(3) {
         transform: translateY(-7px) rotate(-45deg);
+    }
+}
+
+/* 🆕 Mostrar eslogan SOLO en pantallas muy pequeñas (≤480px) */
+@media (max-width: 480px) {
+    .mobile-header {
+        height: 70px; /* ← +10px para acomodar el eslogan */
+        padding-bottom: 6px;
+    }
+    
+    .mobile-header .mobile-slogan {
+        display: block; /* ← Ahora se muestra solo en móviles pequeños */
+    }
+    
+    .mobile-header__logo img {
+        height: 42px; /* ← Logo ligeramente más pequeño */
+        padding: 4px 8px;
+    }
+    
+    .mobile-header__title {
+        font-size: 1rem;
+    }
+    
+    /* Espacio para que el contenido no choque con el eslogan */
+    .main-content,
+    .container {
+        padding-top: 18px !important;
     }
 }
 

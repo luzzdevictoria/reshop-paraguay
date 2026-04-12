@@ -2,9 +2,9 @@
 ================================================================================
 ARCHIVO: admin-dashboard.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.0.0
+VERSION: 2.1.0
 CREADO: 2026-04-10
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Panel de administracion para gestionar usuarios, productos y ordenes.
@@ -19,23 +19,26 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Filtro por estado de orden
 2026-04-11 - [ADD] Funcion para actualizar estado de orden desde admin
 2026-04-11 - [IMPROVE] Diseño responsive y metodos de pago formateados
+2026-04-13 - [FIX] Agregar mobile.css, mobile.js y estilos del loader Three Body
 ================================================================================
 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Panel de Administración - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- 🆕 CSS Móvil -->
+    <link rel="stylesheet" href="css/mobile.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
@@ -82,7 +85,6 @@ HISTORIAL DE MODIFICACIONES:
         .filter-group { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .filter-group select, .filter-group input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
         
-        .loading { text-align: center; padding: 50px; color: #666; }
         .badge { padding: 3px 8px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; }
         .badge-seller { background: #E8B86B; color: #333; }
         .badge-buyer { background: #2A5C6E; color: white; }
@@ -90,7 +92,113 @@ HISTORIAL DE MODIFICACIONES:
         
         .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
         
-        @media (max-width: 768px) { th, td { font-size: 0.8rem; padding: 8px; } }
+        /* 🆕 Loader Three Body - ReShop Theme */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            color: #2A5C6E;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: #2A5C6E;
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        .three-body.three-body-secondary {
+            --uib-color: #E8B86B;
+        }
+
+        .three-body.three-body-accent {
+            --uib-color: #D95A41;
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
+
+        .loading { text-align: center; padding: 50px; color: #666; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
@@ -100,22 +208,29 @@ HISTORIAL DE MODIFICACIONES:
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
         .message.error { background: #f8d7da; color: #721c24; display: block; }
+        
+        @media (max-width: 768px) { 
+            th, td { font-size: 0.8rem; padding: 8px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .tab-btn { padding: 8px 12px; font-size: 0.85rem; }
+            .container { padding: 12px; }
+        }
     </style>
-	<!-- OneSignal Push Notifications -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: "87f4597d-296a-467b-a778-10f48275d72a",
-            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
-            notifyButton: {
-                enable: false
-            },
-            allowLocalhostAsSecureOrigin: true
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: {
+                    enable: false
+                },
+                allowLocalhostAsSecureOrigin: true
+            });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
     <div class="header">
@@ -123,8 +238,8 @@ HISTORIAL DE MODIFICACIONES:
         <p><i class="fas fa-crown"></i> Panel de Administración</p>
         <div style="margin-top: 10px;">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
-			<a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
-			<a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
             <a href="admin-dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
             <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
         </div>
@@ -145,10 +260,13 @@ HISTORIAL DE MODIFICACIONES:
         </div>
         
         <div id="usuariosTab" class="tab-content"><div class="loader-container">
-    <div class="three-body"></div>
-    <p>Cargando usuarios...</p>
-</div></div>
-        <div id="productosTab" class="tab-content"><div class="loading">Cargando productos...</div></div>
+            <div class="three-body"></div>
+            <p>Cargando usuarios...</p>
+        </div></div>
+        <div id="productosTab" class="tab-content"><div class="loader-container">
+            <div class="three-body"></div>
+            <p>Cargando productos...</p>
+        </div></div>
         <div id="ordenesTab" class="tab-content active">
             <div class="filter-group">
                 <label>Filtrar por estado:</label>
@@ -163,7 +281,10 @@ HISTORIAL DE MODIFICACIONES:
                 </select>
                 <button class="btn btn-info" onclick="loadOrders()"><i class="fas fa-search"></i> Buscar</button>
             </div>
-            <div id="ordenesContainer"><div class="loading">Cargando órdenes...</div></div>
+            <div id="ordenesContainer"><div class="loader-container">
+                <div class="three-body"></div>
+                <p>Cargando órdenes...</p>
+            </div></div>
         </div>
     </div>
     
@@ -253,7 +374,7 @@ HISTORIAL DE MODIFICACIONES:
                 const data = await response.json();
                 
                 if (data.success && data.users && data.users.length > 0) {
-                    let html = '<table><thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Tienda</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
+                    let html = '<div style="overflow-x:auto;"></table><thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Tienda</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
                     for (const user of data.users) {
                         const roleClass = user.role === 'seller' ? 'badge-seller' : (user.role === 'admin' ? 'badge-admin' : 'badge-buyer');
                         const statusText = user.is_active ? 'Activo' : 'Inactivo';
@@ -266,10 +387,10 @@ HISTORIAL DE MODIFICACIONES:
                             <td><button class="btn btn-warning" onclick="toggleUserStatus('${user.id}')">${user.is_active ? 'Desactivar' : 'Activar'}</button></td>
                         </tr>`;
                     }
-                    html += '</tbody></table>';
+                    html += '</tbody></table></div>';
                     container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<div class="loading">No hay usuarios registrados</div>';
+                    container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay usuarios registrados</p></div>';
                 }
             } catch (error) {
                 container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
@@ -283,7 +404,7 @@ HISTORIAL DE MODIFICACIONES:
                 const data = await response.json();
                 
                 if (data.success && data.products && data.products.length > 0) {
-                    let html = '<table><thead><tr><th>ID</th><th>Título</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
+                    let html = '<div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Título</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
                     for (const product of data.products) {
                         html += `<tr>
                             <td>${product.id}</td>
@@ -296,10 +417,10 @@ HISTORIAL DE MODIFICACIONES:
                             </td>
                         </tr>`;
                     }
-                    html += '</tbody><table>';
+                    html += '</tbody></table></div>';
                     container.innerHTML = html;
                 } else {
-                    container.innerHTML = '<div class="loading">No hay productos registrados</div>';
+                    container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay productos registrados</p></div>';
                 }
             } catch (error) {
                 container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
@@ -307,11 +428,11 @@ HISTORIAL DE MODIFICACIONES:
         }
         
         // ============================================================
-        // ÓRDENES - NUEVO
+        // ÓRDENES
         // ============================================================
         async function loadOrders() {
             const container = document.getElementById('ordenesContainer');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando órdenes...</div>';
+            container.innerHTML = '<div class="loader-container"><div class="three-body"></div><p>Cargando órdenes...</p></div>';
             
             try {
                 const response = await fetch(`${API_URL}/api/admin/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -321,7 +442,7 @@ HISTORIAL DE MODIFICACIONES:
                     allOrders = data.orders;
                     renderOrders(allOrders);
                 } else {
-                    container.innerHTML = '<div class="loading">No hay órdenes registradas</div>';
+                    container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay órdenes registradas</p></div>';
                 }
             } catch (error) {
                 console.error('Error loading orders:', error);
@@ -339,13 +460,13 @@ HISTORIAL DE MODIFICACIONES:
             }
             
             if (filteredOrders.length === 0) {
-                container.innerHTML = '<div class="loading">No hay órdenes con ese estado</div>';
+                container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay órdenes con ese estado</p></div>';
                 return;
             }
             
-            let html = `<table><thead>
-                <th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Vendedor</th><th>Total</th><th>Comisión</th><th>Estado</th><th>Pago</th><th>Acciones</th>
-            </thead><tbody>`;
+            let html = '<div style="overflow-x:auto;"><table><thead><tr>';
+            html += '<th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Vendedor</th><th>Total</th><th>Comisión</th><th>Estado</th><th>Pago</th><th>Acciones</th>';
+            html += '</tr></thead><tbody>';
             
             for (const order of filteredOrders) {
                 const statusClass = `status-${order.order_status}`;
@@ -380,7 +501,7 @@ HISTORIAL DE MODIFICACIONES:
                 </tr>`;
             }
             
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
         
@@ -515,5 +636,8 @@ HISTORIAL DE MODIFICACIONES:
         loadStats();
         loadOrders();
     </script>
+    
+    <!-- 🆕 JS Móvil (carga al final) -->
+    <script src="js/mobile.js"></script>
 </body>
 </html>

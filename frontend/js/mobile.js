@@ -1,9 +1,13 @@
 /**
  * ARCHIVO: frontend/js/mobile.js
  * PROYECTO: ReShop Paraguay
- * VERSION: 1.2.0
- * ACTUALIZADO: 2026-04-12
+ * VERSION: 1.2.1
+ * ACTUALIZADO: 2026-04-13
  * AUTOR: Pedro José Pirovani
+ *
+ * CHANGELOG v1.2.1:
+ * [+] Agregar eslogan "Shopping Virtual de Ropa de Segunda Mano" en header móvil
+ * [+] Mejorar responsive de header para pantallas ≤480px
  *
  * CHANGELOG v1.2.0:
  * [+] Agregar filtro por origen en el drawer de filtros
@@ -246,6 +250,7 @@
         const count = getCartCount();
         const h = document.createElement('header');
         h.className = 'mobile-header';
+        // 🆕 MODIFICACIÓN: Agregado <div class="mobile-slogan"> al final del template
         h.innerHTML = `
             <a href="index.html" class="mobile-header__logo">
                 <img src="assets/images/logo.png" alt="ReShop" onerror="this.style.display='none'">
@@ -259,7 +264,9 @@
                 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
-            </div>`;
+            </div>
+            <div class="mobile-slogan">Shopping Virtual de Ropa de Segunda Mano</div>
+        `;
         document.body.insertBefore(h, document.body.firstChild);
     }
 

@@ -2,9 +2,9 @@
 ================================================================================
 ARCHIVO: my-orders.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.0
+VERSION: 1.1.0
 CREADO: 2026-04-10
-ACTUALIZADO: 2026-04-10
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Historial de pedidos del comprador. Muestra todas las ordenes
@@ -15,22 +15,24 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - Implementacion de carga de ordenes desde API
 2026-04-10 - Diseño responsive con estados de orden (pendiente, pagado, enviado, entregado)
 2026-04-10 - Integracion con autenticacion de usuario
+2026-04-13 - [FIX] Agregar mobile.css y mobile.js para navegación móvil
+2026-04-13 - [FIX] Agregar estilos del loader Three Body
 ================================================================================
 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Mis Pedidos - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -96,8 +98,113 @@ HISTORIAL DE MODIFICACIONES:
         .order-meta { font-size: 0.8rem; color: #666; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
         .order-meta i { margin-right: 4px; width: 16px; }
         
+        /* 🆕 Loader Three Body - ReShop Theme */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            color: #2A5C6E;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: #2A5C6E;
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        .three-body.three-body-secondary {
+            --uib-color: #E8B86B;
+        }
+
+        .three-body.three-body-accent {
+            --uib-color: #D95A41;
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
+
         /* Estados de carga */
-        .loading { text-align: center; padding: 50px; color: #666; }
         .empty { text-align: center; padding: 50px; color: #666; }
         .error { text-align: center; padding: 50px; color: #D95A41; }
         
@@ -116,21 +223,23 @@ HISTORIAL DE MODIFICACIONES:
             .item-price { text-align: right; }
         }
     </style>
-	<!-- OneSignal Push Notifications -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: "87f4597d-296a-467b-a778-10f48275d72a",
-            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
-            notifyButton: {
-                enable: false
-            },
-            allowLocalhostAsSecureOrigin: true
+    <!-- 🆕 CSS Móvil -->
+    <link rel="stylesheet" href="css/mobile.css">
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: {
+                    enable: false
+                },
+                allowLocalhostAsSecureOrigin: true
+            });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
     <div class="header">
@@ -159,9 +268,9 @@ HISTORIAL DE MODIFICACIONES:
     <div class="container">
         <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-history"></i> Mis Pedidos</h2>
         <div id="ordersContainer"><div class="loader-container">
-    <div class="three-body"></div>
-    <p>Cargando tus pedidos...</p>
-</div></div>
+            <div class="three-body"></div>
+            <p>Cargando tus pedidos...</p>
+        </div></div>
     </div>
     
     <div class="footer">
@@ -201,18 +310,18 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
 
-function setupLogout() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('reshop_cart');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        });
-    }
-}
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('reshop_cart');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
         
         // ============================================================
         // MAPA DE ESTADOS
@@ -263,7 +372,7 @@ function setupLogout() {
                                 html += `
                                     <div class="order-item">
                                         <span class="item-name"><i class="fas fa-tag"></i> ${item.quantity}x ${escapeHtml(item.product?.title || 'Producto')}</span>
-                                        <span class="item-price">${new Intl.NumberFormat('es-PY').format(item.subtotal)} ?</span>
+                                        <span class="item-price">${new Intl.NumberFormat('es-PY').format(item.subtotal)} ₲</span>
                                     </div>
                                 `;
                             }
@@ -333,5 +442,8 @@ function setupLogout() {
             loadOrders();
         });
     </script>
+
+    <!-- 🆕 JS Móvil (carga al final) -->
+    <script src="js/mobile.js"></script>
 </body>
 </html>
