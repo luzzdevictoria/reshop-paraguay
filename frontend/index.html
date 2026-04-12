@@ -2,13 +2,14 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.0.0 (Mobile-First)
+VERSION: 2.1.0 (Mobile-First + Three Body Loader)
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-12
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
              filtros deslizables, bottom nav y tarjetas táctiles.
+             Incluye loader Three Body y botón Buscar cerca de mí.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -18,13 +19,10 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ReShop Paraguay - Ropa de Segunda Mano</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- CSS Principal -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
-    <!-- CSS Móvil -->
     <link rel="stylesheet" href="css/mobile.css">
     <style>
-        /* ── Variables ── */
         :root {
             --primary: #2A5C6E;
             --secondary: #E8B86B;
@@ -40,7 +38,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--background); }
 
-        /* ── Header desktop (oculto en <768px por mobile.css) ── */
         .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
         .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
@@ -56,11 +53,9 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .header__search input { flex: 1; padding: 8px 14px; border-radius: 8px; border: none; font-size: 0.9rem; }
         .header__search button { background: var(--secondary); border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.9rem; }
 
-        /* ── Layout ── */
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .layout { display: flex; gap: 24px; }
 
-        /* ── Sidebar desktop ── */
         .sidebar { width: 240px; flex-shrink: 0; background: white; border-radius: 12px; padding: 20px; box-shadow: var(--shadow); align-self: flex-start; position: sticky; top: 20px; }
         .sidebar h3 { color: var(--primary); margin-bottom: 16px; font-size: 1rem; }
         .filter-group { margin-bottom: 16px; }
@@ -69,7 +64,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--primary); }
         .sidebar .btn { width: 100%; margin-bottom: 8px; padding: 9px; font-size: 0.85rem; }
 
-        /* ── Products grid ── */
         .products-grid-wrapper { flex: 1; }
         .products-grid {
             display: grid;
@@ -77,7 +71,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             gap: 18px;
         }
 
-        /* ── Product card ── */
         .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.13); }
         .product-card__img-wrapper { width: 100%; height: 220px; overflow: hidden; background: #f0f0f0; }
@@ -91,52 +84,147 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .product-card__button { width: 100%; margin-top: 10px; padding: 10px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         .product-card__button:hover { background: #1e4452; }
 
-        /* ── Botones ── */
         .btn { padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: #1e4452; }
         .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-dark); }
         .btn-outline:hover { background: var(--background); }
 
-        /* ── Loading / empty ── */
         .loading, .error { text-align: center; padding: 60px 20px; font-size: 1rem; color: var(--text-light); }
         .error { color: var(--accent); }
         .loading i { font-size: 2rem; display: block; margin-bottom: 12px; color: var(--primary); }
 
-        /* ── Footer ── */
         .footer { background: var(--primary); color: white; text-align: center; padding: 20px; margin-top: 40px; font-size: 0.8rem; }
 
-        /* ── Responsive desktop → tablet ── */
         @media (max-width: 1024px) {
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
         }
 
         @media (max-width: 768px) {
-            /* El sidebar se oculta (mobile.css usa filtros drawer) */
             .container { padding: 12px; }
         }
+
+        /* Loader Three Body */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: var(--primary, #2A5C6E);
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        .three-body.three-body-secondary {
+            --uib-color: var(--secondary, #E8B86B);
+        }
+
+        .three-body.three-body-accent {
+            --uib-color: var(--accent, #D95A41);
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
     </style>
-    <!-- OneSignal Push Notifications -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: "87f4597d-296a-467b-a778-10f48275d72a",
-            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
-            notifyButton: {
-                enable: false
-            },
-            allowLocalhostAsSecureOrigin: true
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true
+            });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
 
-    <!-- ========================================================
-         HEADER DESKTOP (oculto en móvil por mobile.css)
-    ========================================================= -->
     <div class="header">
         <div class="header-top">
             <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
@@ -146,38 +234,33 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             </div>
         </div>
 
-        <!-- Barra de búsqueda desktop -->
         <div class="header__search">
             <input type="text" id="searchInput" placeholder="Buscar productos...">
             <button id="searchBtn"><i class="fas fa-search"></i></button>
         </div>
 
-<div class="header-menu">
-    <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
-    <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-    <a href="my-orders.html"><i class="fas fa-history"></i> Pedidos</a>
-    <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
-    <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
-    <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
-    <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
-    <span id="authLinks">
-        <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
-        <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
-    </span>
-    <span id="userMenu" style="display: none;" class="user-menu">
-        <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
-        <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
-    </span>
-</div>
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="my-orders.html"><i class="fas fa-history"></i> Pedidos</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
+            <span id="authLinks">
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+            </span>
+            <span id="userMenu" style="display: none;" class="user-menu">
+                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </span>
+        </div>
     </div>
 
-    <!-- ========================================================
-         CONTENIDO PRINCIPAL
-    ========================================================= -->
     <div class="container">
         <div class="layout">
 
-            <!-- Sidebar con filtros (visible en desktop, oculto en móvil) -->
             <aside class="sidebar">
                 <h3><i class="fas fa-sliders-h"></i> Filtros</h3>
                 <div class="filter-group">
@@ -216,7 +299,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                     </select>
                 </div>
                 
-                <!-- 🆕 FILTRO POR ORIGEN -->
                 <div class="filter-group">
                     <label><i class="fas fa-globe-americas"></i> Origen</label>
                     <select class="filter-select" id="filterOrigin">
@@ -238,7 +320,8 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                         <option value="ECU">🇪🇨 Ecuador</option>
                         <option value="OTH">🌎 Otro</option>
                     </select>
-                </div>            
+                </div>
+                
                 <div class="filter-group">
                     <label>Precio mín. (Gs)</label>
                     <input type="number" class="filter-input" id="filterMinPrice" placeholder="0">
@@ -251,20 +334,17 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 <button class="btn btn-outline" id="clearFilters"><i class="fas fa-undo"></i> Limpiar</button>
             </aside>
 
-            <!-- Botón Buscar cerca de mí (ÚNICO - visible en desktop y móvil) -->
             <div class="near-me-button-wrapper" style="margin-bottom: 20px;">
                 <button class="btn btn-secondary" id="nearMeBtn" style="background: #E8B86B; color: #333; width: 100%; padding: 12px; border-radius: 24px; font-weight: 600; cursor: pointer;">
                     <i class="fas fa-location-dot"></i> Buscar cerca de mí
                 </button>
             </div>
 
-            <!-- Grilla de productos -->
             <div class="products-grid-wrapper">
-                <!-- Búsqueda desktop (dentro del layout, duplica el del header en móvil) -->
                 <div id="productsGrid" class="products-grid">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-pulse"></i>
-                        Cargando productos...
+                    <div class="loader-container">
+                        <div class="three-body"></div>
+                        <p>Cargando productos...</p>
                     </div>
                 </div>
             </div>
@@ -272,19 +352,12 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         </div>
     </div>
 
-    <!-- ========================================================
-         FOOTER
-    ========================================================= -->
     <div class="footer">
         <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
-    <!-- ========================================================
-         SCRIPTS
-    ========================================================= -->
     <script>
-        // ── Configuración ──────────────────────────────────────
         const API_URL = 'https://reshop-backend.vercel.app';
 
         let currentFilters = {
@@ -293,7 +366,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             min_price: '', max_price: '', search: ''
         };
 
-        // ── Autenticación ──────────────────────────────────────
         function updateUserMenu() {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -329,11 +401,10 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             }
         }
 
-        // ── Productos ──────────────────────────────────────────
         async function loadProducts() {
             const grid = document.getElementById('productsGrid');
             if (!grid) return;
-                                grid.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay productos disponibles</p></div>';
+            grid.innerHTML = '<div class="loader-container"><div class="three-body"></div><p>Cargando productos...</p></div>';
             try {
                 const params = new URLSearchParams();
                 Object.entries(currentFilters).forEach(([k, v]) => { if (v) params.append(k, v); });
@@ -369,7 +440,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                         `;
                     }).join('');
                 } else {
-                    grid.innerHTML = '<div class="loading"><i class="fas fa-box-open"></i><br>No hay productos disponibles</div>';
+                    grid.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay productos disponibles</p></div>';
                 }
             } catch (err) {
                 grid.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><br>Error al cargar: ${err.message}</div>`;
@@ -382,30 +453,18 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             return d.innerHTML;
         }
 
-        // 🆕 Función para mostrar bandera según origen
         function getOriginFlag(origin) {
             const flags = {
-                'PAR': '🇵🇾 Paraguay',
-                'ARG': '🇦🇷 Argentina',
-                'BRA': '🇧🇷 Brasil',
-                'USA': '🇺🇸 USA',
-                'CHN': '🇨🇳 China',
-                'EUR': '🇪🇺 Europa',
-                'JPN': '🇯🇵 Japón',
-                'MEX': '🇲🇽 México',
-                'URY': '🇺🇾 Uruguay',
-                'CHL': '🇨🇱 Chile',
-                'BOL': '🇧🇴 Bolivia',
-                'PER': '🇵🇪 Perú',
-                'COL': '🇨🇴 Colombia',
-                'VEN': '🇻🇪 Venezuela',
-                'ECU': '🇪🇨 Ecuador',
+                'PAR': '🇵🇾 Paraguay', 'ARG': '🇦🇷 Argentina', 'BRA': '🇧🇷 Brasil',
+                'USA': '🇺🇸 USA', 'CHN': '🇨🇳 China', 'EUR': '🇪🇺 Europa',
+                'JPN': '🇯🇵 Japón', 'MEX': '🇲🇽 México', 'URY': '🇺🇾 Uruguay',
+                'CHL': '🇨🇱 Chile', 'BOL': '🇧🇴 Bolivia', 'PER': '🇵🇪 Perú',
+                'COL': '🇨🇴 Colombia', 'VEN': '🇻🇪 Venezuela', 'ECU': '🇪🇨 Ecuador',
                 'OTH': '🌎 Otro'
             };
             return flags[origin] || (origin ? `🌍 ${origin}` : '🌍 No especificado');
         }
 
-        // ── Filtros (desktop) ──────────────────────────────────
         function setupFilters() {
             const applyBtn = document.getElementById('applyFilters');
             const clearBtn = document.getElementById('clearFilters');
@@ -416,7 +475,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 currentFilters.category = document.getElementById('filterCategory').value;
                 currentFilters.size = document.getElementById('filterSize').value;
                 currentFilters.condition = document.getElementById('filterCondition').value;
-                currentFilters.origin = document.getElementById('filterOrigin').value; 
+                currentFilters.origin = document.getElementById('filterOrigin').value;
                 currentFilters.min_price = document.getElementById('filterMinPrice').value;
                 currentFilters.max_price = document.getElementById('filterMaxPrice').value;
                 currentFilters.page = 1;
@@ -443,7 +502,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             });
         }
 
-        // ── Botón Buscar cerca de mí ────────────────────────────
         function setupNearMeButton() {
             const nearMeBtn = document.getElementById('nearMeBtn');
             if (!nearMeBtn) return;
@@ -548,7 +606,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             }).join('');
         }
 
-        // ── Inicializar ────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
             updateUserMenu();
             setupLogout();
@@ -558,7 +615,6 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         });
     </script>
 
-    <!-- JS Móvil (carga al final) -->
     <script src="js/mobile.js"></script>
 
 </body>

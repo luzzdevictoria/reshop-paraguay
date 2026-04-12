@@ -1,17 +1,13 @@
 /**
  * ARCHIVO: frontend/js/mobile.js
  * PROYECTO: ReShop Paraguay
- * VERSION: 1.1.0
- * ACTUALIZADO: 2026-04-11
+ * VERSION: 1.2.0
+ * ACTUALIZADO: 2026-04-12
  * AUTOR: Pedro José Pirovani
  *
- * CHANGELOG v1.1.0:
- * [+] Botón "Buscar cerca de mí" con geolocalización real
- *     → usa JOIN products + users (latitude/longitude en tabla users)
- *     → filtra por address_visible = true
- *     → calcula distancia Haversine en el cliente
- * [+] Enlace "Mensajes" en el drawer (visible para todos)
- * [+] Enlace "Ayuda" en el drawer (visible para todos)
+ * CHANGELOG v1.2.0:
+ * [+] Agregar filtro por origen en el drawer de filtros
+ * [+] Mejorar responsive de tablas y tarjetas
  */
 
 (function () {
@@ -20,7 +16,6 @@
     const API_URL = 'https://reshop-backend.vercel.app';
     const NEAR_ME_RADIUS_KM = 10;
 
-    // ── Utilidades ─────────────────────────────────────────────
     function isMobile() { return window.innerWidth <= 768; }
 
     function getCurrentPage() {
@@ -39,7 +34,6 @@
         catch { return null; }
     }
 
-    // ── Haversine ──────────────────────────────────────────────
     function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -50,7 +44,6 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    // ── Fetch productos cercanos ───────────────────────────────
     async function fetchProductsNearMe(userLat, userLng, radiusKm) {
         const res = await fetch(`${API_URL}/api/products?limit=200`);
         if (!res.ok) throw new Error('Error al consultar productos');
@@ -70,7 +63,18 @@
             .sort((a, b) => a._distanceKm - b._distanceKm);
     }
 
-    // ── Render productos cercanos ──────────────────────────────
+    function getOriginFlagMobile(origin) {
+        const flags = {
+            'PAR': '🇵🇾 Paraguay', 'ARG': '🇦🇷 Argentina', 'BRA': '🇧🇷 Brasil',
+            'USA': '🇺🇸 USA', 'CHN': '🇨🇳 China', 'EUR': '🇪🇺 Europa',
+            'JPN': '🇯🇵 Japón', 'MEX': '🇲🇽 México', 'URY': '🇺🇾 Uruguay',
+            'CHL': '🇨🇱 Chile', 'BOL': '🇧🇴 Bolivia', 'PER': '🇵🇪 Perú',
+            'COL': '🇨🇴 Colombia', 'VEN': '🇻🇪 Venezuela', 'ECU': '🇪🇨 Ecuador',
+            'OTH': '🌎 Otro'
+        };
+        return flags[origin] || (origin ? `🌍 ${origin}` : '🌍 No especificado');
+    }
+
     function renderNearbyProducts(products) {
         const grid = document.getElementById('productsGrid');
         if (!grid) return;
@@ -114,6 +118,7 @@
                     <h3 class="product-card__title">${esc(p.title)}</h3>
                     <p class="product-card__price">${fmt(p.price)} Gs</p>
                     <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(p.seller?.store_name||p.seller?.full_name||'Vendedor')}</p>
+                    <p class="product-card__origin" style="font-size: 0.7rem; color: var(--text-light); margin: 4px 0;"><i class="fas fa-globe-americas"></i> ${getOriginFlagMobile(p.origin)}</p>
                     <span class="product-card__condition">${condMap[p.condition]||''}</span>
                     <button class="product-card__button"
                             onclick="event.stopPropagation();window.location.href='product-detail.html?id=${p.id}'">
@@ -138,7 +143,6 @@
         });
     }
 
-    // ── Toast ──────────────────────────────────────────────────
     function showToast(msg, type = 'info') {
         document.getElementById('nearMeToast')?.remove();
         const colors = { success:'#28a745', error:'#D95A41', info:'#2A5C6E' };
@@ -163,7 +167,6 @@
         }, 3500);
     }
 
-    // ── Botón "Buscar cerca de mí" ────────────────────────────
     function buildNearMeButton(referenceNode) {
         if (document.getElementById('nearMeBtn')) return;
         const grid = document.querySelector('#productsGrid, .products-grid');
@@ -238,7 +241,6 @@
         });
     }
 
-    // ── Header móvil ───────────────────────────────────────────
     function buildMobileHeader() {
         if (document.querySelector('.mobile-header')) return;
         const count = getCartCount();
@@ -261,7 +263,6 @@
         document.body.insertBefore(h, document.body.firstChild);
     }
 
-    // ── Drawer menú (con Mensajes y Ayuda) ─────────────────────
     function buildMenuDrawer() {
         if (document.querySelector('.mobile-menu-overlay')) return;
         const user = getUser();
@@ -323,7 +324,6 @@
         document.addEventListener('keydown', e => { if(e.key==='Escape') close(); });
     }
 
-    // ── Bottom nav ─────────────────────────────────────────────
     function buildBottomNav() {
         if (document.querySelector('.bottom-nav')) return;
         const page  = getCurrentPage();
@@ -350,10 +350,8 @@
         document.body.appendChild(nav);
     }
 
-    // ── Filtros drawer ─────────────────────────────────────────
     function buildFiltersDrawer() {
-        const sidebar = document.querySelector('.sidebar');
-        if (!sidebar || document.querySelector('.filters-drawer')) return;
+        if (document.querySelector('.filters-drawer')) return;
 
         const overlay = document.createElement('div');
         overlay.className = 'filters-overlay';
@@ -397,6 +395,27 @@
                         <option value="acceptable">Aceptable</option>
                     </select>
                 </div>
+                <div class="filters-drawer__group"><label class="filters-drawer__label"><i class="fas fa-globe-americas"></i> Origen</label>
+                    <select class="filters-drawer__select" id="drawerFilterOrigin">
+                        <option value="">Todos los orígenes</option>
+                        <option value="PAR">🇵🇾 Paraguay</option>
+                        <option value="ARG">🇦🇷 Argentina</option>
+                        <option value="BRA">🇧🇷 Brasil</option>
+                        <option value="USA">🇺🇸 Estados Unidos</option>
+                        <option value="CHN">🇨🇳 China</option>
+                        <option value="EUR">🇪🇺 Europa</option>
+                        <option value="JPN">🇯🇵 Japón</option>
+                        <option value="MEX">🇲🇽 México</option>
+                        <option value="URY">🇺🇾 Uruguay</option>
+                        <option value="CHL">🇨🇱 Chile</option>
+                        <option value="BOL">🇧🇴 Bolivia</option>
+                        <option value="PER">🇵🇪 Perú</option>
+                        <option value="COL">🇨🇴 Colombia</option>
+                        <option value="VEN">🇻🇪 Venezuela</option>
+                        <option value="ECU">🇪🇨 Ecuador</option>
+                        <option value="OTH">🌎 Otro</option>
+                    </select>
+                </div>
                 <div class="filters-drawer__group"><label class="filters-drawer__label">Precio (Gs)</label>
                     <div class="filters-drawer__price-row">
                         <input type="number" class="filters-drawer__input" id="drawerFilterMinPrice" placeholder="Mínimo">
@@ -420,7 +439,6 @@
         const grid = document.querySelector('#productsGrid, .products-grid');
         if (grid) grid.parentNode.insertBefore(floatingBtn, grid);
 
-        // Botón near-me después del de filtros
         buildNearMeButton(floatingBtn);
 
         const open  = () => { overlay.classList.add('is-open'); drawer.classList.add('is-open'); document.body.style.overflow='hidden'; };
@@ -432,13 +450,13 @@
 
         document.getElementById('filtersApplyBtn').addEventListener('click', () => {
             [['filterCategory','drawerFilterCategory'],['filterSize','drawerFilterSize'],
-             ['filterCondition','drawerFilterCondition'],['filterMinPrice','drawerFilterMinPrice'],
-             ['filterMaxPrice','drawerFilterMaxPrice']].forEach(([sid, did]) => {
+             ['filterCondition','drawerFilterCondition'],['filterOrigin','drawerFilterOrigin'],
+             ['filterMinPrice','drawerFilterMinPrice'],['filterMaxPrice','drawerFilterMaxPrice']].forEach(([sid, did]) => {
                 const s = document.getElementById(sid), d = document.getElementById(did);
                 if (s && d) s.value = d.value;
             });
             document.getElementById('applyFilters')?.click();
-            const hasF = ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+            const hasF = ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition','drawerFilterOrigin',
                           'drawerFilterMinPrice','drawerFilterMaxPrice']
                 .some(id => (document.getElementById(id)?.value||'')!=='');
             floatingBtn.classList.toggle('has-filters', hasF);
@@ -446,7 +464,7 @@
         });
 
         document.getElementById('filtersClearBtn').addEventListener('click', () => {
-            ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition',
+            ['drawerFilterCategory','drawerFilterSize','drawerFilterCondition','drawerFilterOrigin',
              'drawerFilterMinPrice','drawerFilterMaxPrice'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.value='';
             });
@@ -456,7 +474,6 @@
         document.addEventListener('keydown', e => { if(e.key==='Escape' && drawer.classList.contains('is-open')) close(); });
     }
 
-    // ── Búsqueda móvil ─────────────────────────────────────────
     function buildMobileSearch() {
         const grid = document.querySelector('#productsGrid, .products-grid');
         if (!grid || document.querySelector('.mobile-search')) return;
@@ -474,14 +491,12 @@
         document.getElementById('mobileSearchInput').addEventListener('keydown', e => { if(e.key==='Enter') run(); });
     }
 
-    // ── Cart badges ────────────────────────────────────────────
     function updateCartBadges() {
         const n = getCartCount();
         [document.getElementById('headerCartBadge'), document.getElementById('bottomNavCartBadge')]
             .forEach(b => { if(!b) return; b.textContent=n>99?'99+':n; b.style.display=n>0?'flex':'none'; });
     }
 
-    // ── Swipe to close ─────────────────────────────────────────
     function addSwipeToClose(el, overlayId, dir) {
         if (!el) return;
         let sx=0, sy=0;
@@ -498,7 +513,6 @@
         }, {passive:true});
     }
 
-    // ── Scroll to top ──────────────────────────────────────────
     function buildScrollToTop() {
         if (document.getElementById('scrollTopBtn')) return;
         const btn = document.createElement('button');
@@ -510,7 +524,6 @@
         btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
     }
 
-    // ── Init ───────────────────────────────────────────────────
     function init() {
         if (!isMobile()) return;
         document.querySelector('.header')?.style && (document.querySelector('.header').style.display='none');
