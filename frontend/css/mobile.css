@@ -80,12 +80,15 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         color: white;
     }
 
-    .mobile-header__logo img {
-        height: 36px;
-        width: 36px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
+	.mobile-header__logo img {
+		height: 36px;
+		width: auto;  /* ← Cambiado de 36px a auto */
+		max-width: 120px;
+		border-radius: 8px;
+		background-color: white;
+		padding: 4px 8px;
+		object-fit: contain;
+	}
 
     .mobile-header__title {
         font-size: 1.1rem;
