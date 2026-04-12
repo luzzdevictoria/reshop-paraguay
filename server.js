@@ -2,14 +2,14 @@
 ================================================================================
 ARCHIVO: server.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.5.0 - CLOUDINARY INTEGRATION (SIN ELIMINAR NADA)
+VERSION: 3.6.0 - CLOUDINARY + WATERMARK (MARCA DE AGUA)
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: API REST principal de ReShop Paraguay.
              Inicializa Express, middlewares, rutas y endpoints.
-             AGREGADO: Cloudinary para imágenes (sin eliminar Supabase Storage)
+             AGREGADO: Cloudinary para imágenes con WATERMARK (logo ReShop)
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial del servidor
@@ -25,6 +25,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Endpoints de reseñas: GET/POST /api/products/:id/reviews, GET /api/products/:id/rating
 2026-04-11 - [ADD] Endpoint GET /api/products/seller/:sellerId para productos por vendedor
 2026-04-11 - [ADD] Cloudinary para imágenes (endpoint /api/upload-image, compresión automática)
+2026-04-13 - [ADD] WATERMARK: Marca de agua con logo de ReShop en todas las imágenes subidas
 ================================================================================
 */
 
@@ -35,7 +36,7 @@ const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const crypto = require('crypto');
-const cloudinary = require('cloudinary').v2; // ✅ AGREGADO
+const cloudinary = require('cloudinary').v2;
 
 dotenv.config();
 
@@ -43,7 +44,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURACIÓN CLOUDINARY (NUEVO)
+// CONFIGURACIÓN CLOUDINARY (con watermark)
 // ============================================================
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -240,13 +241,13 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         name: 'ReShop Paraguay API', 
-        version: '3.5.0', 
+        version: '3.6.0', 
         status: 'active',
         endpoints: {
             health: 'GET /api/health',
             products: 'GET /api/products',
             productsBySeller: 'GET /api/products/seller/:sellerId',
-            uploadImage: 'POST /api/upload-image (Cloudinary)',
+            uploadImage: 'POST /api/upload-image (Cloudinary + Watermark)',
             reviews: 'GET/POST /api/products/:id/reviews, GET /api/products/:id/rating',
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
@@ -256,7 +257,7 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================
-// 🆕 NUEVO ENDPOINT: SUBIR IMAGEN A CLOUDINARY
+// 🆕 ENDPOINT: SUBIR IMAGEN A CLOUDINARY CON WATERMARK
 // ============================================================
 app.post('/api/upload-image', authenticateToken, upload.single('image'), async (req, res) => {
     try {
@@ -270,7 +271,17 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), async (
                     folder: `reshop-products/${req.user.id}`,
                     transformation: [
                         { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                        { fetch_format: 'webp' }
+                        { fetch_format: 'webp' },
+                        // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                        { 
+                            overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo en Cloudinary
+                            gravity: 'south_east',   // Esquina inferior derecha
+                            x: 15,                   // Margen horizontal (px)
+                            y: 15,                   // Margen vertical (px)
+                            width: 80,               // Ancho del logo (px)
+                            crop: 'scale',
+                            opacity: 70              // Opacidad 70% (sutil pero visible)
+                        }
                     ]
                 },
                 (error, result) => {
@@ -312,7 +323,7 @@ app.get('/api/products', async (req, res) => {
             .select('*')
             .eq('status', 'active');
         
-        // 🆕 FILTRO POR ORIGEN (código de 3 letras: PAR, ARG, BRA, USA, etc.)
+        // FILTRO POR ORIGEN (código de 3 letras: PAR, ARG, BRA, USA, etc.)
         if (origin && origin !== 'todos') {
             query = query.eq('origin', origin.toUpperCase());
             console.log(`🔍 Filtrando por origen: ${origin}`);
@@ -356,7 +367,7 @@ app.get('/api/products', async (req, res) => {
             success: true, 
             products: products || [],
             count: products?.length || 0,
-            filters: { category, condition, origin, minPrice, maxPrice, search } // útil para debugging
+            filters: { category, condition, origin, minPrice, maxPrice, search }
         });
     } catch (error) {
         console.error('❌ Error en /api/products:', error.message);
@@ -369,12 +380,12 @@ app.get('/api/products', async (req, res) => {
 });
 
 // ============================================================
-// 🆕 ENDPOINT: PRODUCTOS POR VENDEDOR (para dashboard vendedor/admin)
+// ENDPOINT: PRODUCTOS POR VENDEDOR (para dashboard vendedor/admin)
 // ============================================================
 app.get('/api/products/seller/:sellerId', async (req, res) => {
     try {
         const { sellerId } = req.params;
-        const { origin } = req.query; // 🆕 Filtro opcional por origen
+        const { origin } = req.query;
         
         console.log(`📦 Buscando productos del vendedor: ${sellerId}`);
         
@@ -384,7 +395,6 @@ app.get('/api/products/seller/:sellerId', async (req, res) => {
             .eq('seller_id', sellerId)
             .eq('status', 'active');
         
-        // 🆕 Filtrar por origen si viene en la query
         if (origin && origin !== 'todos') {
             query = query.eq('origin', origin.toUpperCase());
             console.log(`🔍 Filtrando por origen: ${origin}`);
@@ -515,7 +525,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // ============================================================
-// CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY
+// CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY + WATERMARK
 // ============================================================
 app.post('/api/products', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -527,7 +537,6 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
         
         let imageUrls = [];
         
-        // ✅ PRIORIDAD: Cloudinary si hay archivos
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
                 const result = await new Promise((resolve, reject) => {
@@ -536,7 +545,17 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
                             folder: `reshop-products/${req.user.id}`,
                             transformation: [
                                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                                { fetch_format: 'webp' }
+                                { fetch_format: 'webp' },
+                                // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                                { 
+                                    overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo
+                                    gravity: 'south_east',
+                                    x: 15,
+                                    y: 15,
+                                    width: 80,
+                                    crop: 'scale',
+                                    opacity: 70
+                                }
                             ]
                         },
                         (error, result) => {
@@ -582,7 +601,7 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
 });
 
 // ============================================================
-// ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY
+// ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY + WATERMARK
 // ============================================================
 app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -612,7 +631,17 @@ app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async
                             folder: `reshop-products/${req.user.id}`,
                             transformation: [
                                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                                { fetch_format: 'webp' }
+                                { fetch_format: 'webp' },
+                                // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                                { 
+                                    overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo
+                                    gravity: 'south_east',
+                                    x: 15,
+                                    y: 15,
+                                    width: 80,
+                                    crop: 'scale',
+                                    opacity: 70
+                                }
                             ]
                         },
                         (error, result) => {
@@ -1054,7 +1083,6 @@ app.post('/api/conversations', authenticateToken, async (req, res) => {
         const { product_id, seller_id } = req.body;
         const buyer_id = req.user.id;
 
-        // Verificar que el producto existe
         const { data: product, error: productError } = await supabase
             .from('products')
             .select('id, title')
@@ -1065,7 +1093,6 @@ app.post('/api/conversations', authenticateToken, async (req, res) => {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
 
-        // Buscar conversación existente
         let { data: conversation, error: findError } = await supabase
             .from('conversations')
             .select('*')
@@ -1074,7 +1101,6 @@ app.post('/api/conversations', authenticateToken, async (req, res) => {
             .eq('seller_id', seller_id)
             .single();
 
-        // Si no existe, crearla
         if (!conversation) {
             const { data: newConversation, error: createError } = await supabase
                 .from('conversations')
@@ -1109,7 +1135,6 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'El mensaje no puede estar vacío' });
         }
 
-        // Insertar mensaje
         const { data: newMessage, error: messageError } = await supabase
             .from('messages')
             .insert({
@@ -1125,7 +1150,6 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
 
         if (messageError) throw messageError;
 
-        // Actualizar último mensaje en conversación
         await supabase
             .from('conversations')
             .update({
@@ -1135,7 +1159,6 @@ app.post('/api/messages', authenticateToken, async (req, res) => {
             })
             .eq('id', conversation_id);
 
-                // Enviar notificación push al receptor
         const receiverExternalId = getUserExternalId(receiver_id);
         await sendNotification(
             receiverExternalId,
@@ -1157,7 +1180,6 @@ app.get('/api/messages/:conversationId', authenticateToken, async (req, res) => 
         const { conversationId } = req.params;
         const userId = req.user.id;
 
-        // Verificar que el usuario pertenece a la conversación
         const { data: conversation, error: convError } = await supabase
             .from('conversations')
             .select('buyer_id, seller_id')
@@ -1172,7 +1194,6 @@ app.get('/api/messages/:conversationId', authenticateToken, async (req, res) => 
             return res.status(403).json({ success: false, error: 'No tienes acceso a esta conversación' });
         }
 
-        // Obtener mensajes
         const { data: messages, error: msgError } = await supabase
             .from('messages')
             .select('*')
@@ -1181,7 +1202,6 @@ app.get('/api/messages/:conversationId', authenticateToken, async (req, res) => 
 
         if (msgError) throw msgError;
 
-        // Marcar mensajes como leídos (si el usuario es el receptor)
         const unreadMessages = messages.filter(m => m.receiver_id === userId && !m.is_read);
         if (unreadMessages.length > 0) {
             await supabase
@@ -1215,7 +1235,6 @@ app.get('/api/conversations', authenticateToken, async (req, res) => {
 
         if (error) throw error;
 
-        // Contar mensajes no leídos por conversación
         const conversationsWithUnread = await Promise.all((conversations || []).map(async (conv) => {
             const { count, error: countError } = await supabase
                 .from('messages')
@@ -1298,12 +1317,12 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.5.0');
-    console.log('  ☁️  Cloudinary integrado para imágenes');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.6.0');
+    console.log('  ☁️  Cloudinary + WATERMARK integrado');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
-    console.log(`📸 Upload: POST /api/upload-image`);
+    console.log(`📸 Upload: POST /api/upload-image (con marca de agua)`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`👤 Seller Products: http://localhost:${PORT}/api/products/seller/:sellerId`);
     console.log(`⭐ Reviews: GET/POST /api/products/:id/reviews`);
@@ -1313,7 +1332,8 @@ app.listen(PORT, () => {
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
     console.log('✅ Endpoint /api/products/seller/:sellerId agregado');
-    console.log('✅ Cloudinary listo | Compresión automática 800x800 | WebP');
+    console.log('✅ Cloudinary listo | Compresión 800x800 | WebP');
+    console.log('✅ WATERMARK activo | Logo ReShop en esquina inferior derecha');
     console.log('');
 });
 

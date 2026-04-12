@@ -2,8 +2,8 @@
 ================================================================================
 ARCHIVO: frontend/dashboard-vendedor.html
 PROYECTO: ReShop Paraguay
-VERSION: 2.2.0 (Mobile-First + Cámara + Cloudinary + Mensajería)
-ACTUALIZADO: 2026-04-11
+VERSION: 2.3.1 (Mobile-First + Cámara + Cloudinary + Mensajería + Eliminar Fondo + Loader Visual)
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 DESCRIPCION: Panel del vendedor. 
              - Tablas convertidas a tarjetas en móvil
@@ -11,6 +11,8 @@ DESCRIPCION: Panel del vendedor.
              - Captura de fotos con cámara del dispositivo
              - Subida directa a Cloudinary
              - Sistema de mensajería para vendedores
+             - 🆕 Eliminación automática de fondo en fotos de producto
+             - 🆕 Loader visual con animación de colores del tema ReShop
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -66,6 +68,26 @@ DESCRIPCION: Panel del vendedor.
         .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
         .btn-outline:hover { background: var(--bg); }
         .btn i { margin-right: 0; }
+        
+        /* 🆕 Botón de eliminar fondo - estilo especial */
+        .btn-magic { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            color: white; 
+            animation: pulse-magic 2s infinite;
+        }
+        .btn-magic:hover { 
+            background: linear-gradient(135deg, #8e44ad, #7d3c98); 
+            transform: scale(1.02);
+        }
+        .btn-magic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            animation: none;
+        }
+        @keyframes pulse-magic {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(155, 89, 182, 0); }
+        }
 
         /* Table (desktop) */
         .products-table { width: 100%; background: white; border-radius: 12px; overflow-x: auto; box-shadow: var(--shadow); }
@@ -128,12 +150,35 @@ DESCRIPCION: Panel del vendedor.
         .image-preview-item { position: relative; width: 76px; height: 76px; }
         .image-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 2px solid var(--border); }
         .image-preview-item .remove-image { position: absolute; top: -8px; right: -8px; background: var(--accent); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem; }
+        .image-preview-item.processing::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-preview-item.processing::before {
+            content: '\f110';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            animation: fa-spin 1s infinite linear;
+            z-index: 2;
+        }
         
         .camera-container { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; }
         .camera-container.is-open { display: flex; }
         .camera-video { width: 100%; max-width: 100%; height: auto; background: #000; }
-        .camera-controls { position: absolute; bottom: 30px; display: flex; gap: 20px; }
-        .camera-controls .btn { padding: 14px 24px; font-size: 1.1rem; }
+        .camera-controls { position: absolute; bottom: 30px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .camera-controls .btn { padding: 12px 18px; font-size: 0.95rem; }
 
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions .btn { flex: 1; justify-content: center; }
@@ -158,10 +203,116 @@ DESCRIPCION: Panel del vendedor.
         .stat-mini__num { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
         .stat-mini__label { font-size: 0.78rem; color: var(--text-light); margin-top: 4px; }
 
+        /* 🆕 LOADER PARA ELIMINAR FONDO - REshop THEME */
+        .bg-removal-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .bg-removal-loader .loader-spinner {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            animation: spinLoader 1.5s linear infinite;
+        }
+
+        .bg-removal-loader .loader-spinner::before,
+        .bg-removal-loader .loader-spinner::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .bg-removal-loader .loader-spinner::before {
+            width: 100%;
+            height: 100%;
+            border: 4px solid rgba(232, 184, 107, 0.2);
+            top: 0;
+            left: 0;
+        }
+
+        .bg-removal-loader .loader-spinner::after {
+            width: 0;
+            height: 0;
+            border: 4px solid transparent;
+            border-top-color: #E8B86B;
+            border-right-color: #D95A41;
+            border-bottom-color: #2A5C6E;
+            border-left-color: #E8B86B;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            animation: pulseColors 1.5s ease-in-out infinite;
+        }
+
+        .bg-removal-loader p {
+            margin-top: 25px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .bg-removal-loader .loader-text {
+            font-size: 0.85rem;
+            color: #E8B86B;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        @keyframes spinLoader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseColors {
+            0% { 
+                border-top-color: #E8B86B;
+                border-right-color: #D95A41;
+                border-bottom-color: #2A5C6E;
+                border-left-color: #E8B86B;
+            }
+            25% {
+                border-top-color: #2A5C6E;
+                border-right-color: #E8B86B;
+                border-bottom-color: #D95A41;
+                border-left-color: #2A5C6E;
+            }
+            50% {
+                border-top-color: #D95A41;
+                border-right-color: #2A5C6E;
+                border-bottom-color: #E8B86B;
+                border-left-color: #D95A41;
+            }
+            75% {
+                border-top-color: #E8B86B;
+                border-right-color: #D95A41;
+                border-bottom-color: #2A5C6E;
+                border-left-color: #E8B86B;
+            }
+            100% { 
+                border-top-color: #E8B86B;
+                border-right-color: #D95A41;
+                border-bottom-color: #2A5C6E;
+                border-left-color: #E8B86B;
+            }
+        }
+
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .stats-row { grid-template-columns: 1fr 1fr; }
-            .camera-controls .btn { padding: 12px 20px; }
+            .camera-controls .btn { padding: 10px 14px; font-size: 0.9rem; }
             .tab-btn { padding: 8px 12px; font-size: 0.85rem; }
         }
     </style>
@@ -397,7 +548,7 @@ DESCRIPCION: Panel del vendedor.
     </div>
 
     <!-- ========================================================
-         CÁMARA OVERLAY
+         CÁMARA OVERLAY - CON BOTÓN ELIMINAR FONDO 🆕
     ========================================================= -->
     <div id="cameraOverlay" class="camera-container">
         <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
@@ -411,6 +562,10 @@ DESCRIPCION: Panel del vendedor.
             </button>
             <button class="btn btn-primary" id="capturePhotoBtn">
                 <i class="fas fa-camera"></i> Capturar
+            </button>
+            <!-- 🆕 BOTÓN ELIMINAR FONDO -->
+            <button class="btn btn-magic" id="removeBgBtn" style="display: none;">
+                <i class="fas fa-magic"></i> Eliminar fondo
             </button>
         </div>
     </div>
@@ -448,6 +603,10 @@ DESCRIPCION: Panel del vendedor.
         // Variables para imágenes
         let uploadedImageUrls = [];
         let currentStream = null;
+
+        // 🆕 Variables para eliminación de fondo
+        let lastCapturedBlob = null;        // Guardar la última foto capturada (blob original)
+        let currentPreviewItem = null;      // Referencia al preview actual que se está procesando
 
         // Variables para mensajería
         let currentConversationId = null;
@@ -710,6 +869,7 @@ DESCRIPCION: Panel del vendedor.
                 <span class="remove-image" onclick="removeImageFromPreview(this)">×</span>
             `;
             preview.appendChild(item);
+            return item; // 🆕 Retornar referencia para poder actualizar después
         }
 
         function updateImagePreviewsWithUrls() {
@@ -736,6 +896,117 @@ DESCRIPCION: Panel del vendedor.
             }
             item.remove();
         };
+
+        // ============================================================
+        // 🆕 FUNCIONES AUXILIARES PARA TOAST Y LOADER
+        // ============================================================
+        
+        // Función auxiliar para mensajes toast
+        function showToastMessage(message, type = 'info') {
+            const msgDiv = document.getElementById('modalMessage');
+            msgDiv.className = `message ${type}`;
+            msgDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${message}`;
+            setTimeout(() => {
+                msgDiv.className = '';
+                msgDiv.innerHTML = '';
+            }, 4000);
+        }
+
+        // Funciones para controlar el loader de eliminación de fondo
+        function showBgRemovalLoader() {
+            const existingLoader = document.querySelector('.bg-removal-loader');
+            if (existingLoader) existingLoader.remove();
+            
+            const loader = document.createElement('div');
+            loader.className = 'bg-removal-loader';
+            loader.innerHTML = `
+                <div class="loader-spinner"></div>
+                <p>✨ Eliminando fondo... ✨</p>
+                <div class="loader-text">Procesando imagen, por favor espera</div>
+            `;
+            document.body.appendChild(loader);
+        }
+
+        function hideBgRemovalLoader() {
+            const loader = document.querySelector('.bg-removal-loader');
+            if (loader) loader.remove();
+        }
+
+        // ============================================================
+        // 🆕 FUNCIÓN: ELIMINAR FONDO CON IMGLY + LOADER VISUAL
+        // ============================================================
+        async function applyBackgroundRemoval() {
+            if (!lastCapturedBlob || !currentPreviewItem) {
+                alert('No hay imagen para procesar');
+                return;
+            }
+
+            const removeBgBtn = document.getElementById('removeBgBtn');
+            
+            // 🆕 Mostrar loader visual con animación de colores del tema
+            showBgRemovalLoader();
+            
+            removeBgBtn.disabled = true;
+            removeBgBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            currentPreviewItem.classList.add('processing');
+
+            try {
+                // 🆕 Importar librería dinámicamente (solo cuando se necesita)
+                const removeBackground = (await import('https://unpkg.com/@imgly/background-removal@1.5.5/dist/background-removal.esm.js')).default;
+                
+                // Procesar la imagen (la librería devuelve un Blob con fondo transparente)
+                const cleanedBlob = await removeBackground(lastCapturedBlob, {
+                    publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal-data@1.5.5/dist/',
+                });
+
+                // Crear URL para preview
+                const cleanedUrl = URL.createObjectURL(cleanedBlob);
+                
+                // Actualizar preview visualmente
+                const img = currentPreviewItem.querySelector('img');
+                if (img) {
+                    img.src = cleanedUrl;
+                    img.style.background = 'url(\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAHUlEQVQ4jWNgYGAQIYAJglEDhoUBg9+FowbQ2gAARjwKARjtnN8AAAAASUVORK5CYII=\') repeat';
+                }
+                
+                // Subir nueva versión a Cloudinary
+                const file = new File([cleanedBlob], `no-bg_${Date.now()}.png`, { type: 'image/png' });
+                const cloudinaryUrl = await uploadImageToCloudinary(file);
+                
+                if (cloudinaryUrl) {
+                    // Actualizar array de URLs: reemplazar la URL anterior si existe, o agregar nueva
+                    const oldUrl = currentPreviewItem.getAttribute('data-url');
+                    if (oldUrl) {
+                        const index = uploadedImageUrls.indexOf(oldUrl);
+                        if (index !== -1) uploadedImageUrls[index] = cloudinaryUrl;
+                    } else {
+                        uploadedImageUrls.push(cloudinaryUrl);
+                    }
+                    // Actualizar atributo data-url
+                    currentPreviewItem.setAttribute('data-url', cloudinaryUrl);
+                    showToastMessage('✨ ¡Fondo eliminado exitosamente!', 'success');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showToastMessage('Error al eliminar fondo: ' + error.message, 'error');
+            } finally {
+                // 🆕 Ocultar loader visual
+                hideBgRemovalLoader();
+                
+                // Restaurar botón y estado
+                removeBgBtn.disabled = false;
+                removeBgBtn.innerHTML = '<i class="fas fa-magic"></i> Eliminar fondo';
+                currentPreviewItem.classList.remove('processing');
+                
+                // Ocultar botón después de usar (solo se puede aplicar una vez por captura)
+                removeBgBtn.style.display = 'none';
+                
+                // Limpiar variables de referencia
+                lastCapturedBlob = null;
+                currentPreviewItem = null;
+            }
+        }
 
         // ============================================================
         // CÁMARA (con botón fijo en HTML)
@@ -790,6 +1061,17 @@ DESCRIPCION: Panel del vendedor.
                 currentStream = null;
             }
             document.getElementById('cameraOverlay').classList.remove('is-open');
+            
+            // 🆕 Ocultar botón de eliminar fondo al cerrar cámara
+            const removeBgBtn = document.getElementById('removeBgBtn');
+            if (removeBgBtn) {
+                removeBgBtn.style.display = 'none';
+                removeBgBtn.disabled = false;
+            }
+            
+            // Limpiar variables de fondo
+            lastCapturedBlob = null;
+            currentPreviewItem = null;
         }
 
         function capturePhoto() {
@@ -808,20 +1090,37 @@ DESCRIPCION: Panel del vendedor.
                     return;
                 }
                 
+                // 🆕 GUARDAR BLOB ORIGINAL PARA ELIMINAR FONDO DESPUÉS
+                lastCapturedBlob = blob;
+                
+                // Mostrar preview temporal
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    addImagePreview(e.target.result, null);
+                    // 🆕 Guardar referencia al item creado para poder actualizarlo después
+                    currentPreviewItem = addImagePreview(e.target.result, null);
                 };
                 reader.readAsDataURL(blob);
                 
+                // Subir imagen original a Cloudinary (backup)
                 const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
                 const url = await uploadImageToCloudinary(file);
                 if (url) {
                     uploadedImageUrls.push(url);
+                    // Actualizar data-url del preview
+                    if (currentPreviewItem) {
+                        currentPreviewItem.setAttribute('data-url', url);
+                    }
                     updateImagePreviewsWithUrls();
                 }
                 
-                stopCamera();
+                // 🆕 MOSTRAR BOTÓN DE ELIMINAR FONDO
+                const removeBgBtn = document.getElementById('removeBgBtn');
+                if (removeBgBtn) {
+                    removeBgBtn.style.display = 'flex';
+                }
+                
+                // No cerrar cámara automáticamente para permitir eliminar fondo
+                // stopCamera(); 
             }, 'image/jpeg', 0.9);
         }
 
@@ -830,6 +1129,9 @@ DESCRIPCION: Panel del vendedor.
         document.getElementById('closeCameraBtn').addEventListener('click', stopCamera);
         document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
         document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
+        
+        // 🆕 Event listener para botón eliminar fondo
+        document.getElementById('removeBgBtn')?.addEventListener('click', applyBackgroundRemoval);
         
         document.getElementById('uploadFileBtn').addEventListener('click', () => {
             const fileArea = document.getElementById('fileInputArea');
@@ -1004,6 +1306,13 @@ DESCRIPCION: Panel del vendedor.
         function closeModal() {
             stopCamera();
             document.getElementById('productModal').classList.remove('is-open');
+            
+            // 🆕 Asegurar que el botón de eliminar fondo esté oculto
+            const removeBgBtn = document.getElementById('removeBgBtn');
+            if (removeBgBtn) {
+                removeBgBtn.style.display = 'none';
+                removeBgBtn.disabled = false;
+            }
         }
 
         document.getElementById('productModal').addEventListener('click', function(e) {

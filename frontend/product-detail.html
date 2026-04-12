@@ -2,12 +2,12 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.3.0 - SISTEMA DE CALIFICACIÓN MEJORADO
+VERSION: 2.4.0 - BOTÓN CONTACTAR VENDEDOR MEJORADO
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería.
+DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería interna.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -145,6 +145,131 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         .modal-message-footer { padding: 15px 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
         .modal-message-footer input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .modal-message-footer button { background: #2A5C6E; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
+        
+        /* 🆕 Botón Contactar vendedor - Estilo ReShop (Mensajería Interna) */
+        .btn-message-reshop {
+            --bg-color: #f0f7fa;
+            --bg-hover-color: #e3f0f5;
+            --text-color: #2A5C6E;
+            --border-color: #2A5C6E;
+            --online-status: #28a745;
+            --font-size: 14px;
+            --btn-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .button-message-reshop {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font: 500 var(--font-size) 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 48px;
+            cursor: pointer;
+            padding: 8px 16px 8px 8px;
+            width: fit-content;
+            min-width: 140px;
+            height: 44px;
+            overflow: hidden;
+            position: relative;
+            transition: var(--btn-transition);
+            gap: 8px;
+        }
+
+        .button-message-reshop:hover {
+            background-color: var(--bg-hover-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(42, 92, 110, 0.15);
+        }
+
+        .button-message-reshop:active {
+            transform: scale(0.98);
+        }
+
+        .button-message-reshop .avatar-container {
+            width: 32px;
+            height: 32px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .button-message-reshop .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2A5C6E, #E8B86B);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .button-message-reshop .status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background-color: var(--online-status);
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse-status 2s ease-in-out infinite;
+        }
+
+        .button-message-reshop .button-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.2;
+        }
+
+        .button-message-reshop .button-label {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .button-message-reshop .button-title {
+            font-weight: 700;
+            color: #2A5C6E;
+            font-size: 0.85rem;
+        }
+
+        .button-message-reshop i {
+            color: #2A5C6E;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            margin-left: auto;
+        }
+
+        .button-message-reshop:hover i {
+            transform: translateX(2px);
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* Responsive móvil */
+        @media (max-width: 768px) {
+            .button-message-reshop {
+                padding: 6px 12px 6px 6px;
+                min-width: 120px;
+                height: 40px;
+            }
+            .button-message-reshop .avatar-container {
+                width: 28px;
+                height: 28px;
+            }
+            .button-message-reshop .button-title {
+                font-size: 0.75rem;
+            }
+            .button-message-reshop .button-label {
+                font-size: 0.6rem;
+            }
+        }
         
         @media (max-width: 600px) {
             .product-title { font-size: 1.3rem; }
@@ -562,8 +687,18 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     <button class="btn btn-secondary" onclick="buyNow(${product.id})">
                         <i class="fas fa-bolt"></i> Comprar Ahora
                     </button>
-                    <button class="btn btn-message" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
-                        <i class="fab fa-whatsapp"></i> Contactar vendedor
+                    <button class="button-message-reshop" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
+                        <div class="avatar-container">
+                            <div class="avatar">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <span class="status-dot"></span>
+                        </div>
+                        <div class="button-text">
+                            <span class="button-label">Preguntar al</span>
+                            <span class="button-title">Vendedor</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
                     </button>
                     <button class="btn btn-fav" id="favBtn" onclick="toggleFavorite()">
                         <i class="far fa-heart"></i> Favorito

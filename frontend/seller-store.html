@@ -2,9 +2,9 @@
 ================================================================================
 ARCHIVO: seller-store.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.0.0
+VERSION: 1.1.0
 CREADO: 2026-04-11
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página pública de la tienda de un vendedor. Muestra información
@@ -15,7 +15,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Carga de datos del vendedor desde API
 2026-04-11 - [ADD] Listado de productos del vendedor
 2026-04-11 - [ADD] Boton para contactar por WhatsApp
-2026-04-11 - [ADD] Mapa de ubicacion si el vendedor compartio su direccion
+2026-04-13 - [FIX] Reemplazar WhatsApp por mensajería interna con botón rediseñado
+2026-04-13 - [ADD] Estilos del botón con colores ReShop
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -71,8 +72,6 @@ HISTORIAL DE MODIFICACIONES:
         .stat-value { font-size: 1.5rem; font-weight: bold; color: #D95A41; }
         .stat-label { font-size: 0.8rem; color: #666; }
         .seller-contact { margin-top: 15px; }
-        .btn-whatsapp { background: #25D366; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-whatsapp:hover { background: #128C7E; }
         
         /* Mapa */
         .seller-map { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 12px; }
@@ -90,6 +89,132 @@ HISTORIAL DE MODIFICACIONES:
         .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
         .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
         
+        /* 🆕 Botón Contactar vendedor - Estilo ReShop (Mensajería Interna) */
+        .btn-message-reshop {
+            --bg-color: #f0f7fa;
+            --bg-hover-color: #e3f0f5;
+            --text-color: #2A5C6E;
+            --border-color: #2A5C6E;
+            --online-status: #28a745;
+            --font-size: 14px;
+            --btn-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .button-message-reshop {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font: 500 var(--font-size) 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            border: 1.5px solid var(--border-color);
+            border-radius: 48px;
+            cursor: pointer;
+            padding: 8px 16px 8px 8px;
+            width: fit-content;
+            min-width: 160px;
+            height: 44px;
+            overflow: hidden;
+            position: relative;
+            transition: var(--btn-transition);
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .button-message-reshop:hover {
+            background-color: var(--bg-hover-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(42, 92, 110, 0.15);
+        }
+
+        .button-message-reshop:active {
+            transform: scale(0.98);
+        }
+
+        .button-message-reshop .avatar-container {
+            width: 32px;
+            height: 32px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .button-message-reshop .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2A5C6E, #E8B86B);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .button-message-reshop .status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background-color: var(--online-status);
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse-status 2s ease-in-out infinite;
+        }
+
+        .button-message-reshop .button-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.2;
+        }
+
+        .button-message-reshop .button-label {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .button-message-reshop .button-title {
+            font-weight: 700;
+            color: #2A5C6E;
+            font-size: 0.85rem;
+        }
+
+        .button-message-reshop i {
+            color: #2A5C6E;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            margin-left: auto;
+        }
+
+        .button-message-reshop:hover i {
+            transform: translateX(2px);
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* Responsive móvil */
+        @media (max-width: 768px) {
+            .button-message-reshop {
+                padding: 6px 12px 6px 6px;
+                min-width: 140px;
+                height: 40px;
+            }
+            .button-message-reshop .avatar-container {
+                width: 28px;
+                height: 28px;
+            }
+            .button-message-reshop .button-title {
+                font-size: 0.75rem;
+            }
+            .button-message-reshop .button-label {
+                font-size: 0.6rem;
+            }
+        }
+        
         .loading, .error, .no-products { text-align: center; padding: 50px; font-size: 1.1rem; color: #666; }
         .error { color: #D95A41; }
         
@@ -106,7 +231,7 @@ HISTORIAL DE MODIFICACIONES:
             .seller-stats { gap: 15px; }
         }
     </style>
-	<!-- OneSignal Push Notifications -->
+    <!-- OneSignal Push Notifications -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -134,8 +259,8 @@ HISTORIAL DE MODIFICACIONES:
         <div class="header-menu">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-			<a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
-			<a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
             <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
             <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
             <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
@@ -155,14 +280,17 @@ HISTORIAL DE MODIFICACIONES:
         
         <div id="sellerProfile" class="seller-profile">
             <div class="loader-container">
-    <div class="three-body"></div>
-    <p>Cargando información del vendedor...</p>
-</div>
+                <div class="three-body"></div>
+                <p>Cargando información del vendedor...</p>
+            </div>
         </div>
         
         <h2 class="section-title"><i class="fas fa-box"></i> Productos de la tienda</h2>
         <div id="productsGrid" class="products-grid">
-            <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>
+            <div class="loader-container">
+                <div class="three-body"></div>
+                <p>Cargando productos...</p>
+            </div>
         </div>
     </div>
 
@@ -221,6 +349,21 @@ HISTORIAL DE MODIFICACIONES:
         }
         
         // ============================================================
+        // FUNCIÓN PARA ENVIAR MENSAJE (mensajería interna)
+        // ============================================================
+        function startConversationWithSeller(sellerId, sellerName) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Inicia sesión para enviar mensajes al vendedor');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Redirigir a messages.html con los datos del vendedor
+            window.location.href = `messages.html?seller=${sellerId}&name=${encodeURIComponent(sellerName)}`;
+        }
+        
+        // ============================================================
         // CARGAR DATOS DEL VENDEDOR
         // ============================================================
         async function loadSeller() {
@@ -244,8 +387,6 @@ HISTORIAL DE MODIFICACIONES:
         function renderSellerProfile(seller) {
             const container = document.getElementById('sellerProfile');
             
-            const ratingStars = seller.rating ? '⭐'.repeat(Math.floor(seller.rating)) + (seller.rating % 1 ? '½' : '') : 'Sin calificaciones';
-            
             let mapHtml = '';
             if (seller.latitude && seller.longitude && seller.address_visible) {
                 mapHtml = `
@@ -262,12 +403,15 @@ HISTORIAL DE MODIFICACIONES:
                 `;
             }
             
+            const sellerName = escapeHtml(seller.store_name || seller.full_name);
+            const sellerFullName = escapeHtml(seller.full_name);
+            
             container.innerHTML = `
                 <div class="seller-avatar">
                     <i class="fas fa-store"></i>
                 </div>
-                <h1 class="seller-name">${escapeHtml(seller.store_name || seller.full_name)}</h1>
-                <div class="seller-store">${escapeHtml(seller.full_name)}</div>
+                <h1 class="seller-name">${sellerName}</h1>
+                <div class="seller-store">${sellerFullName}</div>
                 <div class="seller-stats">
                     <div class="stat"><div class="stat-value">${seller.rating || 0}</div><div class="stat-label">⭐ Calificación</div></div>
                     <div class="stat"><div class="stat-value">${seller.total_sales || 0}</div><div class="stat-label">📦 Ventas</div></div>
@@ -275,9 +419,19 @@ HISTORIAL DE MODIFICACIONES:
                 </div>
                 <div class="seller-description">${escapeHtml(seller.store_description || 'Bienvenido a mi tienda. ¡Encontrá ropa de segunda mano de calidad!')}</div>
                 <div class="seller-contact">
-                    <a href="https://wa.me/${seller.phone ? seller.phone.replace(/[^0-9]/g, '') : ''}" target="_blank" class="btn-whatsapp" ${!seller.phone ? 'style="display:none"' : ''}>
-                        <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
-                    </a>
+                    <button class="button-message-reshop" onclick="startConversationWithSeller('${seller.id}', '${sellerName}')">
+                        <div class="avatar-container">
+                            <div class="avatar">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <span class="status-dot"></span>
+                        </div>
+                        <div class="button-text">
+                            <span class="button-label">Enviar mensaje a</span>
+                            <span class="button-title">${sellerName}</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
                 ${mapHtml}
             `;
@@ -288,7 +442,7 @@ HISTORIAL DE MODIFICACIONES:
         // ============================================================
         async function loadSellerProducts() {
             const container = document.getElementById('productsGrid');
-            container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando productos...</div>';
+            container.innerHTML = '<div class="loader-container"><div class="three-body"></div><p>Cargando productos...</p></div>';
             
             try {
                 const response = await fetch(`${API_URL}/api/products/seller/${sellerId}`);
@@ -299,8 +453,8 @@ HISTORIAL DE MODIFICACIONES:
                     for (const product of data.products) {
                         const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
                         const conditionText = {
-                            'new_with_tag': 'Nuevo con etiqueta',
-                            'new_without_tag': 'Nuevo sin etiqueta',
+                            'new_with_tags': 'Nuevo con etiqueta',
+                            'new_without_tags': 'Nuevo sin etiqueta',
                             'very_good': 'Muy bueno',
                             'good': 'Bueno',
                             'acceptable': 'Aceptable'
