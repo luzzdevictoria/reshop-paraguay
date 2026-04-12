@@ -30,3 +30,633 @@
     }
 }
 
+<<<<<<< Updated upstream
+=======
+/* ============================================================
+   PANEL VENDEDOR - TABLAS A TARJETAS
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Transformar tabla en lista de tarjetas */
+    .products-table {
+        display: block !important;
+        overflow: visible !important;
+    }
+
+    .products-table thead {
+        display: none !important;
+    }
+
+    .products-table tbody {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .products-table tr {
+        display: grid !important;
+        grid-template-columns: 70px 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 12px;
+        border-bottom: none !important;
+    }
+
+    .products-table tr:hover {
+        background: white;
+    }
+
+    /* Imagen en columna izquierda, todo lo demás a la derecha */
+    .products-table td:nth-child(1) {
+        grid-row: 1 / 4;
+        grid-column: 1;
+        padding: 0 !important;
+        padding-right: 12px !important;
+    }
+
+    .products-table td:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0 !important;
+        padding-bottom: 4px !important;
+        border-bottom: none !important;
+    }
+
+    .products-table td:nth-child(3) {
+        grid-column: 2;
+        grid-row: 2;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0 !important;
+        padding-bottom: 4px !important;
+        border-bottom: none !important;
+    }
+
+    /* Categoría + estado juntos */
+    .products-table td:nth-child(4),
+    .products-table td:nth-child(5) {
+        display: none !important;
+    }
+
+    /* Botones de acción */
+    .products-table td:nth-child(6) {
+        grid-column: 2;
+        grid-row: 3;
+        padding: 0 !important;
+        border-bottom: none !important;
+        display: flex;
+        gap: 8px;
+    }
+
+    .products-table td:nth-child(6) .btn {
+        flex: 1;
+        padding: 8px 12px !important;
+        font-size: 0.8rem !important;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+
+    .products-table .product-image {
+        width: 70px !important;
+        height: 70px !important;
+        border-radius: 10px;
+        object-fit: cover;
+    }
+
+    /* Tabs del panel */
+    .panel-header {
+        flex-direction: column !important;
+        gap: 12px;
+        align-items: stretch !important;
+    }
+
+    .panel-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .panel-header .btn {
+        width: 100%;
+        min-height: var(--touch-target);
+        font-size: 0.95rem;
+    }
+
+    /* Tabs en vendedor */
+    .vendor-tabs {
+        display: flex;
+        gap: 0;
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 16px;
+    }
+
+    .vendor-tabs .tab-btn {
+        flex: 1;
+        padding: 10px 8px !important;
+        font-size: 0.85rem !important;
+        border-radius: 9px !important;
+        min-height: var(--touch-target);
+    }
+}
+
+/* ============================================================
+   CARRITO MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .cart-table {
+        display: block !important;
+    }
+
+    .cart-table thead {
+        display: none !important;
+    }
+
+    .cart-table tbody {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cart-table tr {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        gap: 8px;
+        background: white;
+        border-radius: 12px;
+        padding: 14px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-bottom: none !important;
+    }
+
+    .cart-table tr:hover {
+        background: white;
+    }
+
+    /* Nombre del producto */
+    .cart-table td:nth-child(1) {
+        grid-column: 1;
+        grid-row: 1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0 !important;
+        border-bottom: none !important;
+    }
+
+    /* Precio */
+    .cart-table td:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+        color: var(--accent);
+        font-weight: 700;
+        text-align: right;
+        padding: 0 !important;
+        border-bottom: none !important;
+    }
+
+    /* Cantidad */
+    .cart-table td:nth-child(3) {
+        grid-column: 1;
+        grid-row: 2;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 !important;
+        border-bottom: none !important;
+    }
+
+    .cart-table td:nth-child(3)::before {
+        content: "Cantidad:";
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    /* Subtotal (ocultar - se muestra el precio ya) */
+    .cart-table td:nth-child(4) {
+        display: none !important;
+    }
+
+    /* Eliminar */
+    .cart-table td:nth-child(5) {
+        grid-column: 2;
+        grid-row: 2;
+        padding: 0 !important;
+        border-bottom: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .cart-table td:nth-child(5) .btn {
+        padding: 6px 12px !important;
+        font-size: 0.8rem !important;
+        min-height: 36px;
+    }
+
+    .quantity-input {
+        width: 50px !important;
+    }
+
+    /* Summary */
+    .cart-summary {
+        text-align: left !important;
+    }
+
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        min-height: var(--touch-target);
+        font-size: 1rem;
+    }
+}
+
+/* ============================================================
+   CHECKOUT MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .checkout-container,
+    .checkout-grid {
+        grid-template-columns: 1fr !important;
+        flex-direction: column !important;
+    }
+
+    .checkout-form-section,
+    .checkout-summary-section {
+        width: 100% !important;
+    }
+
+    /* Orden: resumen arriba, formulario abajo */
+    .checkout-summary-section {
+        order: -1;
+    }
+}
+
+/* ============================================================
+   INPUTS Y FORMULARIOS MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        padding: 12px 14px !important;
+        border-radius: 10px !important;
+        min-height: var(--touch-target);
+    }
+
+    .btn-submit {
+        min-height: var(--touch-target);
+        font-size: 1rem !important;
+    }
+}
+
+/* ============================================================
+   MODALES MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 96vw !important;
+        max-width: 96vw !important;
+        margin: 8px !important;
+        padding: 20px !important;
+        border-radius: 16px !important;
+        max-height: 90vh !important;
+    }
+}
+
+/* ============================================================
+   DETALLE DE PRODUCTO MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .product-detail {
+        padding: 16px !important;
+    }
+
+    .product-title {
+        font-size: 1.3rem !important;
+    }
+
+    .product-price {
+        font-size: 1.5rem !important;
+    }
+
+    .product-info label {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 2px;
+        font-size: 0.75rem;
+        color: var(--text-light);
+    }
+
+    .quantity-selector {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .product-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-actions .btn {
+        width: 100%;
+        min-height: var(--touch-target);
+        font-size: 1rem;
+    }
+}
+
+/* ============================================================
+   MIS PEDIDOS MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .orders-list {
+        gap: 12px !important;
+    }
+
+    .order-card {
+        padding: 14px !important;
+    }
+
+    .order-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+}
+
+/* ============================================================
+   STATS / ADMIN MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+
+    .stat-card {
+        padding: 14px !important;
+    }
+
+    .stat-number {
+        font-size: 1.5rem !important;
+    }
+
+    .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+        padding-bottom: 4px;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+        padding: 8px 14px !important;
+        font-size: 0.85rem !important;
+        flex-shrink: 0;
+    }
+}
+
+/* ============================================================
+   SEARCH BAR MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    .mobile-search {
+        display: flex !important;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .mobile-search input {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+
+    .mobile-search input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .mobile-search button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        min-height: var(--touch-target);
+    }
+
+    /* Ocultar header-search original */
+    .header__search {
+        display: none;
+    }
+}
+
+/* ============================================================
+   HERO SECTION MÓVIL (si existe)
+   ============================================================ */
+@media (max-width: 768px) {
+    .hero {
+        padding: 24px 16px !important;
+    }
+
+    .hero h2 {
+        font-size: 1.4rem !important;
+    }
+}
+
+/* ============================================================
+   FOOTER MÓVIL (ajuste para bottom nav)
+   ============================================================ */
+@media (max-width: 768px) {
+    .footer {
+        padding-bottom: calc(var(--mobile-nav-height) + 16px) !important;
+    }
+}
+
+/* ============================================================
+   ANIMACIONES Y MICRO-INTERACCIONES
+   ============================================================ */
+@media (max-width: 768px) {
+    .product-card {
+        animation: fadeInUp 0.3s ease both;
+    }
+
+    .product-card:nth-child(2) { animation-delay: 0.05s; }
+    .product-card:nth-child(3) { animation-delay: 0.1s; }
+    .product-card:nth-child(4) { animation-delay: 0.15s; }
+    .product-card:nth-child(5) { animation-delay: 0.2s; }
+    .product-card:nth-child(n+6) { animation-delay: 0.25s; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide in de drawers */
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* ============================================================
+   ACCESIBILIDAD - FOCUS VISIBLE
+   ============================================================ */
+@media (max-width: 768px) {
+    :focus-visible {
+        outline: 3px solid var(--secondary);
+        outline-offset: 2px;
+    }
+}
+
+/* ============================================================
+   TABLET (768px - 1024px)
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .container {
+        padding: 16px 20px !important;
+    }
+
+    .mobile-header {
+        display: none !important;
+    }
+
+    .bottom-nav {
+        display: none !important;
+    }
+}
+
+/* ============================================================
+   OCULTAR ELEMENTOS SOLO EN DESKTOP
+   ============================================================ */
+@media (min-width: 769px) {
+    .mobile-header {
+        display: none !important;
+    }
+
+    .mobile-menu-overlay,
+    .mobile-menu-drawer {
+        display: none !important;
+    }
+
+    .bottom-nav {
+        display: none !important;
+    }
+
+    .floating-filter-btn {
+        display: none !important;
+    }
+
+    .filters-overlay,
+    .filters-drawer {
+        display: none !important;
+    }
+}
+
+/* ============================================================
+   BOTÓN "BUSCAR CERCA DE MÍ" - CONTENEDOR VISIBLE EN MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Mostrar el contenedor del botón en móvil */
+    .near-me-button-wrapper {
+        display: block !important;
+        width: 100%;
+        padding: 0 12px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+    }
+    
+    /* Asegurar que el botón se vea correctamente */
+    #nearMeBtn {
+        display: flex !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        justify-content: center !important;
+        background: var(--secondary) !important;
+        color: #333 !important;
+        border: none !important;
+        border-radius: 24px !important;
+        padding: 12px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+    }
+
+    /* Estado activo: verde cuando el filtro está aplicado */
+    .btn-near-me.is-active {
+        background: #28a745 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-near-me.is-active:hover {
+        background: #218838;
+    }
+
+    /* Badge de distancia sobre la imagen de cada tarjeta */
+    .distance-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(42, 92, 110, 0.88);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        backdrop-filter: blur(4px);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .distance-badge i {
+        font-size: 0.65rem;
+        color: #E8B86B;
+    }
+}
+>>>>>>> Stashed changes
+"" 
