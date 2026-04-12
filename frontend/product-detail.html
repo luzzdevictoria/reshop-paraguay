@@ -2,12 +2,12 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.2.0 - CON MENSAJERÍA
+VERSION: 2.3.0 - SISTEMA DE CALIFICACIÓN MEJORADO
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
-DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favoritos y mensajería.
+DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -59,6 +59,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
         .stars { display: inline-flex; gap: 2px; }
         .star { color: #ddd; font-size: 1.2rem; }
         .star.filled { color: #E8B86B; }
+        .star.half-filled { color: #E8B86B; }
         .rating-value { font-weight: bold; color: #2A5C6E; }
         .rating-count { color: #666; font-size: 0.9rem; }
         
@@ -74,10 +75,30 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
         
         .review-form { background: #f9f9f9; border-radius: 12px; padding: 20px; margin-top: 20px; }
         .review-form h4 { color: #2A5C6E; margin-bottom: 15px; }
-        .rating-input { display: flex; gap: 5px; margin-bottom: 15px; cursor: pointer; }
-        .rating-input .star { font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
-        .rating-input .star:hover,
-        .rating-input .star.hover { color: #E8B86B; }
+        
+        /* === SISTEMA DE CALIFICACIÓN CON ESTRELLAS MEJORADO === */
+        .rating-stars {
+            display: flex;
+            gap: 8px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .rating-stars i {
+            font-size: 1.8rem;
+            transition: all 0.2s ease;
+            color: #ccc;
+        }
+
+        .rating-stars i:hover,
+        .rating-stars i.hover-star,
+        .rating-stars i.active-star {
+            color: #FFD700;
+            text-shadow: 0 0 2px rgba(0,0,0,0.2);
+            transform: scale(1.05);
+        }
+        /* === FIN SISTEMA DE CALIFICACIÓN === */
+        
         .review-form textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; resize: vertical; min-height: 100px; }
         .btn-submit-review { background: #2A5C6E; color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; }
         .btn-submit-review:hover { background: #1e4452; }
@@ -281,7 +302,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
         }
         
         // ============================================================
-        // FUNCIONES DE ESTRELLAS
+        // FUNCIONES DE ESTRELLAS (Para visualización de reseñas existentes)
         // ============================================================
         function renderStars(rating, size = '1.2rem') {
             const fullStars = Math.floor(rating);
@@ -297,6 +318,65 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
                 }
             }
             return stars;
+        }
+        
+        // ============================================================
+        // SISTEMA DE CALIFICACIÓN CON ESTRELLAS INTERACTIVAS (Para formulario)
+        // ============================================================
+        function setupRatingStars() {
+            const stars = document.querySelectorAll('#ratingStars i');
+            let currentRating = 0;
+            
+            function updateStars(rating) {
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.remove('far', 'hover-star');
+                        star.classList.add('fas', 'active-star');
+                    } else {
+                        star.classList.remove('fas', 'active-star', 'hover-star');
+                        star.classList.add('far');
+                    }
+                });
+                currentRating = rating;
+            }
+            
+            // Hover efecto (pintar hasta la estrella seleccionada)
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', () => {
+                    const rating = parseInt(star.getAttribute('data-rating'));
+                    stars.forEach((s, idx) => {
+                        if (idx < rating) {
+                            s.classList.remove('far', 'active-star');
+                            s.classList.add('fas', 'hover-star');
+                        } else {
+                            s.classList.remove('fas', 'hover-star', 'active-star');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+            });
+            
+            // Restaurar estrellas al salir del hover
+            const container = document.getElementById('ratingStars');
+            if (container) {
+                container.addEventListener('mouseleave', () => {
+                    updateStars(currentRating);
+                });
+            }
+            
+            // Click: seleccionar calificación
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.getAttribute('data-rating'));
+                    updateStars(rating);
+                    // Guardar rating seleccionado en el input hidden
+                    const hiddenInput = document.getElementById('selectedRating');
+                    if (hiddenInput) {
+                        hiddenInput.value = rating;
+                    }
+                    console.log(`⭐ Calificación seleccionada: ${rating} estrellas`);
+                });
+            });
         }
         
         // ============================================================
@@ -523,7 +603,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
                     reviewsHtml += `</div>`;
                     reviewsHtml += getReviewFormHtml();
                     container.innerHTML = reviewsHtml;
-                    setupRatingInput();
+                    setupRatingStars();
                     setupReviewForm();
                 } else {
                     container.innerHTML = `
@@ -531,7 +611,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
                         <p style="color: #666; padding: 20px 0;">Sé el primero en opinar sobre este producto.</p>
                         ${getReviewFormHtml()}
                     `;
-                    setupRatingInput();
+                    setupRatingStars();
                     setupReviewForm();
                 }
             } catch (error) {
@@ -551,13 +631,14 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
             return `
                 <div class="review-form">
                     <h4><i class="fas fa-edit"></i> Tu opinión</h4>
-                    <div class="rating-input" id="ratingInput">
-                        <i class="far fa-star star" data-rating="1"></i>
-                        <i class="far fa-star star" data-rating="2"></i>
-                        <i class="far fa-star star" data-rating="3"></i>
-                        <i class="far fa-star star" data-rating="4"></i>
-                        <i class="far fa-star star" data-rating="5"></i>
+                    <div class="rating-stars" id="ratingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
                     </div>
+                    <input type="hidden" id="selectedRating" name="rating" value="0">
                     <textarea id="reviewComment" placeholder="Comparte tu experiencia con este producto... (opcional)"></textarea>
                     <button id="submitReview" class="btn-submit-review"><i class="fas fa-paper-plane"></i> Publicar reseña</button>
                     <div id="reviewMessage" class="message" style="margin-top: 15px;"></div>
@@ -565,53 +646,16 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
             `;
         }
         
-        function setupRatingInput() {
-            const stars = document.querySelectorAll('#ratingInput .star');
-            stars.forEach(star => {
-                star.addEventListener('mouseenter', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    stars.forEach((s, idx) => {
-                        if (idx < rating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-                star.addEventListener('mouseleave', function() {
-                    stars.forEach((s, idx) => {
-                        if (idx < selectedRating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-                star.addEventListener('click', function() {
-                    selectedRating = parseInt(this.dataset.rating);
-                    stars.forEach((s, idx) => {
-                        if (idx < selectedRating) {
-                            s.classList.remove('far');
-                            s.classList.add('fas');
-                        } else {
-                            s.classList.remove('fas');
-                            s.classList.add('far');
-                        }
-                    });
-                });
-            });
-        }
-        
         function setupReviewForm() {
             const submitBtn = document.getElementById('submitReview');
             if (!submitBtn) return;
             
             submitBtn.addEventListener('click', async () => {
-                if (selectedRating === 0) {
+                // Obtener rating del input hidden
+                const ratingInput = document.getElementById('selectedRating');
+                const rating = parseInt(ratingInput?.value) || 0;
+                
+                if (rating === 0) {
                     showReviewMessage('Selecciona una calificación', 'error');
                     return;
                 }
@@ -635,7 +679,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones, favori
                             'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
-                            rating: selectedRating,
+                            rating: rating,
                             comment: comment,
                             order_id: null
                         })
