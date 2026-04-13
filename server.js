@@ -676,7 +676,7 @@ app.get('/api/products/:id', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         
-        // Obtener los datos del vendedor
+        // Obtener los datos del vendedor (consulta separada)
         const { data: seller, error: sellerError } = await supabase
             .from('users')
             .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address_visible')
@@ -687,7 +687,7 @@ app.get('/api/products/:id', async (req, res) => {
             product.seller = seller;
         }
         
-        // Incrementar vistas
+        // Incrementar vistas en segundo plano
         const currentViews = product.views || 0;
         supabase
             .from('products')
