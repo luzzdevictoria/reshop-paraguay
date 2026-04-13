@@ -103,11 +103,9 @@ async function deleteAvatar(token) {
     }
 }
 
-// ============================================
-// EXPORTS (para módulos ES6 si es necesario)
-// ============================================
-export {
-    apiRequest,
-    uploadAvatar,
-    deleteAvatar
-};
+// Hacer funciones disponibles globalmente (para usar desde el HTML)
+if (typeof window !== 'undefined') {
+    window.apiRequest = apiRequest;
+    window.uploadAvatar = uploadAvatar;
+    window.deleteAvatar = deleteAvatar;
+}
