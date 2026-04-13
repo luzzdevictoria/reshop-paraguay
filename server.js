@@ -271,36 +271,31 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), async (
             return res.status(400).json({ success: false, error: 'No se envió ninguna imagen' });
         }
 
-        const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: `reshop-products/${req.user.id}`,
-                    transformation: [
-                        { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                        { fetch_format: 'webp' },
-                        // WATERMARK - Marca de agua con TEXTO (no requiere logo subido)
-                        { 
-                            overlay: {
-                                font_family: 'Arial',
-                                font_size: 18,
-                                font_weight: 'bold',
-                                text: 'ReShop PY'
-                            },
-                            gravity: 'south_east',
-                            x: 10,
-                            y: 10,
-                            color: '#FFFFFF',
-                            opacity: 70
-                        }
-                    ]
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
+const result = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+        {
+            folder: `reshop-products/${req.user.id}`,
+            transformation: [
+                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                { fetch_format: 'webp' },
+                { 
+                    overlay: 'reshop-logo',
+                    gravity: 'south_east',
+                    x: 15,
+                    y: 15,
+                    width: 80,
+                    crop: 'scale',
+                    opacity: 85
                 }
-            );
-            uploadStream.end(req.file.buffer);
-        });
+            ]
+        },
+        (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+        }
+    );
+    uploadStream.end(req.file.buffer);
+});
 
         res.json({ 
             success: true, 
@@ -734,36 +729,31 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
         
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const result = await new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
-                            folder: `reshop-products/${req.user.id}`,
-                            transformation: [
-                                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                                { fetch_format: 'webp' },
-                                // WATERMARK - Marca de agua con TEXTO
-                                { 
-                                    overlay: {
-                                        font_family: 'Arial',
-                                        font_size: 18,
-                                        font_weight: 'bold',
-                                        text: 'ReShop PY'
-                                    },
-                                    gravity: 'south_east',
-                                    x: 10,
-                                    y: 10,
-                                    color: '#FFFFFF',
-                                    opacity: 70
-                                }
-                            ]
-                        },
-                        (error, result) => {
-                            if (error) reject(error);
-                            else resolve(result);
-                        }
-                    );
-                    uploadStream.end(file.buffer);
-                });
+const result = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+        {
+            folder: `reshop-products/${req.user.id}`,
+            transformation: [
+                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                { fetch_format: 'webp' },
+                { 
+                    overlay: 'reshop-logo',
+                    gravity: 'south_east',
+                    x: 15,
+                    y: 15,
+                    width: 80,
+                    crop: 'scale',
+                    opacity: 85
+                }
+            ]
+        },
+        (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+        }
+    );
+    uploadStream.end(file.buffer);
+});
                 imageUrls.push(result.secure_url);
             }
         }
@@ -824,36 +814,31 @@ app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
             for (const file of req.files) {
-                const result = await new Promise((resolve, reject) => {
-                    const uploadStream = cloudinary.uploader.upload_stream(
-                        {
-                            folder: `reshop-products/${req.user.id}`,
-                            transformation: [
-                                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                                { fetch_format: 'webp' },
-                                // WATERMARK - Marca de agua con TEXTO
-                                { 
-                                    overlay: {
-                                        font_family: 'Arial',
-                                        font_size: 18,
-                                        font_weight: 'bold',
-                                        text: 'ReShop PY'
-                                    },
-                                    gravity: 'south_east',
-                                    x: 10,
-                                    y: 10,
-                                    color: '#FFFFFF',
-                                    opacity: 70
-                                }
-                            ]
-                        },
-                        (error, result) => {
-                            if (error) reject(error);
-                            else resolve(result);
-                        }
-                    );
-                    uploadStream.end(file.buffer);
-                });
+const result = await new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+        {
+            folder: `reshop-products/${req.user.id}`,
+            transformation: [
+                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                { fetch_format: 'webp' },
+                { 
+                    overlay: 'reshop-logo',
+                    gravity: 'south_east',
+                    x: 15,
+                    y: 15,
+                    width: 80,
+                    crop: 'scale',
+                    opacity: 85
+                }
+            ]
+        },
+        (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+        }
+    );
+    uploadStream.end(file.buffer);
+});
                 imageUrls.push(result.secure_url);
             }
         }
