@@ -2,15 +2,15 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.2.0 (Mobile-First + Three Body Loader + PWA Install Button)
+VERSION: 2.3.0 (Mobile-First + Three Body Loader + PWA + Avatar Usuario)
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
              filtros deslizables, bottom nav y tarjetas táctiles.
-             Incluye loader Three Body, botón Buscar cerca de mí y
-             🆕 botón para instalar la app como PWA.
+             Incluye loader Three Body, botón Buscar cerca de mí,
+             botón para instalar la app como PWA y avatar de usuario.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -56,9 +56,50 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .header-title h1 { margin: 0; font-size: 1.8rem; }
         .header-title h1 i { margin-right: 8px; color: var(--secondary); }
         .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
-        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        .user-menu { display: inline-block; margin-left: 15px; }
-        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: center; }
+        .user-menu { display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; }
+        .user-avatar { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            background: var(--secondary);
+            flex-shrink: 0;
+        }
+        .user-avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block; 
+        }
+        .user-avatar .initials {
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            color: var(--text-dark);
+        }
+        .user-name { 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            max-width: 120px; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+        .logout-btn { 
+            background: none; 
+            border: none; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            margin-left: 8px; 
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.15); }
         .header__search { display: flex; gap: 10px; max-width: 400px; margin: 12px auto 0; }
         .header__search input { flex: 1; padding: 8px 14px; border-radius: 8px; border: none; font-size: 0.9rem; }
         .header__search button { background: var(--secondary); border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.9rem; }
@@ -99,6 +140,8 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .btn-primary:hover { background: #1e4452; }
         .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-dark); }
         .btn-outline:hover { background: var(--background); }
+        .btn-secondary { background: var(--secondary); color: var(--text-dark); }
+        .btn-secondary:hover { background: #d4a55a; }
 
         .loading, .error { text-align: center; padding: 60px 20px; font-size: 1rem; color: var(--text-light); }
         .error { color: var(--accent); }
@@ -146,6 +189,9 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
 
         @media (max-width: 768px) {
             .container { padding: 12px; }
+            .user-name { max-width: 80px; font-size: 0.85rem; }
+            .user-avatar { width: 24px; height: 24px; }
+            .user-avatar .initials { font-size: 0.7rem; }
         }
 
         /* Loader Three Body */
@@ -296,8 +342,9 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
             </span>
             <span id="userMenu" style="display: none;" class="user-menu">
-                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
-                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                <span id="userAvatar" class="user-avatar"></span>
+                <span class="user-name" id="userName"></span>
+                <button id="logoutBtn" class="logout-btn" title="Cerrar Sesión"><i class="fas fa-sign-out-alt"></i></button>
             </span>
         </div>
     </div>
@@ -421,15 +468,34 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             const authLinks = document.getElementById('authLinks');
             const userMenu = document.getElementById('userMenu');
             const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
             const dashboardLink = document.getElementById('dashboardLink');
             const adminLink = document.getElementById('adminLink');
 
             if (token && user) {
                 authLinks.style.display = 'none';
-                userMenu.style.display = 'inline-block';
+                userMenu.style.display = 'inline-flex';
+                
+                // Nombre del usuario
                 userName.textContent = user.full_name || user.email;
-                if (dashboardLink && (user.role === 'seller' || user.role === 'admin')) dashboardLink.style.display = 'inline';
-                if (adminLink && user.role === 'admin') adminLink.style.display = 'inline';
+                
+                // Avatar: imagen o iniciales
+                if (userAvatar) {
+                    if (user.avatar_url) {
+                        userAvatar.innerHTML = `<img src="${user.avatar_url}" alt="Avatar" onerror="this.parentElement.innerHTML='<div class=\\'initials\\'>${(user.full_name || user.email)[0].toUpperCase()}</div>'">`;
+                    } else {
+                        const initials = (user.full_name || user.email || '?')[0].toUpperCase();
+                        userAvatar.innerHTML = `<div class="initials">${initials}</div>`;
+                    }
+                }
+                
+                // Mostrar enlaces según rol
+                if (dashboardLink && (user.role === 'seller' || user.role === 'admin')) {
+                    dashboardLink.style.display = 'inline';
+                }
+                if (adminLink && user.role === 'admin') {
+                    adminLink.style.display = 'inline';
+                }
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';

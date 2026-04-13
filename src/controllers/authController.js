@@ -2,9 +2,9 @@
 ================================================================================
 ARCHIVO: authController.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 4.1.0 - AGREGADO DOCUMENT_ID
+VERSION: 4.2.0 - AGREGADO avatar_url EN RESPUESTAS
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Controlador de autenticacion con Supabase.
@@ -25,6 +25,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-10 - [ADD] Email confirmado automaticamente (email_confirm: true)
 2026-04-11 - [ADD] Campo document_id en getMe y updateProfile
 2026-04-11 - [ADD] Campo document_id en respuesta de login
+2026-04-13 - [ADD] Campo avatar_url en getMe, login y updateProfile
 ================================================================================
 */
 
@@ -135,6 +136,7 @@ async function register(req, res) {
             phone: phone || null,
             role: userRole,
             store_name: (userRole === 'seller' && store_name) ? store_name : null,
+            avatar_url: null,
             is_active: true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -175,7 +177,8 @@ async function register(req, res) {
                 full_name: insertedUser.full_name,
                 role: insertedUser.role,
                 store_name: insertedUser.store_name,
-                phone: insertedUser.phone
+                phone: insertedUser.phone,
+                avatar_url: insertedUser.avatar_url
             },
             token
         });
@@ -216,10 +219,10 @@ async function login(req, res) {
             });
         }
 
-        // Buscar usuario en la tabla users
+        // Buscar usuario en la tabla users (CON avatar_url)
         const { data: user, error: findError } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('id, email, full_name, phone, document_id, address, city, role, store_name, store_description, store_logo_url, avatar_url, rating, total_sales, created_at, is_active')
             .eq('id', authData.user.id)
             .single();
 
@@ -257,6 +260,7 @@ async function login(req, res) {
                 store_name: user.store_name,
                 phone: user.phone,
                 document_id: user.document_id,
+                avatar_url: user.avatar_url,
                 rating: user.rating,
                 total_sales: user.total_sales
             },
@@ -279,9 +283,10 @@ async function getMe(req, res) {
     try {
         const userId = req.user.sub;
 
+        // CONSULTA CON avatar_url INCLUIDO
         const { data: user, error } = await supabaseAdmin
             .from('users')
-            .select('id, email, full_name, phone, document_id, address, city, role, store_name, store_description, store_logo_url, rating, total_sales, created_at, is_active')
+            .select('id, email, full_name, phone, document_id, address, city, role, store_name, store_description, store_logo_url, avatar_url, rating, total_sales, created_at, is_active')
             .eq('id', userId)
             .single();
 
@@ -294,7 +299,24 @@ async function getMe(req, res) {
 
         res.json({
             success: true,
-            user
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                phone: user.phone,
+                document_id: user.document_id,
+                address: user.address,
+                city: user.city,
+                role: user.role,
+                store_name: user.store_name,
+                store_description: user.store_description,
+                store_logo_url: user.store_logo_url,
+                avatar_url: user.avatar_url,
+                rating: user.rating,
+                total_sales: user.total_sales,
+                created_at: user.created_at,
+                is_active: user.is_active
+            }
         });
 
     } catch (error) {
@@ -307,12 +329,21 @@ async function getMe(req, res) {
 }
 
 // ============================================================
-// ACTUALIZAR PERFIL (CON DOCUMENT_ID)
+// ACTUALIZAR PERFIL (CON document_id Y avatar_url)
 // ============================================================
 async function updateProfile(req, res) {
     try {
         const userId = req.user.sub;
-        const { full_name, phone, document_id, address, city, store_name, store_description } = req.body;
+        const { 
+            full_name, 
+            phone, 
+            document_id, 
+            address, 
+            city, 
+            store_name, 
+            store_description,
+            avatar_url 
+        } = req.body;
 
         const updateData = {
             updated_at: new Date().toISOString()
@@ -325,12 +356,13 @@ async function updateProfile(req, res) {
         if (city !== undefined) updateData.city = city;
         if (store_name !== undefined) updateData.store_name = store_name;
         if (store_description !== undefined) updateData.store_description = store_description;
+        if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
 
         const { data: user, error } = await supabaseAdmin
             .from('users')
             .update(updateData)
             .eq('id', userId)
-            .select()
+            .select('id, email, full_name, phone, document_id, address, city, role, store_name, store_description, store_logo_url, avatar_url, rating, total_sales')
             .single();
 
         if (error) {
@@ -354,7 +386,11 @@ async function updateProfile(req, res) {
                 city: user.city,
                 role: user.role,
                 store_name: user.store_name,
-                store_description: user.store_description
+                store_description: user.store_description,
+                store_logo_url: user.store_logo_url,
+                avatar_url: user.avatar_url,
+                rating: user.rating,
+                total_sales: user.total_sales
             }
         });
 

@@ -2,14 +2,14 @@
 ================================================================================
 ARCHIVO: profile.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.2.0 - CON GEOLOCALIZACIÓN DE TIENDA
+VERSION: 1.3.0 - CON AVATAR DE USUARIO
 CREADO: 2026-04-11
-ACTUALIZADO: 2026-04-11
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Perfil de usuario. Permite ver y editar información personal,
-             incluyendo número de cédula (document_id), dirección, y datos de tienda
-             con geolocalización opcional.
+             incluyendo número de cédula (document_id), dirección, datos de tienda
+             con geolocalización opcional, y avatar de perfil.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-11 - Creacion inicial del perfil de usuario
@@ -18,6 +18,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Geolocalización de tienda (latitud/longitud)
 2026-04-11 - [ADD] Opción para mostrar dirección pública
 2026-04-11 - [FIX] Header con logo y navegación profesional
+2026-04-13 - [ADD] Sección de avatar con upload/delete
+2026-04-13 - [ADD] Estilos y funcionalidad JS para manejo de avatar
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -64,6 +66,17 @@ HISTORIAL DE MODIFICACIONES:
         .profile-title h2 { color: #2A5C6E; margin-bottom: 5px; }
         .profile-title p { color: #666; }
         
+        /* ========== AVATAR SECTION STYLES ========== */
+        .avatar-section { text-align: center; margin-bottom: 30px; padding: 20px; background: #f9f9f9; border-radius: 12px; }
+        .avatar-preview { width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; background: #2A5C6E; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 4px solid #E8B86B; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-preview i { font-size: 3rem; color: white; opacity: 0.9; }
+        .avatar-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .avatar-hint { font-size: 0.7rem; color: #666; margin-top: 8px; }
+        .btn-danger { background: #D95A41; color: white; }
+        .btn-danger:hover { background: #c44a33; }
+        /* ========== END AVATAR STYLES ========== */
+        
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
@@ -94,6 +107,8 @@ HISTORIAL DE MODIFICACIONES:
             .logo-img { height: 55px; }
             .header-title h1 { font-size: 1.2rem; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
+            .avatar-preview { width: 100px; height: 100px; }
+            .avatar-preview i { font-size: 2.5rem; }
         }
     </style>
 	<!-- OneSignal Push Notifications -->
@@ -149,6 +164,30 @@ HISTORIAL DE MODIFICACIONES:
                     <p id="profileRole"></p>
                 </div>
             </div>
+            
+            <!-- ============================================ -->
+            <!-- SECCIÓN DE AVATAR - AGREGADA AQUÍ -->
+            <!-- ============================================ -->
+            <div class="avatar-section">
+                <div id="avatarPreview" class="avatar-preview">
+                    <!-- Se llena con JS -->
+                </div>
+                <div class="avatar-buttons">
+                    <button type="button" class="btn btn-secondary" id="uploadAvatarBtn">
+                        <i class="fas fa-camera"></i> Subir foto
+                    </button>
+                    <button type="button" class="btn btn-danger" id="removeAvatarBtn" style="display: none;">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                <p class="avatar-hint">
+                    <i class="fas fa-info-circle"></i> Formato: JPG, PNG, WEBP (máx. 2MB)
+                </p>
+            </div>
+            <!-- ============================================ -->
+            <!-- FIN SECCIÓN DE AVATAR -->
+            <!-- ============================================ -->
             
             <form id="profileForm">
                 <div class="form-row">
@@ -224,6 +263,9 @@ HISTORIAL DE MODIFICACIONES:
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
+    <!-- API Client -->
+    <script src="js/api.js"></script>
+    
     <script>
         const API_URL = 'https://reshop-backend.vercel.app';
         const token = localStorage.getItem('token');
@@ -297,6 +339,108 @@ HISTORIAL DE MODIFICACIONES:
             } else { alert('Tu navegador no soporta geolocalización. Usa Chrome, Firefox o Edge actualizado.'); }
         }
         
+        // ========== FUNCIONES DE AVATAR ==========
+        
+        /**
+         * Renderiza el avatar en el preview
+         * @param {string|null} avatarUrl - URL del avatar o null
+         */
+        function renderAvatar(avatarUrl) {
+            const preview = document.getElementById('avatarPreview');
+            const removeBtn = document.getElementById('removeAvatarBtn');
+            
+            if (avatarUrl) {
+                // Agregar timestamp para evitar cache
+                const urlWithCache = `${avatarUrl}?t=${Date.now()}`;
+                preview.innerHTML = `<img src="${urlWithCache}" alt="Avatar" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>'">`;
+                removeBtn.style.display = 'inline-flex';
+            } else {
+                preview.innerHTML = '<i class="fas fa-user"></i>';
+                removeBtn.style.display = 'none';
+            }
+        }
+        
+        /**
+         * Maneja el upload del avatar
+         */
+        async function handleAvatarUpload(file) {
+            // Validar tipo de archivo
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('Formato no válido. Usa JPG, PNG o WEBP', 'error');
+                return;
+            }
+            
+            // Validar tamaño (2MB max)
+            if (file.size > 2 * 1024 * 1024) {
+                showMessage('El archivo es muy grande. Máximo 2MB', 'error');
+                return;
+            }
+            
+            showMessage('Subiendo avatar...', 'loading');
+            
+            try {
+                // Usar función uploadAvatar de api.js
+                const result = await uploadAvatar(file, token);
+                
+                if (result.success && result.avatar_url) {
+                    // Actualizar UI inmediatamente
+                    renderAvatar(result.avatar_url);
+                    
+                    // Actualizar también en el backend (perfil)
+                    await apiRequest('/auth/me', 'PUT', { avatar_url: result.avatar_url }, token);
+                    
+                    // Actualizar localStorage
+                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    storedUser.avatar_url = result.avatar_url;
+                    localStorage.setItem('user', JSON.stringify(storedUser));
+                    
+                    showMessage('✅ Avatar actualizado correctamente', 'success');
+                } else {
+                    throw new Error(result.error || 'Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('[Avatar Upload]', error);
+                showMessage(error.message || 'Error al subir el avatar', 'error');
+            }
+        }
+        
+        /**
+         * Maneja la eliminación del avatar
+         */
+        async function handleAvatarDelete() {
+            if (!confirm('¿Estás seguro de eliminar tu foto de perfil?')) return;
+            
+            showMessage('Eliminando avatar...', 'loading');
+            
+            try {
+                // Usar función deleteAvatar de api.js
+                const result = await deleteAvatar(token);
+                
+                if (result.success) {
+                    // Actualizar UI
+                    renderAvatar(null);
+                    
+                    // Actualizar backend
+                    await apiRequest('/auth/me', 'PUT', { avatar_url: null }, token);
+                    
+                    // Actualizar localStorage
+                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    storedUser.avatar_url = null;
+                    localStorage.setItem('user', JSON.stringify(storedUser));
+                    
+                    showMessage('✅ Avatar eliminado', 'success');
+                } else {
+                    throw new Error(result.error || 'Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('[Avatar Delete]', error);
+                showMessage(error.message || 'Error al eliminar el avatar', 'error');
+            }
+        }
+        
+        // ========== FIN FUNCIONES DE AVATAR ==========
+        
         async function loadProfile() {
             try {
                 const response = await fetch(`${API_URL}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -312,6 +456,10 @@ HISTORIAL DE MODIFICACIONES:
                     document.getElementById('address').value = currentUser.address || '';
                     document.getElementById('city').value = currentUser.city || '';
                     
+                    // ========== CARGAR AVATAR ==========
+                    renderAvatar(currentUser.avatar_url);
+                    // ========== FIN CARGAR AVATAR ==========
+                    
                     if (currentUser.role === 'seller' || currentUser.role === 'admin') {
                         document.getElementById('sellerFields').style.display = 'block';
                         document.getElementById('storeName').value = currentUser.store_name || '';
@@ -326,6 +474,7 @@ HISTORIAL DE MODIFICACIONES:
                     
                     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
                     storedUser.full_name = currentUser.full_name;
+                    storedUser.avatar_url = currentUser.avatar_url; // Guardar avatar en localStorage
                     localStorage.setItem('user', JSON.stringify(storedUser));
                 } else { showMessage('Error al cargar perfil', 'error'); }
             } catch (error) { console.error('Error:', error); showMessage('Error de conexión', 'error'); }
@@ -378,7 +527,36 @@ HISTORIAL DE MODIFICACIONES:
             if (type !== 'loading') { setTimeout(() => { if (messageDiv.className === `message ${type}`) { messageDiv.className = 'message'; } }, 4000); }
         }
         
-        document.addEventListener('DOMContentLoaded', () => { updateUserMenu(); setupLogout(); loadProfile(); });
+        // ========== EVENT LISTENERS PARA AVATAR ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserMenu(); 
+            setupLogout(); 
+            loadProfile();
+            
+            // Upload avatar button
+            const uploadBtn = document.getElementById('uploadAvatarBtn');
+            const avatarInput = document.getElementById('avatarInput');
+            
+            if (uploadBtn && avatarInput) {
+                uploadBtn.addEventListener('click', () => avatarInput.click());
+                
+                avatarInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handleAvatarUpload(file);
+                        // Reset input para permitir seleccionar el mismo archivo nuevamente
+                        avatarInput.value = '';
+                    }
+                });
+            }
+            
+            // Remove avatar button
+            const removeBtn = document.getElementById('removeAvatarBtn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', handleAvatarDelete);
+            }
+        });
+        // ========== FIN EVENT LISTENERS ==========
     </script>
 </body>
 </html>

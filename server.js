@@ -1492,6 +1492,13 @@ const ordersRoutes = require('./src/routes/orders');
 app.use('/api/orders', ordersRoutes);
 
 // ============================================================
+// RUTAS DE UPLOAD (Avatar - Cloudinary)
+// ============================================================
+
+const uploadRoutes = require('./src/routes/uploadRoutes');
+app.use('/api/upload', uploadRoutes);
+
+// ============================================================
 // MANEJO DE ERRORES
 // ============================================================
 
