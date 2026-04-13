@@ -40,7 +40,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
-const { removeBackground } = require('@imgly/background-removal-node');
+//const { removeBackground } = require('@imgly/background-removal-node');
 
 dotenv.config();
 
@@ -57,7 +57,7 @@ cloudinary.config({
 });
 
 console.log('✅ Cloudinary configurado:', cloudinary.config().cloud_name);
-console.log('✅ IMG.LY background removal configurado (gratis, sin límites)');
+//console.log('✅ IMG.LY background removal configurado (gratis, sin límites)');
 
 // ============================================================
 // NOTIFICACIONES PUSH (OneSignal via REST API - con axios)
@@ -253,7 +253,7 @@ app.get('/', (req, res) => {
             products: 'GET /api/products',
             productsBySeller: 'GET /api/products/seller/:sellerId',
             uploadImage: 'POST /api/upload-image (Cloudinary + Watermark texto)',
-            removeBackground: 'POST /api/remove-background (gratis, sin límites)',
+          //removeBackground: 'POST /api/remove-background (gratis, sin límites)',
             reviews: 'GET/POST /api/products/:id/reviews, GET /api/products/:id/rating',
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
@@ -316,9 +316,88 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), async (
     }
 });
 
+// // ============================================================
+// // 🆕 ENDPOINT: ELIMINAR FONDO GRATIS CON IMG.LY
+// // ============================================================
+// app.post('/api/remove-background', authenticateToken, upload.single('image'), async (req, res) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({ success: false, error: 'No se envió ninguna imagen' });
+//         }
+//
+//         console.log('🖼️ Eliminando fondo con IMG.LY (gratis, sin límites)...');
+//         console.log(`📏 Tamaño original: ${(req.file.buffer.length / 1024).toFixed(2)} KB`);
+//
+//         // Eliminar fondo - la primera vez descarga los modelos (~40MB)
+//         const cleanedBlob = await removeBackground(req.file.buffer, {
+//             model: 'small',        // Modelo pequeño: 40MB, más rápido
+//             output: {
+//                 format: 'image/png',    // PNG mantiene transparencia
+//                 quality: 0.9
+//             },
+//             progress: (key, current, total) => {
+//                 console.log(`📥 ${key}: ${current}/${total}`);
+//             }
+//         });
+//
+//         console.log(`✅ Fondo eliminado. Tamaño resultante: ${(cleanedBlob.length / 1024).toFixed(2)} KB`);
+//
+//         // Subir a Cloudinary con watermark
+//         const result = await new Promise((resolve, reject) => {
+//             const uploadStream = cloudinary.uploader.upload_stream(
+//                 {
+//                     folder: `reshop-products/${req.user.id}`,
+//                     transformation: [
+//                         { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+//                         { fetch_format: 'webp' },
+//                         // WATERMARK - Marca de agua con TEXTO
+//                         { 
+//                             overlay: {
+//                                 font_family: 'Arial',
+//                                 font_size: 18,
+//                                 font_weight: 'bold',
+//                                 text: 'ReShop PY'
+//                             },
+//                             gravity: 'south_east',
+//                             x: 10,
+//                             y: 10,
+//                             color: '#FFFFFF',
+//                             opacity: 70
+//                         }
+//                     ]
+//                 },
+//                 (error, result) => {
+//                     if (error) reject(error);
+//                     else resolve(result);
+//                 }
+//             );
+//             uploadStream.end(cleanedBlob);
+//         });
+//
+//         res.json({ 
+//             success: true, 
+//             url: result.secure_url,
+//             message: 'Fondo eliminado correctamente (sin costo, sin límites)'
+//         });
+//
+//     } catch (error) {
+//         console.error('❌ Error en remove-background:', error);
+//         
+//         // Si el error es porque falta instalar la librería
+//         if (error.code === 'MODULE_NOT_FOUND') {
+//             return res.status(500).json({ 
+//                 success: false, 
+//                 error: 'Librería de eliminación de fondo no instalada. Ejecuta: npm install @imgly/background-removal-node' 
+//             });
+//         }
+//         
+//         res.status(500).json({ success: false, error: error.message });
+//     }
+// });
 // ============================================================
-// 🆕 ENDPOINT: ELIMINAR FONDO GRATIS CON IMG.LY
+// 🆕 ENDPOINT: ELIMINAR FONDO GRATIS CON IMG.LY (COMENTADO - límite Vercel 250MB)
 // ============================================================
+/*
 app.post('/api/remove-background', authenticateToken, upload.single('image'), async (req, res) => {
     try {
         if (!req.file) {
@@ -328,11 +407,10 @@ app.post('/api/remove-background', authenticateToken, upload.single('image'), as
         console.log('🖼️ Eliminando fondo con IMG.LY (gratis, sin límites)...');
         console.log(`📏 Tamaño original: ${(req.file.buffer.length / 1024).toFixed(2)} KB`);
 
-        // Eliminar fondo - la primera vez descarga los modelos (~40MB)
         const cleanedBlob = await removeBackground(req.file.buffer, {
-            model: 'small',        // Modelo pequeño: 40MB, más rápido
+            model: 'small',
             output: {
-                format: 'image/png',    // PNG mantiene transparencia
+                format: 'image/png',
                 quality: 0.9
             },
             progress: (key, current, total) => {
@@ -342,7 +420,6 @@ app.post('/api/remove-background', authenticateToken, upload.single('image'), as
 
         console.log(`✅ Fondo eliminado. Tamaño resultante: ${(cleanedBlob.length / 1024).toFixed(2)} KB`);
 
-        // Subir a Cloudinary con watermark
         const result = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
                 {
@@ -350,7 +427,6 @@ app.post('/api/remove-background', authenticateToken, upload.single('image'), as
                     transformation: [
                         { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                         { fetch_format: 'webp' },
-                        // WATERMARK - Marca de agua con TEXTO
                         { 
                             overlay: {
                                 font_family: 'Arial',
@@ -383,7 +459,6 @@ app.post('/api/remove-background', authenticateToken, upload.single('image'), as
     } catch (error) {
         console.error('❌ Error en remove-background:', error);
         
-        // Si el error es porque falta instalar la librería
         if (error.code === 'MODULE_NOT_FOUND') {
             return res.status(500).json({ 
                 success: false, 
@@ -394,6 +469,8 @@ app.post('/api/remove-background', authenticateToken, upload.single('image'), as
         res.status(500).json({ success: false, error: error.message });
     }
 });
+*/
+
 
 // ============================================================
 // RUTA DE PRODUCTOS (CONSULTA SUPABASE)
@@ -1448,7 +1525,7 @@ app.listen(PORT, () => {
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
     console.log(`📸 Upload: POST /api/upload-image (con marca de agua texto)`);
-    console.log(`✨ Remove BG: POST /api/remove-background (gratis, sin límites)`);
+  //console.log(`✨ Remove BG: POST /api/remove-background (gratis, sin límites)`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`👤 Seller Products: http://localhost:${PORT}/api/products/seller/:sellerId`);
     console.log(`⭐ Reviews: GET/POST /api/products/:id/reviews`);
@@ -1458,8 +1535,8 @@ app.listen(PORT, () => {
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
     console.log('✅ Watermark de TEXTO (ya no depende de logo en Cloudinary)');
-    console.log('✅ Eliminación de fondo GRATIS con IMG.LY (sin API key, sin límites)');
-    console.log('⚠️  La primera vez que se use remove-background descargará ~40MB de modelos');
+  //console.log('✅ Eliminación de fondo GRATIS con IMG.LY (sin API key, sin límites)');
+  //console.log('⚠️  La primera vez que se use remove-background descargará ~40MB de modelos');
     console.log('');
 });
 
