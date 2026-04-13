@@ -2,13 +2,14 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.6.0 - BOTÓN CONTACTAR VENDEDOR MEJORADO
+VERSION: 2.7.0 - BOTÓN FAVORITO MEJORADO (MODERNO)
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería interna.
-             OPTIMIZADO: Header hamburguesa, bottom nav, botón instalar app y BOTÓN CONTACTAR VENDEDOR MEJORADO.
+             OPTIMIZADO: Header hamburguesa, bottom nav, botón instalar app, botón contactar vendedor mejorado
+             y BOTÓN FAVORITO MODERNO (checkbox + SVG + animación).
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -116,9 +117,91 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         .btn-primary:hover { background: #1e4452; }
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
-        .btn-fav { background: #E8B86B; color: #333; }
-        .btn-fav:hover { background: #d4a050; }
-        .btn-fav.active { background: #D95A41; color: white; }
+        
+        /* 🆕 BOTÓN FAVORITO MODERNO - ESTILO CHECKBOX CON SVG */
+        .fav-checkbox {
+            display: none;
+        }
+
+        .fav-label {
+            background-color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px 10px 14px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 60px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            color: #555;
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .fav-label:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .fav-label svg {
+            transition: all 0.3s ease;
+        }
+
+        .fav-checkbox:checked + .fav-label {
+            background: #fff5f5;
+            border-color: #D95A41;
+        }
+
+        .fav-checkbox:checked + .fav-label svg {
+            fill: #D95A41;
+            stroke: #D95A41;
+            animation: heartBeat 0.5s ease;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .fav-label .fav-action {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+        }
+
+        .fav-label .fav-action span {
+            grid-column-start: 1;
+            grid-column-end: 1;
+            grid-row-start: 1;
+            grid-row-end: 1;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fav-label .fav-action .option-1 {
+            transform: translate(0px, 0%);
+            opacity: 1;
+        }
+
+        .fav-checkbox:checked + .fav-label .fav-action .option-1 {
+            transform: translate(0px, -100%);
+            opacity: 0;
+        }
+
+        .fav-label .fav-action .option-2 {
+            transform: translate(0px, 100%);
+            opacity: 0;
+            color: #D95A41;
+        }
+
+        .fav-checkbox:checked + .fav-label .fav-action .option-2 {
+            transform: translate(0px, 0%);
+            opacity: 1;
+        }
         
         /* 🆕 BOTÓN CONTACTAR VENDEDOR MEJORADO - MARKETING PSICOLÓGICO */
         .btn-contact-seller {
@@ -346,7 +429,20 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             .product-actions { flex-direction: column; align-items: stretch; }
             .product-actions .btn { width: 100%; margin-right: 0; margin-bottom: 8px; }
             .btn-contact-seller { width: 100%; justify-content: center; }
+            .fav-label { justify-content: center; }
             .message-item { max-width: 90%; }
+        }
+        
+        /* Versión móvil del botón favorito */
+        @media (max-width: 600px) {
+            .fav-label {
+                padding: 8px 14px 8px 12px;
+                font-size: 0.85rem;
+            }
+            .fav-label svg {
+                width: 18px;
+                height: 18px;
+            }
         }
     </style>
     <!-- OneSignal Push Notifications -->
@@ -839,7 +935,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     currentProduct = data.product;
                     renderProduct(data.product); 
                     loadReviews();
-                    setTimeout(() => checkFavorite(), 100);
+                    setTimeout(() => checkFavoriteModern(), 100);
                     // Agregar efecto de pulso al botón si nunca contactó
                     setTimeout(() => addPulseEffect(), 500);
                 } else { 
@@ -907,9 +1003,17 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     <button class="btn btn-secondary" onclick="buyNow(${product.id})">
                         <i class="fas fa-bolt"></i> Comprar Ahora
                     </button>
-                    <button class="btn-fav" id="favBtn" onclick="toggleFavorite()">
-                        <i class="far fa-heart"></i> Favorito
-                    </button>
+                    <!-- 🆕 BOTÓN FAVORITO MODERNO -->
+                    <input type="checkbox" id="favoriteCheckbox" class="fav-checkbox" onchange="toggleFavoriteModern()">
+                    <label for="favoriteCheckbox" class="fav-label" id="favLabel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <div class="fav-action">
+                            <span class="option-1">Agregar a favoritos</span>
+                            <span class="option-2">¡En favoritos! ❤️</span>
+                        </div>
+                    </label>
                     <button class="btn-contact-seller" id="contactSellerBtn" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
                         <i class="fas fa-comment-dots"></i>
                         <span>Consultar al vendedor</span>
@@ -1062,11 +1166,13 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         }
 
         // ============================================================
-        // FAVORITOS
+        // FAVORITOS - VERSIÓN MODERNA
         // ============================================================
-        async function checkFavorite() {
+        async function checkFavoriteModern() {
             const token = localStorage.getItem('token');
-            if (!token || !productId) return;
+            const checkbox = document.getElementById('favoriteCheckbox');
+            
+            if (!token || !productId || !checkbox) return;
             
             try {
                 const response = await fetch(`${API_URL}/api/favorites/check/${productId}`, {
@@ -1077,31 +1183,29 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                 });
                 const data = await response.json();
                 
-                const favBtn = document.getElementById('favBtn');
-                if (favBtn && data.isFavorite) {
-                    favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorito';
-                    favBtn.classList.add('active');
-                    favBtn.style.background = '#D95A41';
+                if (data.isFavorite) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
                 }
             } catch (error) {
                 console.error('Error checking favorite:', error);
             }
         }
 
-        async function toggleFavorite() {
+        async function toggleFavoriteModern() {
             const token = localStorage.getItem('token');
+            const checkbox = document.getElementById('favoriteCheckbox');
+            
             if (!token) {
-                alert('⚠️ Inicia sesión para agregar a favoritos');
-                window.location.href = 'login.html';
+                showLoginModal();
+                setTimeout(() => {
+                    if (checkbox) checkbox.checked = false;
+                }, 100);
                 return;
             }
             
-            const favBtn = document.getElementById('favBtn');
-            if (!favBtn) return;
-            
-            const originalContent = favBtn.innerHTML;
-            favBtn.disabled = true;
-            favBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> ...';
+            const shouldAdd = checkbox.checked;
             
             try {
                 const response = await fetch(`${API_URL}/api/favorites/toggle`, {
@@ -1112,51 +1216,24 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     },
                     body: JSON.stringify({ product_id: productId })
                 });
+                
                 const data = await response.json();
                 
                 if (data.success) {
                     if (data.action === 'added') {
-                        favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorito';
-                        favBtn.classList.add('active');
-                        favBtn.style.background = '#D95A41';
-                        showMessage('✨ Producto agregado a tus favoritos', 'success');
+                        showToast('✨ Producto agregado a favoritos', 'success');
                     } else {
-                        favBtn.innerHTML = '<i class="far fa-heart"></i> Favorito';
-                        favBtn.classList.remove('active');
-                        favBtn.style.background = '#E8B86B';
-                        showMessage('🗑️ Producto removido de favoritos', 'success');
+                        showToast('🗑️ Producto removido de favoritos', 'info');
                     }
                 } else {
-                    favBtn.innerHTML = originalContent;
-                    favBtn.disabled = false;
-                    showMessage(data.error || 'Error al actualizar favoritos', 'error');
+                    checkbox.checked = !shouldAdd;
+                    showToast(data.error || 'Error al actualizar favoritos', 'error');
                 }
             } catch (error) {
                 console.error('Error toggling favorite:', error);
-                favBtn.innerHTML = originalContent;
-                favBtn.disabled = false;
-                showMessage('Error de conexión: ' + error.message, 'error');
+                checkbox.checked = !shouldAdd;
+                showToast('Error de conexión', 'error');
             }
-        }
-
-        function showMessage(msg, type) {
-            let messageDiv = document.getElementById('favMessage');
-            if (!messageDiv) {
-                messageDiv = document.createElement('div');
-                messageDiv.id = 'favMessage';
-                messageDiv.className = 'message';
-                const productDetail = document.getElementById('productDetail');
-                if (productDetail) {
-                    productDetail.appendChild(messageDiv);
-                }
-            }
-            messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${msg}`;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.className = 'message';
-                messageDiv.style.display = 'none';
-            }, 4000);
         }
         
         // ============================================================

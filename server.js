@@ -469,7 +469,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // ============================================================
-// ENDPOINT: PRODUCTOS POR VENDEDOR (para dashboard vendedor/admin)
+// ENDPOINT: PRODUCTOS POR VENDEDOR (con datos del vendedor)
 // ============================================================
 app.get('/api/products/seller/:sellerId', async (req, res) => {
     try {
@@ -480,7 +480,16 @@ app.get('/api/products/seller/:sellerId', async (req, res) => {
         
         let query = supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                seller:seller_id (
+                    id,
+                    email,
+                    full_name,
+                    store_name,
+                    avatar_url
+                )
+            `)
             .eq('seller_id', sellerId)
             .eq('status', 'active');
         
@@ -587,13 +596,14 @@ app.get('/api/favorites/check/:productId', authenticateToken, async (req, res) =
 });
 
 // ============================================================
-// RUTA DE PRODUCTO POR ID
+// RUTA DE PRODUCTO POR ID (CON CONTADOR DE VISTAS)
 // ============================================================
 
 app.get('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
+        // Obtener el producto actual
         const { data: product, error } = await supabase
             .from('products')
             .select('*')
@@ -606,7 +616,24 @@ app.get('/api/products/:id', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         
-        res.json({ success: true, product });
+        // 🆕 INCREMENTAR CONTADOR DE VISTAS (sin bloquear la respuesta)
+        const currentViews = product.views || 0;
+        
+        // Actualizar vistas en segundo plano (no esperar a que termine)
+        supabase
+            .from('products')
+            .update({ views: currentViews + 1, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .then(({ error: updateError }) => {
+                if (updateError) {
+                    console.error('❌ Error actualizando vistas:', updateError);
+                } else {
+                    console.log(`👁️ Vistas incrementadas para producto ${id}: ${currentViews + 1}`);
+                }
+            });
+        
+        // Devolver el producto con las vistas actuales (no esperamos la actualización)
+        res.json({ success: true, product: { ...product, views: currentViews + 1 } });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ success: false, error: error.message });
