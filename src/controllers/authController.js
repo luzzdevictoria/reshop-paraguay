@@ -32,17 +32,10 @@ HISTORIAL DE MODIFICACIONES:
 const jwt = require('jsonwebtoken');
 const { supabase, supabaseAdmin } = require('../../database');
 
-// Inicializar Supabase
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
-
-// Cliente admin (bypassea RLS y rate limit)
-const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+// ============================================================
+// NO volver a declarar supabase y supabaseAdmin aquí
+// Ya vienen importados desde database.js
+// ============================================================
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
