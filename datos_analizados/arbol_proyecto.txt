@@ -2,7 +2,7 @@
    ARBOL DE ARCHIVOS - RESHOP PARAGUAY
 ============================================================
 
-Fecha: dom 12/04/2026 18:44:30,96
+Fecha: lun 13/04/2026 10:06:57,22
 Propietaria: Luciana Noelia Da Silva
 Desarrollador: Pedro Jose Pirovani
 
@@ -18,6 +18,7 @@ C:.
 ¦   .env.local
 ¦   .gitignore
 ¦   CREDENCIALES DE SUPABASE.txt
+¦   database.js
 ¦   detener.bat
 ¦   iniciar.bat
 ¦   OneSignalSDKWorker.js
@@ -50,6 +51,7 @@ C:.
 ¦   ¦   help.html
 ¦   ¦   index.html
 ¦   ¦   login.html
+¦   ¦   manifest.json
 ¦   ¦   messages.html
 ¦   ¦   my-orders.html
 ¦   ¦   OneSignalSDKWorker.js
@@ -58,6 +60,7 @@ C:.
 ¦   ¦   profile.html
 ¦   ¦   register.html
 ¦   ¦   seller-store.html
+¦   ¦   sw.js
 ¦   ¦   
 ¦   +---assets
 ¦   ¦   +---icons
@@ -87,22 +90,14 @@ C:.
 ¦   ¦       components.css
 ¦   ¦       main.css
 ¦   ¦       mobile.css
-¦   ¦       responsive.css
 ¦   ¦       
 ¦   +---js
-¦   ¦       admin.js
 ¦   ¦       api.js
 ¦   ¦       app.js
 ¦   ¦       auth.js
-¦   ¦       cart.js
-¦   ¦       chat.js
-¦   ¦       checkout.js
-¦   ¦       favorites.js
+¦   ¦       avatar.js
 ¦   ¦       mobile.js
-¦   ¦       orders.js
 ¦   ¦       products.js
-¦   ¦       profile.js
-¦   ¦       seller-products.js
 ¦   ¦       utils.js
 ¦   ¦       
 ¦   +---partials
@@ -128,10 +123,1296 @@ C:.
 ¦   ¦       nodetouch
 ¦   ¦       nodetouch.cmd
 ¦   ¦       nodetouch.ps1
+¦   ¦       prebuild-install
+¦   ¦       prebuild-install.cmd
+¦   ¦       prebuild-install.ps1
+¦   ¦       rc
+¦   ¦       rc.cmd
+¦   ¦       rc.ps1
 ¦   ¦       semver
 ¦   ¦       semver.cmd
 ¦   ¦       semver.ps1
 ¦   ¦       
+¦   +---@imgly
+¦   ¦   +---background-removal-node
+¦   ¦       ¦   CHANGELOG.md
+¦   ¦       ¦   LICENSE.md
+¦   ¦       ¦   package.json
+¦   ¦       ¦   README.md
+¦   ¦       ¦   ThirdPartyLicenses.json
+¦   ¦       ¦   
+¦   ¦       +---dist
+¦   ¦       ¦       014c9e0229363137e92b85ed3c6f56b1386c279cdd9af2d7f1960ed8428b5e94
+¦   ¦       ¦       01f6efcc8a01c727d99073ceede8e64c654fa3c4612b006e69e22dc663236943
+¦   ¦       ¦       024e3d8beaf517d25496b73e36b0e0498110652753273e0dd8b591ad7c1c9e2f
+¦   ¦       ¦       0ad4ebb86cfdd847901427181b7a7804dba93d868c3cd5f11a294acf36c9413f
+¦   ¦       ¦       0c8c5c24237304482ccc70a50008b73c8ef53e4656068da32b635607cca0c8c9
+¦   ¦       ¦       10d02652d10fbc47bf93732ff9e8ad53eefbd3bd89ab3c1fbc15ddd740bea672
+¦   ¦       ¦       145d8355f50b7847de5d04815124790867fe1752a0013bdf6ce28882b5e0a2fc
+¦   ¦       ¦       1b8eaad4cd019b76e7eba964a38711a0bdeafbd10b6208c1107403a64dbd902a
+¦   ¦       ¦       230f667e0332dc09ef08aacbf1992c40ce112192f95dfc14231a3ef515f9a2c7
+¦   ¦       ¦       3315eb3c14ca3ff5c03c80fac58f486a14264dd0bb9c168c096f2bd2531ba438
+¦   ¦       ¦       34dd3ad760f7e31b5e9144b8c387b8ecd6dc43116248c93c56dd7051ab525e3b
+¦   ¦       ¦       3f31511c3c16a29cf81b32379f51ead2bd082677b48b1dcc11a66beeb37cc729
+¦   ¦       ¦       3f5638267419916c9d4d906ff25f721d3d2e034851ea01566f0d2d6f943550b8
+¦   ¦       ¦       4c44c8b64af9f044623ceace7cc55e0bc348394f7ff63629d46118c0a03c9c54
+¦   ¦       ¦       529f1df7d027b0315090ba15d42ef32998cac2efd6783c62f6b11cedf4c548f3
+¦   ¦       ¦       5faec25d2338ae8ca2c7bff72e954cebd40a04c5f34c4b6bb8ca6720fae40996
+¦   ¦       ¦       6cfd013f552a05e9fc81156e6d6de593668e0247a3970feae22e285c16d13e62
+¦   ¦       ¦       724543b36c7b5eddfbd7f55cb5a7c1676b2089c277611850c257efa42212d8a2
+¦   ¦       ¦       7b1dd767c5c1c0156b8d13bb34d4c1d11e014723b10cddc25c93e89a28e7cd96
+¦   ¦       ¦       897d4d8a3f9f8c07f439300a5d81c8be4b0fcecf19ca6d77929b1750fedd8306
+¦   ¦       ¦       8a85c22e472bed10198298a3d57480a5a90946dba88bddecf8b0bf0eafc06e70
+¦   ¦       ¦       8b2e3d773d7084c5cfac1c04d69d3586e4b8914a840d2b582dfde4940d698957
+¦   ¦       ¦       9582c0375aed822c5577a814766c4afc6c096f4ccd3b0d08af6a1794987206a1
+¦   ¦       ¦       9927e74b3a0638d4cf5701e78e66d77476a4ba68c75831f1c8ea9117ec7f8809
+¦   ¦       ¦       a5b8c519c832bc46b2ae5a9887fac1e3d5cc76a04846d8c3544875c7f2b40960
+¦   ¦       ¦       b34a3e9350ad77140964b6a2e1e32cd9738acd9d01e5899b96be71901a22ef47
+¦   ¦       ¦       b9861d932a549be455fc8ebd8ce5d413049515bfdd3edd55e136dbe05dd34ef5
+¦   ¦       ¦       cbcda0a0c830ba51928e7935d9d3cfe1c4dc258bf117f2c76d047113ab8f9f8c
+¦   ¦       ¦       codecs.d.ts
+¦   ¦       ¦       codecs.d.ts.map
+¦   ¦       ¦       e01a157b677e0e17815cd738dcda7e6daa268898d006b52b5d3604c439e6c96e
+¦   ¦       ¦       e7ca5cc3e0afd65581642a05ac91eb8ea4d0deb868df94b8981c910212526476
+¦   ¦       ¦       f070b4c4f512cfe8dd6936c3cb9a616f132894867d3d33304d83599eb6b55636
+¦   ¦       ¦       f9290547b2e34555536647c1e2ca456348170eef1aee05d8fd522f5a051f260c
+¦   ¦       ¦       fe1b9f06af9d2147016884f4eb683d4dc540244a7453c3b742ae527725df2eec
+¦   ¦       ¦       index.cjs
+¦   ¦       ¦       index.cjs.map
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.mjs
+¦   ¦       ¦       index.mjs.map
+¦   ¦       ¦       inference.d.ts
+¦   ¦       ¦       inference.d.ts.map
+¦   ¦       ¦       onnx.d.ts
+¦   ¦       ¦       onnx.d.ts.map
+¦   ¦       ¦       resource.d.ts
+¦   ¦       ¦       resource.d.ts.map
+¦   ¦       ¦       resources.json
+¦   ¦       ¦       schema.d.ts
+¦   ¦       ¦       schema.d.ts.map
+¦   ¦       ¦       url.d.ts
+¦   ¦       ¦       url.d.ts.map
+¦   ¦       ¦       utils.d.ts
+¦   ¦       ¦       utils.d.ts.map
+¦   ¦       ¦       
+¦   ¦           +---@types
+¦   ¦           ¦   +---node
+¦   ¦           ¦       ¦   assert.d.ts
+¦   ¦           ¦       ¦   async_hooks.d.ts
+¦   ¦           ¦       ¦   buffer.d.ts
+¦   ¦           ¦       ¦   child_process.d.ts
+¦   ¦           ¦       ¦   cluster.d.ts
+¦   ¦           ¦       ¦   console.d.ts
+¦   ¦           ¦       ¦   constants.d.ts
+¦   ¦           ¦       ¦   crypto.d.ts
+¦   ¦           ¦       ¦   dgram.d.ts
+¦   ¦           ¦       ¦   diagnostics_channel.d.ts
+¦   ¦           ¦       ¦   dns.d.ts
+¦   ¦           ¦       ¦   dom-events.d.ts
+¦   ¦           ¦       ¦   domain.d.ts
+¦   ¦           ¦       ¦   events.d.ts
+¦   ¦           ¦       ¦   fs.d.ts
+¦   ¦           ¦       ¦   globals.d.ts
+¦   ¦           ¦       ¦   globals.global.d.ts
+¦   ¦           ¦       ¦   http.d.ts
+¦   ¦           ¦       ¦   http2.d.ts
+¦   ¦           ¦       ¦   https.d.ts
+¦   ¦           ¦       ¦   index.d.ts
+¦   ¦           ¦       ¦   inspector.d.ts
+¦   ¦           ¦       ¦   LICENSE
+¦   ¦           ¦       ¦   module.d.ts
+¦   ¦           ¦       ¦   net.d.ts
+¦   ¦           ¦       ¦   os.d.ts
+¦   ¦           ¦       ¦   package.json
+¦   ¦           ¦       ¦   path.d.ts
+¦   ¦           ¦       ¦   perf_hooks.d.ts
+¦   ¦           ¦       ¦   process.d.ts
+¦   ¦           ¦       ¦   punycode.d.ts
+¦   ¦           ¦       ¦   querystring.d.ts
+¦   ¦           ¦       ¦   readline.d.ts
+¦   ¦           ¦       ¦   README.md
+¦   ¦           ¦       ¦   repl.d.ts
+¦   ¦           ¦       ¦   stream.d.ts
+¦   ¦           ¦       ¦   string_decoder.d.ts
+¦   ¦           ¦       ¦   test.d.ts
+¦   ¦           ¦       ¦   timers.d.ts
+¦   ¦           ¦       ¦   tls.d.ts
+¦   ¦           ¦       ¦   trace_events.d.ts
+¦   ¦           ¦       ¦   tty.d.ts
+¦   ¦           ¦       ¦   url.d.ts
+¦   ¦           ¦       ¦   util.d.ts
+¦   ¦           ¦       ¦   v8.d.ts
+¦   ¦           ¦       ¦   vm.d.ts
+¦   ¦           ¦       ¦   wasi.d.ts
+¦   ¦           ¦       ¦   worker_threads.d.ts
+¦   ¦           ¦       ¦   zlib.d.ts
+¦   ¦           ¦       ¦   
+¦   ¦           ¦       +---assert
+¦   ¦           ¦       ¦       strict.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---dns
+¦   ¦           ¦       ¦       promises.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---fs
+¦   ¦           ¦       ¦       promises.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---readline
+¦   ¦           ¦       ¦       promises.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---stream
+¦   ¦           ¦       ¦       consumers.d.ts
+¦   ¦           ¦       ¦       promises.d.ts
+¦   ¦           ¦       ¦       web.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---timers
+¦   ¦           ¦       ¦       promises.d.ts
+¦   ¦           ¦       ¦       
+¦   ¦           ¦       +---ts4.8
+¦   ¦           ¦           ¦   assert.d.ts
+¦   ¦           ¦           ¦   async_hooks.d.ts
+¦   ¦           ¦           ¦   buffer.d.ts
+¦   ¦           ¦           ¦   child_process.d.ts
+¦   ¦           ¦           ¦   cluster.d.ts
+¦   ¦           ¦           ¦   console.d.ts
+¦   ¦           ¦           ¦   constants.d.ts
+¦   ¦           ¦           ¦   crypto.d.ts
+¦   ¦           ¦           ¦   dgram.d.ts
+¦   ¦           ¦           ¦   diagnostics_channel.d.ts
+¦   ¦           ¦           ¦   dns.d.ts
+¦   ¦           ¦           ¦   dom-events.d.ts
+¦   ¦           ¦           ¦   domain.d.ts
+¦   ¦           ¦           ¦   events.d.ts
+¦   ¦           ¦           ¦   fs.d.ts
+¦   ¦           ¦           ¦   globals.d.ts
+¦   ¦           ¦           ¦   globals.global.d.ts
+¦   ¦           ¦           ¦   http.d.ts
+¦   ¦           ¦           ¦   http2.d.ts
+¦   ¦           ¦           ¦   https.d.ts
+¦   ¦           ¦           ¦   index.d.ts
+¦   ¦           ¦           ¦   inspector.d.ts
+¦   ¦           ¦           ¦   module.d.ts
+¦   ¦           ¦           ¦   net.d.ts
+¦   ¦           ¦           ¦   os.d.ts
+¦   ¦           ¦           ¦   path.d.ts
+¦   ¦           ¦           ¦   perf_hooks.d.ts
+¦   ¦           ¦           ¦   process.d.ts
+¦   ¦           ¦           ¦   punycode.d.ts
+¦   ¦           ¦           ¦   querystring.d.ts
+¦   ¦           ¦           ¦   readline.d.ts
+¦   ¦           ¦           ¦   repl.d.ts
+¦   ¦           ¦           ¦   stream.d.ts
+¦   ¦           ¦           ¦   string_decoder.d.ts
+¦   ¦           ¦           ¦   test.d.ts
+¦   ¦           ¦           ¦   timers.d.ts
+¦   ¦           ¦           ¦   tls.d.ts
+¦   ¦           ¦           ¦   trace_events.d.ts
+¦   ¦           ¦           ¦   tty.d.ts
+¦   ¦           ¦           ¦   url.d.ts
+¦   ¦           ¦           ¦   util.d.ts
+¦   ¦           ¦           ¦   v8.d.ts
+¦   ¦           ¦           ¦   vm.d.ts
+¦   ¦           ¦           ¦   wasi.d.ts
+¦   ¦           ¦           ¦   worker_threads.d.ts
+¦   ¦           ¦           ¦   zlib.d.ts
+¦   ¦           ¦           ¦   
+¦   ¦           ¦           +---assert
+¦   ¦           ¦           ¦       strict.d.ts
+¦   ¦           ¦           ¦       
+¦   ¦           ¦           +---dns
+¦   ¦           ¦           ¦       promises.d.ts
+¦   ¦           ¦           ¦       
+¦   ¦           ¦           +---fs
+¦   ¦           ¦           ¦       promises.d.ts
+¦   ¦           ¦           ¦       
+¦   ¦           ¦           +---readline
+¦   ¦           ¦           ¦       promises.d.ts
+¦   ¦           ¦           ¦       
+¦   ¦           ¦           +---stream
+¦   ¦           ¦           ¦       consumers.d.ts
+¦   ¦           ¦           ¦       promises.d.ts
+¦   ¦           ¦           ¦       web.d.ts
+¦   ¦           ¦           ¦       
+¦   ¦           ¦           +---timers
+¦   ¦           ¦                   promises.d.ts
+¦   ¦           ¦                   
+¦   ¦           +---lodash
+¦   ¦               ¦   add.js
+¦   ¦               ¦   after.js
+¦   ¦               ¦   array.js
+¦   ¦               ¦   ary.js
+¦   ¦               ¦   assign.js
+¦   ¦               ¦   assignIn.js
+¦   ¦               ¦   assignInWith.js
+¦   ¦               ¦   assignWith.js
+¦   ¦               ¦   at.js
+¦   ¦               ¦   attempt.js
+¦   ¦               ¦   before.js
+¦   ¦               ¦   bind.js
+¦   ¦               ¦   bindAll.js
+¦   ¦               ¦   bindKey.js
+¦   ¦               ¦   camelCase.js
+¦   ¦               ¦   capitalize.js
+¦   ¦               ¦   castArray.js
+¦   ¦               ¦   ceil.js
+¦   ¦               ¦   chain.js
+¦   ¦               ¦   chunk.js
+¦   ¦               ¦   clamp.js
+¦   ¦               ¦   clone.js
+¦   ¦               ¦   cloneDeep.js
+¦   ¦               ¦   cloneDeepWith.js
+¦   ¦               ¦   cloneWith.js
+¦   ¦               ¦   collection.js
+¦   ¦               ¦   commit.js
+¦   ¦               ¦   compact.js
+¦   ¦               ¦   concat.js
+¦   ¦               ¦   cond.js
+¦   ¦               ¦   conforms.js
+¦   ¦               ¦   conformsTo.js
+¦   ¦               ¦   constant.js
+¦   ¦               ¦   core.js
+¦   ¦               ¦   core.min.js
+¦   ¦               ¦   countBy.js
+¦   ¦               ¦   create.js
+¦   ¦               ¦   curry.js
+¦   ¦               ¦   curryRight.js
+¦   ¦               ¦   date.js
+¦   ¦               ¦   debounce.js
+¦   ¦               ¦   deburr.js
+¦   ¦               ¦   defaults.js
+¦   ¦               ¦   defaultsDeep.js
+¦   ¦               ¦   defaultTo.js
+¦   ¦               ¦   defer.js
+¦   ¦               ¦   delay.js
+¦   ¦               ¦   difference.js
+¦   ¦               ¦   differenceBy.js
+¦   ¦               ¦   differenceWith.js
+¦   ¦               ¦   divide.js
+¦   ¦               ¦   drop.js
+¦   ¦               ¦   dropRight.js
+¦   ¦               ¦   dropRightWhile.js
+¦   ¦               ¦   dropWhile.js
+¦   ¦               ¦   each.js
+¦   ¦               ¦   eachRight.js
+¦   ¦               ¦   endsWith.js
+¦   ¦               ¦   entries.js
+¦   ¦               ¦   entriesIn.js
+¦   ¦               ¦   eq.js
+¦   ¦               ¦   escape.js
+¦   ¦               ¦   escapeRegExp.js
+¦   ¦               ¦   every.js
+¦   ¦               ¦   extend.js
+¦   ¦               ¦   extendWith.js
+¦   ¦               ¦   fill.js
+¦   ¦               ¦   filter.js
+¦   ¦               ¦   find.js
+¦   ¦               ¦   findIndex.js
+¦   ¦               ¦   findKey.js
+¦   ¦               ¦   findLast.js
+¦   ¦               ¦   findLastIndex.js
+¦   ¦               ¦   findLastKey.js
+¦   ¦               ¦   first.js
+¦   ¦               ¦   flatMap.js
+¦   ¦               ¦   flatMapDeep.js
+¦   ¦               ¦   flatMapDepth.js
+¦   ¦               ¦   flatten.js
+¦   ¦               ¦   flattenDeep.js
+¦   ¦               ¦   flattenDepth.js
+¦   ¦               ¦   flip.js
+¦   ¦               ¦   floor.js
+¦   ¦               ¦   flow.js
+¦   ¦               ¦   flowRight.js
+¦   ¦               ¦   forEach.js
+¦   ¦               ¦   forEachRight.js
+¦   ¦               ¦   forIn.js
+¦   ¦               ¦   forInRight.js
+¦   ¦               ¦   forOwn.js
+¦   ¦               ¦   forOwnRight.js
+¦   ¦               ¦   fp.js
+¦   ¦               ¦   fromPairs.js
+¦   ¦               ¦   function.js
+¦   ¦               ¦   functions.js
+¦   ¦               ¦   functionsIn.js
+¦   ¦               ¦   get.js
+¦   ¦               ¦   groupBy.js
+¦   ¦               ¦   gt.js
+¦   ¦               ¦   gte.js
+¦   ¦               ¦   has.js
+¦   ¦               ¦   hasIn.js
+¦   ¦               ¦   head.js
+¦   ¦               ¦   identity.js
+¦   ¦               ¦   includes.js
+¦   ¦               ¦   index.js
+¦   ¦               ¦   indexOf.js
+¦   ¦               ¦   initial.js
+¦   ¦               ¦   inRange.js
+¦   ¦               ¦   intersection.js
+¦   ¦               ¦   intersectionBy.js
+¦   ¦               ¦   intersectionWith.js
+¦   ¦               ¦   invert.js
+¦   ¦               ¦   invertBy.js
+¦   ¦               ¦   invoke.js
+¦   ¦               ¦   invokeMap.js
+¦   ¦               ¦   isArguments.js
+¦   ¦               ¦   isArray.js
+¦   ¦               ¦   isArrayBuffer.js
+¦   ¦               ¦   isArrayLike.js
+¦   ¦               ¦   isArrayLikeObject.js
+¦   ¦               ¦   isBoolean.js
+¦   ¦               ¦   isBuffer.js
+¦   ¦               ¦   isDate.js
+¦   ¦               ¦   isElement.js
+¦   ¦               ¦   isEmpty.js
+¦   ¦               ¦   isEqual.js
+¦   ¦               ¦   isEqualWith.js
+¦   ¦               ¦   isError.js
+¦   ¦               ¦   isFinite.js
+¦   ¦               ¦   isFunction.js
+¦   ¦               ¦   isInteger.js
+¦   ¦               ¦   isLength.js
+¦   ¦               ¦   isMap.js
+¦   ¦               ¦   isMatch.js
+¦   ¦               ¦   isMatchWith.js
+¦   ¦               ¦   isNaN.js
+¦   ¦               ¦   isNative.js
+¦   ¦               ¦   isNil.js
+¦   ¦               ¦   isNull.js
+¦   ¦               ¦   isNumber.js
+¦   ¦               ¦   isObject.js
+¦   ¦               ¦   isObjectLike.js
+¦   ¦               ¦   isPlainObject.js
+¦   ¦               ¦   isRegExp.js
+¦   ¦               ¦   isSafeInteger.js
+¦   ¦               ¦   isSet.js
+¦   ¦               ¦   isString.js
+¦   ¦               ¦   isSymbol.js
+¦   ¦               ¦   isTypedArray.js
+¦   ¦               ¦   isUndefined.js
+¦   ¦               ¦   isWeakMap.js
+¦   ¦               ¦   isWeakSet.js
+¦   ¦               ¦   iteratee.js
+¦   ¦               ¦   join.js
+¦   ¦               ¦   kebabCase.js
+¦   ¦               ¦   keyBy.js
+¦   ¦               ¦   keys.js
+¦   ¦               ¦   keysIn.js
+¦   ¦               ¦   lang.js
+¦   ¦               ¦   last.js
+¦   ¦               ¦   lastIndexOf.js
+¦   ¦               ¦   LICENSE
+¦   ¦               ¦   lodash.js
+¦   ¦               ¦   lodash.min.js
+¦   ¦               ¦   lowerCase.js
+¦   ¦               ¦   lowerFirst.js
+¦   ¦               ¦   lt.js
+¦   ¦               ¦   lte.js
+¦   ¦               ¦   map.js
+¦   ¦               ¦   mapKeys.js
+¦   ¦               ¦   mapValues.js
+¦   ¦               ¦   matches.js
+¦   ¦               ¦   matchesProperty.js
+¦   ¦               ¦   math.js
+¦   ¦               ¦   max.js
+¦   ¦               ¦   maxBy.js
+¦   ¦               ¦   mean.js
+¦   ¦               ¦   meanBy.js
+¦   ¦               ¦   memoize.js
+¦   ¦               ¦   merge.js
+¦   ¦               ¦   mergeWith.js
+¦   ¦               ¦   method.js
+¦   ¦               ¦   methodOf.js
+¦   ¦               ¦   min.js
+¦   ¦               ¦   minBy.js
+¦   ¦               ¦   mixin.js
+¦   ¦               ¦   multiply.js
+¦   ¦               ¦   negate.js
+¦   ¦               ¦   next.js
+¦   ¦               ¦   noop.js
+¦   ¦               ¦   now.js
+¦   ¦               ¦   nth.js
+¦   ¦               ¦   nthArg.js
+¦   ¦               ¦   number.js
+¦   ¦               ¦   object.js
+¦   ¦               ¦   omit.js
+¦   ¦               ¦   omitBy.js
+¦   ¦               ¦   once.js
+¦   ¦               ¦   orderBy.js
+¦   ¦               ¦   over.js
+¦   ¦               ¦   overArgs.js
+¦   ¦               ¦   overEvery.js
+¦   ¦               ¦   overSome.js
+¦   ¦               ¦   package.json
+¦   ¦               ¦   pad.js
+¦   ¦               ¦   padEnd.js
+¦   ¦               ¦   padStart.js
+¦   ¦               ¦   parseInt.js
+¦   ¦               ¦   partial.js
+¦   ¦               ¦   partialRight.js
+¦   ¦               ¦   partition.js
+¦   ¦               ¦   pick.js
+¦   ¦               ¦   pickBy.js
+¦   ¦               ¦   plant.js
+¦   ¦               ¦   property.js
+¦   ¦               ¦   propertyOf.js
+¦   ¦               ¦   pull.js
+¦   ¦               ¦   pullAll.js
+¦   ¦               ¦   pullAllBy.js
+¦   ¦               ¦   pullAllWith.js
+¦   ¦               ¦   pullAt.js
+¦   ¦               ¦   random.js
+¦   ¦               ¦   range.js
+¦   ¦               ¦   rangeRight.js
+¦   ¦               ¦   README.md
+¦   ¦               ¦   rearg.js
+¦   ¦               ¦   reduce.js
+¦   ¦               ¦   reduceRight.js
+¦   ¦               ¦   reject.js
+¦   ¦               ¦   remove.js
+¦   ¦               ¦   repeat.js
+¦   ¦               ¦   replace.js
+¦   ¦               ¦   rest.js
+¦   ¦               ¦   result.js
+¦   ¦               ¦   reverse.js
+¦   ¦               ¦   round.js
+¦   ¦               ¦   sample.js
+¦   ¦               ¦   sampleSize.js
+¦   ¦               ¦   seq.js
+¦   ¦               ¦   set.js
+¦   ¦               ¦   setWith.js
+¦   ¦               ¦   shuffle.js
+¦   ¦               ¦   size.js
+¦   ¦               ¦   slice.js
+¦   ¦               ¦   snakeCase.js
+¦   ¦               ¦   some.js
+¦   ¦               ¦   sortBy.js
+¦   ¦               ¦   sortedIndex.js
+¦   ¦               ¦   sortedIndexBy.js
+¦   ¦               ¦   sortedIndexOf.js
+¦   ¦               ¦   sortedLastIndex.js
+¦   ¦               ¦   sortedLastIndexBy.js
+¦   ¦               ¦   sortedLastIndexOf.js
+¦   ¦               ¦   sortedUniq.js
+¦   ¦               ¦   sortedUniqBy.js
+¦   ¦               ¦   split.js
+¦   ¦               ¦   spread.js
+¦   ¦               ¦   startCase.js
+¦   ¦               ¦   startsWith.js
+¦   ¦               ¦   string.js
+¦   ¦               ¦   stubArray.js
+¦   ¦               ¦   stubFalse.js
+¦   ¦               ¦   stubObject.js
+¦   ¦               ¦   stubString.js
+¦   ¦               ¦   stubTrue.js
+¦   ¦               ¦   subtract.js
+¦   ¦               ¦   sum.js
+¦   ¦               ¦   sumBy.js
+¦   ¦               ¦   tail.js
+¦   ¦               ¦   take.js
+¦   ¦               ¦   takeRight.js
+¦   ¦               ¦   takeRightWhile.js
+¦   ¦               ¦   takeWhile.js
+¦   ¦               ¦   tap.js
+¦   ¦               ¦   template.js
+¦   ¦               ¦   templateSettings.js
+¦   ¦               ¦   throttle.js
+¦   ¦               ¦   thru.js
+¦   ¦               ¦   times.js
+¦   ¦               ¦   toArray.js
+¦   ¦               ¦   toFinite.js
+¦   ¦               ¦   toInteger.js
+¦   ¦               ¦   toIterator.js
+¦   ¦               ¦   toJSON.js
+¦   ¦               ¦   toLength.js
+¦   ¦               ¦   toLower.js
+¦   ¦               ¦   toNumber.js
+¦   ¦               ¦   toPairs.js
+¦   ¦               ¦   toPairsIn.js
+¦   ¦               ¦   toPath.js
+¦   ¦               ¦   toPlainObject.js
+¦   ¦               ¦   toSafeInteger.js
+¦   ¦               ¦   toString.js
+¦   ¦               ¦   toUpper.js
+¦   ¦               ¦   transform.js
+¦   ¦               ¦   trim.js
+¦   ¦               ¦   trimEnd.js
+¦   ¦               ¦   trimStart.js
+¦   ¦               ¦   truncate.js
+¦   ¦               ¦   unary.js
+¦   ¦               ¦   unescape.js
+¦   ¦               ¦   union.js
+¦   ¦               ¦   unionBy.js
+¦   ¦               ¦   unionWith.js
+¦   ¦               ¦   uniq.js
+¦   ¦               ¦   uniqBy.js
+¦   ¦               ¦   uniqueId.js
+¦   ¦               ¦   uniqWith.js
+¦   ¦               ¦   unset.js
+¦   ¦               ¦   unzip.js
+¦   ¦               ¦   unzipWith.js
+¦   ¦               ¦   update.js
+¦   ¦               ¦   updateWith.js
+¦   ¦               ¦   upperCase.js
+¦   ¦               ¦   upperFirst.js
+¦   ¦               ¦   util.js
+¦   ¦               ¦   value.js
+¦   ¦               ¦   valueOf.js
+¦   ¦               ¦   values.js
+¦   ¦               ¦   valuesIn.js
+¦   ¦               ¦   without.js
+¦   ¦               ¦   words.js
+¦   ¦               ¦   wrap.js
+¦   ¦               ¦   wrapperAt.js
+¦   ¦               ¦   wrapperChain.js
+¦   ¦               ¦   wrapperLodash.js
+¦   ¦               ¦   wrapperReverse.js
+¦   ¦               ¦   wrapperValue.js
+¦   ¦               ¦   xor.js
+¦   ¦               ¦   xorBy.js
+¦   ¦               ¦   xorWith.js
+¦   ¦               ¦   zip.js
+¦   ¦               ¦   zipObject.js
+¦   ¦               ¦   zipObjectDeep.js
+¦   ¦               ¦   zipWith.js
+¦   ¦               ¦   _apply.js
+¦   ¦               ¦   _arrayAggregator.js
+¦   ¦               ¦   _arrayEach.js
+¦   ¦               ¦   _arrayEachRight.js
+¦   ¦               ¦   _arrayEvery.js
+¦   ¦               ¦   _arrayFilter.js
+¦   ¦               ¦   _arrayIncludes.js
+¦   ¦               ¦   _arrayIncludesWith.js
+¦   ¦               ¦   _arrayLikeKeys.js
+¦   ¦               ¦   _arrayMap.js
+¦   ¦               ¦   _arrayPush.js
+¦   ¦               ¦   _arrayReduce.js
+¦   ¦               ¦   _arrayReduceRight.js
+¦   ¦               ¦   _arraySample.js
+¦   ¦               ¦   _arraySampleSize.js
+¦   ¦               ¦   _arrayShuffle.js
+¦   ¦               ¦   _arraySome.js
+¦   ¦               ¦   _asciiSize.js
+¦   ¦               ¦   _asciiToArray.js
+¦   ¦               ¦   _asciiWords.js
+¦   ¦               ¦   _assignMergeValue.js
+¦   ¦               ¦   _assignValue.js
+¦   ¦               ¦   _assocIndexOf.js
+¦   ¦               ¦   _baseAggregator.js
+¦   ¦               ¦   _baseAssign.js
+¦   ¦               ¦   _baseAssignIn.js
+¦   ¦               ¦   _baseAssignValue.js
+¦   ¦               ¦   _baseAt.js
+¦   ¦               ¦   _baseClamp.js
+¦   ¦               ¦   _baseClone.js
+¦   ¦               ¦   _baseConforms.js
+¦   ¦               ¦   _baseConformsTo.js
+¦   ¦               ¦   _baseCreate.js
+¦   ¦               ¦   _baseDelay.js
+¦   ¦               ¦   _baseDifference.js
+¦   ¦               ¦   _baseEach.js
+¦   ¦               ¦   _baseEachRight.js
+¦   ¦               ¦   _baseEvery.js
+¦   ¦               ¦   _baseExtremum.js
+¦   ¦               ¦   _baseFill.js
+¦   ¦               ¦   _baseFilter.js
+¦   ¦               ¦   _baseFindIndex.js
+¦   ¦               ¦   _baseFindKey.js
+¦   ¦               ¦   _baseFlatten.js
+¦   ¦               ¦   _baseFor.js
+¦   ¦               ¦   _baseForOwn.js
+¦   ¦               ¦   _baseForOwnRight.js
+¦   ¦               ¦   _baseForRight.js
+¦   ¦               ¦   _baseFunctions.js
+¦   ¦               ¦   _baseGet.js
+¦   ¦               ¦   _baseGetAllKeys.js
+¦   ¦               ¦   _baseGetTag.js
+¦   ¦               ¦   _baseGt.js
+¦   ¦               ¦   _baseHas.js
+¦   ¦               ¦   _baseHasIn.js
+¦   ¦               ¦   _baseIndexOf.js
+¦   ¦               ¦   _baseIndexOfWith.js
+¦   ¦               ¦   _baseInRange.js
+¦   ¦               ¦   _baseIntersection.js
+¦   ¦               ¦   _baseInverter.js
+¦   ¦               ¦   _baseInvoke.js
+¦   ¦               ¦   _baseIsArguments.js
+¦   ¦               ¦   _baseIsArrayBuffer.js
+¦   ¦               ¦   _baseIsDate.js
+¦   ¦               ¦   _baseIsEqual.js
+¦   ¦               ¦   _baseIsEqualDeep.js
+¦   ¦               ¦   _baseIsMap.js
+¦   ¦               ¦   _baseIsMatch.js
+¦   ¦               ¦   _baseIsNaN.js
+¦   ¦               ¦   _baseIsNative.js
+¦   ¦               ¦   _baseIsRegExp.js
+¦   ¦               ¦   _baseIsSet.js
+¦   ¦               ¦   _baseIsTypedArray.js
+¦   ¦               ¦   _baseIteratee.js
+¦   ¦               ¦   _baseKeys.js
+¦   ¦               ¦   _baseKeysIn.js
+¦   ¦               ¦   _baseLodash.js
+¦   ¦               ¦   _baseLt.js
+¦   ¦               ¦   _baseMap.js
+¦   ¦               ¦   _baseMatches.js
+¦   ¦               ¦   _baseMatchesProperty.js
+¦   ¦               ¦   _baseMean.js
+¦   ¦               ¦   _baseMerge.js
+¦   ¦               ¦   _baseMergeDeep.js
+¦   ¦               ¦   _baseNth.js
+¦   ¦               ¦   _baseOrderBy.js
+¦   ¦               ¦   _basePick.js
+¦   ¦               ¦   _basePickBy.js
+¦   ¦               ¦   _baseProperty.js
+¦   ¦               ¦   _basePropertyDeep.js
+¦   ¦               ¦   _basePropertyOf.js
+¦   ¦               ¦   _basePullAll.js
+¦   ¦               ¦   _basePullAt.js
+¦   ¦               ¦   _baseRandom.js
+¦   ¦               ¦   _baseRange.js
+¦   ¦               ¦   _baseReduce.js
+¦   ¦               ¦   _baseRepeat.js
+¦   ¦               ¦   _baseRest.js
+¦   ¦               ¦   _baseSample.js
+¦   ¦               ¦   _baseSampleSize.js
+¦   ¦               ¦   _baseSet.js
+¦   ¦               ¦   _baseSetData.js
+¦   ¦               ¦   _baseSetToString.js
+¦   ¦               ¦   _baseShuffle.js
+¦   ¦               ¦   _baseSlice.js
+¦   ¦               ¦   _baseSome.js
+¦   ¦               ¦   _baseSortBy.js
+¦   ¦               ¦   _baseSortedIndex.js
+¦   ¦               ¦   _baseSortedIndexBy.js
+¦   ¦               ¦   _baseSortedUniq.js
+¦   ¦               ¦   _baseSum.js
+¦   ¦               ¦   _baseTimes.js
+¦   ¦               ¦   _baseToNumber.js
+¦   ¦               ¦   _baseToPairs.js
+¦   ¦               ¦   _baseToString.js
+¦   ¦               ¦   _baseTrim.js
+¦   ¦               ¦   _baseUnary.js
+¦   ¦               ¦   _baseUniq.js
+¦   ¦               ¦   _baseUnset.js
+¦   ¦               ¦   _baseUpdate.js
+¦   ¦               ¦   _baseValues.js
+¦   ¦               ¦   _baseWhile.js
+¦   ¦               ¦   _baseWrapperValue.js
+¦   ¦               ¦   _baseXor.js
+¦   ¦               ¦   _baseZipObject.js
+¦   ¦               ¦   _cacheHas.js
+¦   ¦               ¦   _castArrayLikeObject.js
+¦   ¦               ¦   _castFunction.js
+¦   ¦               ¦   _castPath.js
+¦   ¦               ¦   _castRest.js
+¦   ¦               ¦   _castSlice.js
+¦   ¦               ¦   _charsEndIndex.js
+¦   ¦               ¦   _charsStartIndex.js
+¦   ¦               ¦   _cloneArrayBuffer.js
+¦   ¦               ¦   _cloneBuffer.js
+¦   ¦               ¦   _cloneDataView.js
+¦   ¦               ¦   _cloneRegExp.js
+¦   ¦               ¦   _cloneSymbol.js
+¦   ¦               ¦   _cloneTypedArray.js
+¦   ¦               ¦   _compareAscending.js
+¦   ¦               ¦   _compareMultiple.js
+¦   ¦               ¦   _composeArgs.js
+¦   ¦               ¦   _composeArgsRight.js
+¦   ¦               ¦   _copyArray.js
+¦   ¦               ¦   _copyObject.js
+¦   ¦               ¦   _copySymbols.js
+¦   ¦               ¦   _copySymbolsIn.js
+¦   ¦               ¦   _coreJsData.js
+¦   ¦               ¦   _countHolders.js
+¦   ¦               ¦   _createAggregator.js
+¦   ¦               ¦   _createAssigner.js
+¦   ¦               ¦   _createBaseEach.js
+¦   ¦               ¦   _createBaseFor.js
+¦   ¦               ¦   _createBind.js
+¦   ¦               ¦   _createCaseFirst.js
+¦   ¦               ¦   _createCompounder.js
+¦   ¦               ¦   _createCtor.js
+¦   ¦               ¦   _createCurry.js
+¦   ¦               ¦   _createFind.js
+¦   ¦               ¦   _createFlow.js
+¦   ¦               ¦   _createHybrid.js
+¦   ¦               ¦   _createInverter.js
+¦   ¦               ¦   _createMathOperation.js
+¦   ¦               ¦   _createOver.js
+¦   ¦               ¦   _createPadding.js
+¦   ¦               ¦   _createPartial.js
+¦   ¦               ¦   _createRange.js
+¦   ¦               ¦   _createRecurry.js
+¦   ¦               ¦   _createRelationalOperation.js
+¦   ¦               ¦   _createRound.js
+¦   ¦               ¦   _createSet.js
+¦   ¦               ¦   _createToPairs.js
+¦   ¦               ¦   _createWrap.js
+¦   ¦               ¦   _customDefaultsAssignIn.js
+¦   ¦               ¦   _customDefaultsMerge.js
+¦   ¦               ¦   _customOmitClone.js
+¦   ¦               ¦   _DataView.js
+¦   ¦               ¦   _deburrLetter.js
+¦   ¦               ¦   _defineProperty.js
+¦   ¦               ¦   _equalArrays.js
+¦   ¦               ¦   _equalByTag.js
+¦   ¦               ¦   _equalObjects.js
+¦   ¦               ¦   _escapeHtmlChar.js
+¦   ¦               ¦   _escapeStringChar.js
+¦   ¦               ¦   _flatRest.js
+¦   ¦               ¦   _freeGlobal.js
+¦   ¦               ¦   _getAllKeys.js
+¦   ¦               ¦   _getAllKeysIn.js
+¦   ¦               ¦   _getData.js
+¦   ¦               ¦   _getFuncName.js
+¦   ¦               ¦   _getHolder.js
+¦   ¦               ¦   _getMapData.js
+¦   ¦               ¦   _getMatchData.js
+¦   ¦               ¦   _getNative.js
+¦   ¦               ¦   _getPrototype.js
+¦   ¦               ¦   _getRawTag.js
+¦   ¦               ¦   _getSymbols.js
+¦   ¦               ¦   _getSymbolsIn.js
+¦   ¦               ¦   _getTag.js
+¦   ¦               ¦   _getValue.js
+¦   ¦               ¦   _getView.js
+¦   ¦               ¦   _getWrapDetails.js
+¦   ¦               ¦   _Hash.js
+¦   ¦               ¦   _hashClear.js
+¦   ¦               ¦   _hashDelete.js
+¦   ¦               ¦   _hashGet.js
+¦   ¦               ¦   _hashHas.js
+¦   ¦               ¦   _hashSet.js
+¦   ¦               ¦   _hasPath.js
+¦   ¦               ¦   _hasUnicode.js
+¦   ¦               ¦   _hasUnicodeWord.js
+¦   ¦               ¦   _initCloneArray.js
+¦   ¦               ¦   _initCloneByTag.js
+¦   ¦               ¦   _initCloneObject.js
+¦   ¦               ¦   _insertWrapDetails.js
+¦   ¦               ¦   _isFlattenable.js
+¦   ¦               ¦   _isIndex.js
+¦   ¦               ¦   _isIterateeCall.js
+¦   ¦               ¦   _isKey.js
+¦   ¦               ¦   _isKeyable.js
+¦   ¦               ¦   _isLaziable.js
+¦   ¦               ¦   _isMaskable.js
+¦   ¦               ¦   _isMasked.js
+¦   ¦               ¦   _isPrototype.js
+¦   ¦               ¦   _isStrictComparable.js
+¦   ¦               ¦   _iteratorToArray.js
+¦   ¦               ¦   _lazyClone.js
+¦   ¦               ¦   _lazyReverse.js
+¦   ¦               ¦   _lazyValue.js
+¦   ¦               ¦   _LazyWrapper.js
+¦   ¦               ¦   _ListCache.js
+¦   ¦               ¦   _listCacheClear.js
+¦   ¦               ¦   _listCacheDelete.js
+¦   ¦               ¦   _listCacheGet.js
+¦   ¦               ¦   _listCacheHas.js
+¦   ¦               ¦   _listCacheSet.js
+¦   ¦               ¦   _LodashWrapper.js
+¦   ¦               ¦   _Map.js
+¦   ¦               ¦   _MapCache.js
+¦   ¦               ¦   _mapCacheClear.js
+¦   ¦               ¦   _mapCacheDelete.js
+¦   ¦               ¦   _mapCacheGet.js
+¦   ¦               ¦   _mapCacheHas.js
+¦   ¦               ¦   _mapCacheSet.js
+¦   ¦               ¦   _mapToArray.js
+¦   ¦               ¦   _matchesStrictComparable.js
+¦   ¦               ¦   _memoizeCapped.js
+¦   ¦               ¦   _mergeData.js
+¦   ¦               ¦   _metaMap.js
+¦   ¦               ¦   _nativeCreate.js
+¦   ¦               ¦   _nativeKeys.js
+¦   ¦               ¦   _nativeKeysIn.js
+¦   ¦               ¦   _nodeUtil.js
+¦   ¦               ¦   _objectToString.js
+¦   ¦               ¦   _overArg.js
+¦   ¦               ¦   _overRest.js
+¦   ¦               ¦   _parent.js
+¦   ¦               ¦   _Promise.js
+¦   ¦               ¦   _realNames.js
+¦   ¦               ¦   _reEscape.js
+¦   ¦               ¦   _reEvaluate.js
+¦   ¦               ¦   _reInterpolate.js
+¦   ¦               ¦   _reorder.js
+¦   ¦               ¦   _replaceHolders.js
+¦   ¦               ¦   _root.js
+¦   ¦               ¦   _safeGet.js
+¦   ¦               ¦   _Set.js
+¦   ¦               ¦   _SetCache.js
+¦   ¦               ¦   _setCacheAdd.js
+¦   ¦               ¦   _setCacheHas.js
+¦   ¦               ¦   _setData.js
+¦   ¦               ¦   _setToArray.js
+¦   ¦               ¦   _setToPairs.js
+¦   ¦               ¦   _setToString.js
+¦   ¦               ¦   _setWrapToString.js
+¦   ¦               ¦   _shortOut.js
+¦   ¦               ¦   _shuffleSelf.js
+¦   ¦               ¦   _Stack.js
+¦   ¦               ¦   _stackClear.js
+¦   ¦               ¦   _stackDelete.js
+¦   ¦               ¦   _stackGet.js
+¦   ¦               ¦   _stackHas.js
+¦   ¦               ¦   _stackSet.js
+¦   ¦               ¦   _strictIndexOf.js
+¦   ¦               ¦   _strictLastIndexOf.js
+¦   ¦               ¦   _stringSize.js
+¦   ¦               ¦   _stringToArray.js
+¦   ¦               ¦   _stringToPath.js
+¦   ¦               ¦   _Symbol.js
+¦   ¦               ¦   _toKey.js
+¦   ¦               ¦   _toSource.js
+¦   ¦               ¦   _trimmedEndIndex.js
+¦   ¦               ¦   _Uint8Array.js
+¦   ¦               ¦   _unescapeHtmlChar.js
+¦   ¦               ¦   _unicodeSize.js
+¦   ¦               ¦   _unicodeToArray.js
+¦   ¦               ¦   _unicodeWords.js
+¦   ¦               ¦   _updateWrapDetails.js
+¦   ¦               ¦   _WeakMap.js
+¦   ¦               ¦   _wrapperClone.js
+¦   ¦               ¦   
+¦   ¦               +---fp
+¦   ¦                       add.js
+¦   ¦                       after.js
+¦   ¦                       all.js
+¦   ¦                       allPass.js
+¦   ¦                       always.js
+¦   ¦                       any.js
+¦   ¦                       anyPass.js
+¦   ¦                       apply.js
+¦   ¦                       array.js
+¦   ¦                       ary.js
+¦   ¦                       assign.js
+¦   ¦                       assignAll.js
+¦   ¦                       assignAllWith.js
+¦   ¦                       assignIn.js
+¦   ¦                       assignInAll.js
+¦   ¦                       assignInAllWith.js
+¦   ¦                       assignInWith.js
+¦   ¦                       assignWith.js
+¦   ¦                       assoc.js
+¦   ¦                       assocPath.js
+¦   ¦                       at.js
+¦   ¦                       attempt.js
+¦   ¦                       before.js
+¦   ¦                       bind.js
+¦   ¦                       bindAll.js
+¦   ¦                       bindKey.js
+¦   ¦                       camelCase.js
+¦   ¦                       capitalize.js
+¦   ¦                       castArray.js
+¦   ¦                       ceil.js
+¦   ¦                       chain.js
+¦   ¦                       chunk.js
+¦   ¦                       clamp.js
+¦   ¦                       clone.js
+¦   ¦                       cloneDeep.js
+¦   ¦                       cloneDeepWith.js
+¦   ¦                       cloneWith.js
+¦   ¦                       collection.js
+¦   ¦                       commit.js
+¦   ¦                       compact.js
+¦   ¦                       complement.js
+¦   ¦                       compose.js
+¦   ¦                       concat.js
+¦   ¦                       cond.js
+¦   ¦                       conforms.js
+¦   ¦                       conformsTo.js
+¦   ¦                       constant.js
+¦   ¦                       contains.js
+¦   ¦                       convert.js
+¦   ¦                       countBy.js
+¦   ¦                       create.js
+¦   ¦                       curry.js
+¦   ¦                       curryN.js
+¦   ¦                       curryRight.js
+¦   ¦                       curryRightN.js
+¦   ¦                       date.js
+¦   ¦                       debounce.js
+¦   ¦                       deburr.js
+¦   ¦                       defaults.js
+¦   ¦                       defaultsAll.js
+¦   ¦                       defaultsDeep.js
+¦   ¦                       defaultsDeepAll.js
+¦   ¦                       defaultTo.js
+¦   ¦                       defer.js
+¦   ¦                       delay.js
+¦   ¦                       difference.js
+¦   ¦                       differenceBy.js
+¦   ¦                       differenceWith.js
+¦   ¦                       dissoc.js
+¦   ¦                       dissocPath.js
+¦   ¦                       divide.js
+¦   ¦                       drop.js
+¦   ¦                       dropLast.js
+¦   ¦                       dropLastWhile.js
+¦   ¦                       dropRight.js
+¦   ¦                       dropRightWhile.js
+¦   ¦                       dropWhile.js
+¦   ¦                       each.js
+¦   ¦                       eachRight.js
+¦   ¦                       endsWith.js
+¦   ¦                       entries.js
+¦   ¦                       entriesIn.js
+¦   ¦                       eq.js
+¦   ¦                       equals.js
+¦   ¦                       escape.js
+¦   ¦                       escapeRegExp.js
+¦   ¦                       every.js
+¦   ¦                       extend.js
+¦   ¦                       extendAll.js
+¦   ¦                       extendAllWith.js
+¦   ¦                       extendWith.js
+¦   ¦                       F.js
+¦   ¦                       fill.js
+¦   ¦                       filter.js
+¦   ¦                       find.js
+¦   ¦                       findFrom.js
+¦   ¦                       findIndex.js
+¦   ¦                       findIndexFrom.js
+¦   ¦                       findKey.js
+¦   ¦                       findLast.js
+¦   ¦                       findLastFrom.js
+¦   ¦                       findLastIndex.js
+¦   ¦                       findLastIndexFrom.js
+¦   ¦                       findLastKey.js
+¦   ¦                       first.js
+¦   ¦                       flatMap.js
+¦   ¦                       flatMapDeep.js
+¦   ¦                       flatMapDepth.js
+¦   ¦                       flatten.js
+¦   ¦                       flattenDeep.js
+¦   ¦                       flattenDepth.js
+¦   ¦                       flip.js
+¦   ¦                       floor.js
+¦   ¦                       flow.js
+¦   ¦                       flowRight.js
+¦   ¦                       forEach.js
+¦   ¦                       forEachRight.js
+¦   ¦                       forIn.js
+¦   ¦                       forInRight.js
+¦   ¦                       forOwn.js
+¦   ¦                       forOwnRight.js
+¦   ¦                       fromPairs.js
+¦   ¦                       function.js
+¦   ¦                       functions.js
+¦   ¦                       functionsIn.js
+¦   ¦                       get.js
+¦   ¦                       getOr.js
+¦   ¦                       groupBy.js
+¦   ¦                       gt.js
+¦   ¦                       gte.js
+¦   ¦                       has.js
+¦   ¦                       hasIn.js
+¦   ¦                       head.js
+¦   ¦                       identical.js
+¦   ¦                       identity.js
+¦   ¦                       includes.js
+¦   ¦                       includesFrom.js
+¦   ¦                       indexBy.js
+¦   ¦                       indexOf.js
+¦   ¦                       indexOfFrom.js
+¦   ¦                       init.js
+¦   ¦                       initial.js
+¦   ¦                       inRange.js
+¦   ¦                       intersection.js
+¦   ¦                       intersectionBy.js
+¦   ¦                       intersectionWith.js
+¦   ¦                       invert.js
+¦   ¦                       invertBy.js
+¦   ¦                       invertObj.js
+¦   ¦                       invoke.js
+¦   ¦                       invokeArgs.js
+¦   ¦                       invokeArgsMap.js
+¦   ¦                       invokeMap.js
+¦   ¦                       isArguments.js
+¦   ¦                       isArray.js
+¦   ¦                       isArrayBuffer.js
+¦   ¦                       isArrayLike.js
+¦   ¦                       isArrayLikeObject.js
+¦   ¦                       isBoolean.js
+¦   ¦                       isBuffer.js
+¦   ¦                       isDate.js
+¦   ¦                       isElement.js
+¦   ¦                       isEmpty.js
+¦   ¦                       isEqual.js
+¦   ¦                       isEqualWith.js
+¦   ¦                       isError.js
+¦   ¦                       isFinite.js
+¦   ¦                       isFunction.js
+¦   ¦                       isInteger.js
+¦   ¦                       isLength.js
+¦   ¦                       isMap.js
+¦   ¦                       isMatch.js
+¦   ¦                       isMatchWith.js
+¦   ¦                       isNaN.js
+¦   ¦                       isNative.js
+¦   ¦                       isNil.js
+¦   ¦                       isNull.js
+¦   ¦                       isNumber.js
+¦   ¦                       isObject.js
+¦   ¦                       isObjectLike.js
+¦   ¦                       isPlainObject.js
+¦   ¦                       isRegExp.js
+¦   ¦                       isSafeInteger.js
+¦   ¦                       isSet.js
+¦   ¦                       isString.js
+¦   ¦                       isSymbol.js
+¦   ¦                       isTypedArray.js
+¦   ¦                       isUndefined.js
+¦   ¦                       isWeakMap.js
+¦   ¦                       isWeakSet.js
+¦   ¦                       iteratee.js
+¦   ¦                       join.js
+¦   ¦                       juxt.js
+¦   ¦                       kebabCase.js
+¦   ¦                       keyBy.js
+¦   ¦                       keys.js
+¦   ¦                       keysIn.js
+¦   ¦                       lang.js
+¦   ¦                       last.js
+¦   ¦                       lastIndexOf.js
+¦   ¦                       lastIndexOfFrom.js
+¦   ¦                       lowerCase.js
+¦   ¦                       lowerFirst.js
+¦   ¦                       lt.js
+¦   ¦                       lte.js
+¦   ¦                       map.js
+¦   ¦                       mapKeys.js
+¦   ¦                       mapValues.js
+¦   ¦                       matches.js
+¦   ¦                       matchesProperty.js
+¦   ¦                       math.js
+¦   ¦                       max.js
+¦   ¦                       maxBy.js
+¦   ¦                       mean.js
+¦   ¦                       meanBy.js
+¦   ¦                       memoize.js
+¦   ¦                       merge.js
+¦   ¦                       mergeAll.js
+¦   ¦                       mergeAllWith.js
+¦   ¦                       mergeWith.js
+¦   ¦                       method.js
+¦   ¦                       methodOf.js
+¦   ¦                       min.js
+¦   ¦                       minBy.js
+¦   ¦                       mixin.js
+¦   ¦                       multiply.js
+¦   ¦                       nAry.js
+¦   ¦                       negate.js
+¦   ¦                       next.js
+¦   ¦                       noop.js
+¦   ¦                       now.js
+¦   ¦                       nth.js
+¦   ¦                       nthArg.js
+¦   ¦                       number.js
+¦   ¦                       object.js
+¦   ¦                       omit.js
+¦   ¦                       omitAll.js
+¦   ¦                       omitBy.js
+¦   ¦                       once.js
+¦   ¦                       orderBy.js
+¦   ¦                       over.js
+¦   ¦                       overArgs.js
+¦   ¦                       overEvery.js
+¦   ¦                       overSome.js
+¦   ¦                       pad.js
+¦   ¦                       padChars.js
+¦   ¦                       padCharsEnd.js
+¦   ¦                       padCharsStart.js
+¦   ¦                       padEnd.js
+¦   ¦                       padStart.js
+¦   ¦                       parseInt.js
+¦   ¦                       partial.js
+¦   ¦                       partialRight.js
+¦   ¦                       partition.js
+¦   ¦                       path.js
+¦   ¦                       pathEq.js
+¦   ¦                       pathOr.js
+¦   ¦                       paths.js
+¦   ¦                       pick.js
+¦   ¦                       pickAll.js
+¦   ¦                       pickBy.js
+¦   ¦                       pipe.js
+¦   ¦                       placeholder.js
+¦   ¦                       plant.js
+¦   ¦                       pluck.js
+¦   ¦                       prop.js
+¦   ¦                       propEq.js
+¦   ¦                       property.js
+¦   ¦                       propertyOf.js
+¦   ¦                       propOr.js
+¦   ¦                       props.js
+¦   ¦                       pull.js
+¦   ¦                       pullAll.js
+¦   ¦                       pullAllBy.js
+¦   ¦                       pullAllWith.js
+¦   ¦                       pullAt.js
+¦   ¦                       random.js
+¦   ¦                       range.js
+¦   ¦                       rangeRight.js
+¦   ¦                       rangeStep.js
+¦   ¦                       rangeStepRight.js
+¦   ¦                       rearg.js
+¦   ¦                       reduce.js
+¦   ¦                       reduceRight.js
+¦   ¦                       reject.js
+¦   ¦                       remove.js
+¦   ¦                       repeat.js
+¦   ¦                       replace.js
+¦   ¦                       rest.js
+¦   ¦                       restFrom.js
+¦   ¦                       result.js
+¦   ¦                       reverse.js
+¦   ¦                       round.js
+¦   ¦                       sample.js
+¦   ¦                       sampleSize.js
+¦   ¦                       seq.js
+¦   ¦                       set.js
+¦   ¦                       setWith.js
+¦   ¦                       shuffle.js
+¦   ¦                       size.js
+¦   ¦                       slice.js
+¦   ¦                       snakeCase.js
+¦   ¦                       some.js
+¦   ¦                       sortBy.js
+¦   ¦                       sortedIndex.js
+¦   ¦                       sortedIndexBy.js
+¦   ¦                       sortedIndexOf.js
+¦   ¦                       sortedLastIndex.js
+¦   ¦                       sortedLastIndexBy.js
+¦   ¦                       sortedLastIndexOf.js
+¦   ¦                       sortedUniq.js
+¦   ¦                       sortedUniqBy.js
+¦   ¦                       split.js
+¦   ¦                       spread.js
+¦   ¦                       spreadFrom.js
+¦   ¦                       startCase.js
+¦   ¦                       startsWith.js
+¦   ¦                       string.js
+¦   ¦                       stubArray.js
+¦   ¦                       stubFalse.js
+¦   ¦                       stubObject.js
+¦   ¦                       stubString.js
+¦   ¦                       stubTrue.js
+¦   ¦                       subtract.js
+¦   ¦                       sum.js
+¦   ¦                       sumBy.js
+¦   ¦                       symmetricDifference.js
+¦   ¦                       symmetricDifferenceBy.js
+¦   ¦                       symmetricDifferenceWith.js
+¦   ¦                       T.js
+¦   ¦                       tail.js
+¦   ¦                       take.js
+¦   ¦                       takeLast.js
+¦   ¦                       takeLastWhile.js
+¦   ¦                       takeRight.js
+¦   ¦                       takeRightWhile.js
+¦   ¦                       takeWhile.js
+¦   ¦                       tap.js
+¦   ¦                       template.js
+¦   ¦                       templateSettings.js
+¦   ¦                       throttle.js
+¦   ¦                       thru.js
+¦   ¦                       times.js
+¦   ¦                       toArray.js
+¦   ¦                       toFinite.js
+¦   ¦                       toInteger.js
+¦   ¦                       toIterator.js
+¦   ¦                       toJSON.js
+¦   ¦                       toLength.js
+¦   ¦                       toLower.js
+¦   ¦                       toNumber.js
+¦   ¦                       toPairs.js
+¦   ¦                       toPairsIn.js
+¦   ¦                       toPath.js
+¦   ¦                       toPlainObject.js
+¦   ¦                       toSafeInteger.js
+¦   ¦                       toString.js
+¦   ¦                       toUpper.js
+¦   ¦                       transform.js
+¦   ¦                       trim.js
+¦   ¦                       trimChars.js
+¦   ¦                       trimCharsEnd.js
+¦   ¦                       trimCharsStart.js
+¦   ¦                       trimEnd.js
+¦   ¦                       trimStart.js
+¦   ¦                       truncate.js
+¦   ¦                       unapply.js
+¦   ¦                       unary.js
+¦   ¦                       unescape.js
+¦   ¦                       union.js
+¦   ¦                       unionBy.js
+¦   ¦                       unionWith.js
+¦   ¦                       uniq.js
+¦   ¦                       uniqBy.js
+¦   ¦                       uniqueId.js
+¦   ¦                       uniqWith.js
+¦   ¦                       unnest.js
+¦   ¦                       unset.js
+¦   ¦                       unzip.js
+¦   ¦                       unzipWith.js
+¦   ¦                       update.js
+¦   ¦                       updateWith.js
+¦   ¦                       upperCase.js
+¦   ¦                       upperFirst.js
+¦   ¦                       useWith.js
+¦   ¦                       util.js
+¦   ¦                       value.js
+¦   ¦                       valueOf.js
+¦   ¦                       values.js
+¦   ¦                       valuesIn.js
+¦   ¦                       where.js
+¦   ¦                       whereEq.js
+¦   ¦                       without.js
+¦   ¦                       words.js
+¦   ¦                       wrap.js
+¦   ¦                       wrapperAt.js
+¦   ¦                       wrapperChain.js
+¦   ¦                       wrapperLodash.js
+¦   ¦                       wrapperReverse.js
+¦   ¦                       wrapperValue.js
+¦   ¦                       xor.js
+¦   ¦                       xorBy.js
+¦   ¦                       xorWith.js
+¦   ¦                       zip.js
+¦   ¦                       zipAll.js
+¦   ¦                       zipObj.js
+¦   ¦                       zipObject.js
+¦   ¦                       zipObjectDeep.js
+¦   ¦                       zipWith.js
+¦   ¦                       _baseConvert.js
+¦   ¦                       _convertBrowser.js
+¦   ¦                       _falseOptions.js
+¦   ¦                       _mapping.js
+¦   ¦                       _util.js
+¦   ¦                       __.js
+¦   ¦                       
+¦   +---@isaacs
+¦   ¦   +---fs-minipass
+¦   ¦       ¦   LICENSE
+¦   ¦       ¦   package.json
+¦   ¦       ¦   README.md
+¦   ¦       ¦   
+¦   ¦       +---dist
+¦   ¦           +---commonjs
+¦   ¦           ¦       index.d.ts
+¦   ¦           ¦       index.d.ts.map
+¦   ¦           ¦       index.js
+¦   ¦           ¦       index.js.map
+¦   ¦           ¦       package.json
+¦   ¦           ¦       
+¦   ¦           +---esm
+¦   ¦                   index.d.ts
+¦   ¦                   index.d.ts.map
+¦   ¦                   index.js
+¦   ¦                   index.js.map
+¦   ¦                   package.json
+¦   ¦                   
 ¦   +---@supabase
 ¦   ¦   +---auth-js
 ¦   ¦   ¦   ¦   LICENSE
@@ -739,6 +2020,722 @@ C:.
 ¦   ¦                               rpc.ts
 ¦   ¦                               
 ¦   +---@types
+¦   ¦   +---lodash
+¦   ¦   ¦   ¦   add.d.ts
+¦   ¦   ¦   ¦   after.d.ts
+¦   ¦   ¦   ¦   ary.d.ts
+¦   ¦   ¦   ¦   assign.d.ts
+¦   ¦   ¦   ¦   assignIn.d.ts
+¦   ¦   ¦   ¦   assignInWith.d.ts
+¦   ¦   ¦   ¦   assignWith.d.ts
+¦   ¦   ¦   ¦   at.d.ts
+¦   ¦   ¦   ¦   attempt.d.ts
+¦   ¦   ¦   ¦   before.d.ts
+¦   ¦   ¦   ¦   bind.d.ts
+¦   ¦   ¦   ¦   bindAll.d.ts
+¦   ¦   ¦   ¦   bindKey.d.ts
+¦   ¦   ¦   ¦   camelCase.d.ts
+¦   ¦   ¦   ¦   capitalize.d.ts
+¦   ¦   ¦   ¦   castArray.d.ts
+¦   ¦   ¦   ¦   ceil.d.ts
+¦   ¦   ¦   ¦   chain.d.ts
+¦   ¦   ¦   ¦   chunk.d.ts
+¦   ¦   ¦   ¦   clamp.d.ts
+¦   ¦   ¦   ¦   clone.d.ts
+¦   ¦   ¦   ¦   cloneDeep.d.ts
+¦   ¦   ¦   ¦   cloneDeepWith.d.ts
+¦   ¦   ¦   ¦   cloneWith.d.ts
+¦   ¦   ¦   ¦   compact.d.ts
+¦   ¦   ¦   ¦   concat.d.ts
+¦   ¦   ¦   ¦   cond.d.ts
+¦   ¦   ¦   ¦   conformsTo.d.ts
+¦   ¦   ¦   ¦   constant.d.ts
+¦   ¦   ¦   ¦   countBy.d.ts
+¦   ¦   ¦   ¦   create.d.ts
+¦   ¦   ¦   ¦   curry.d.ts
+¦   ¦   ¦   ¦   curryRight.d.ts
+¦   ¦   ¦   ¦   debounce.d.ts
+¦   ¦   ¦   ¦   deburr.d.ts
+¦   ¦   ¦   ¦   defaults.d.ts
+¦   ¦   ¦   ¦   defaultsDeep.d.ts
+¦   ¦   ¦   ¦   defaultTo.d.ts
+¦   ¦   ¦   ¦   defer.d.ts
+¦   ¦   ¦   ¦   delay.d.ts
+¦   ¦   ¦   ¦   difference.d.ts
+¦   ¦   ¦   ¦   differenceBy.d.ts
+¦   ¦   ¦   ¦   differenceWith.d.ts
+¦   ¦   ¦   ¦   divide.d.ts
+¦   ¦   ¦   ¦   drop.d.ts
+¦   ¦   ¦   ¦   dropRight.d.ts
+¦   ¦   ¦   ¦   dropRightWhile.d.ts
+¦   ¦   ¦   ¦   dropWhile.d.ts
+¦   ¦   ¦   ¦   each.d.ts
+¦   ¦   ¦   ¦   eachRight.d.ts
+¦   ¦   ¦   ¦   endsWith.d.ts
+¦   ¦   ¦   ¦   entries.d.ts
+¦   ¦   ¦   ¦   entriesIn.d.ts
+¦   ¦   ¦   ¦   eq.d.ts
+¦   ¦   ¦   ¦   escape.d.ts
+¦   ¦   ¦   ¦   escapeRegExp.d.ts
+¦   ¦   ¦   ¦   every.d.ts
+¦   ¦   ¦   ¦   extend.d.ts
+¦   ¦   ¦   ¦   extendWith.d.ts
+¦   ¦   ¦   ¦   fill.d.ts
+¦   ¦   ¦   ¦   filter.d.ts
+¦   ¦   ¦   ¦   find.d.ts
+¦   ¦   ¦   ¦   findIndex.d.ts
+¦   ¦   ¦   ¦   findKey.d.ts
+¦   ¦   ¦   ¦   findLast.d.ts
+¦   ¦   ¦   ¦   findLastIndex.d.ts
+¦   ¦   ¦   ¦   findLastKey.d.ts
+¦   ¦   ¦   ¦   first.d.ts
+¦   ¦   ¦   ¦   flatMap.d.ts
+¦   ¦   ¦   ¦   flatMapDeep.d.ts
+¦   ¦   ¦   ¦   flatMapDepth.d.ts
+¦   ¦   ¦   ¦   flatten.d.ts
+¦   ¦   ¦   ¦   flattenDeep.d.ts
+¦   ¦   ¦   ¦   flattenDepth.d.ts
+¦   ¦   ¦   ¦   flip.d.ts
+¦   ¦   ¦   ¦   floor.d.ts
+¦   ¦   ¦   ¦   flow.d.ts
+¦   ¦   ¦   ¦   flowRight.d.ts
+¦   ¦   ¦   ¦   forEach.d.ts
+¦   ¦   ¦   ¦   forEachRight.d.ts
+¦   ¦   ¦   ¦   forIn.d.ts
+¦   ¦   ¦   ¦   forInRight.d.ts
+¦   ¦   ¦   ¦   forOwn.d.ts
+¦   ¦   ¦   ¦   forOwnRight.d.ts
+¦   ¦   ¦   ¦   fp.d.ts
+¦   ¦   ¦   ¦   fromPairs.d.ts
+¦   ¦   ¦   ¦   functions.d.ts
+¦   ¦   ¦   ¦   functionsIn.d.ts
+¦   ¦   ¦   ¦   get.d.ts
+¦   ¦   ¦   ¦   groupBy.d.ts
+¦   ¦   ¦   ¦   gt.d.ts
+¦   ¦   ¦   ¦   gte.d.ts
+¦   ¦   ¦   ¦   has.d.ts
+¦   ¦   ¦   ¦   hasIn.d.ts
+¦   ¦   ¦   ¦   head.d.ts
+¦   ¦   ¦   ¦   identity.d.ts
+¦   ¦   ¦   ¦   includes.d.ts
+¦   ¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   ¦   indexOf.d.ts
+¦   ¦   ¦   ¦   initial.d.ts
+¦   ¦   ¦   ¦   inRange.d.ts
+¦   ¦   ¦   ¦   intersection.d.ts
+¦   ¦   ¦   ¦   intersectionBy.d.ts
+¦   ¦   ¦   ¦   intersectionWith.d.ts
+¦   ¦   ¦   ¦   invert.d.ts
+¦   ¦   ¦   ¦   invertBy.d.ts
+¦   ¦   ¦   ¦   invoke.d.ts
+¦   ¦   ¦   ¦   invokeMap.d.ts
+¦   ¦   ¦   ¦   isArguments.d.ts
+¦   ¦   ¦   ¦   isArray.d.ts
+¦   ¦   ¦   ¦   isArrayBuffer.d.ts
+¦   ¦   ¦   ¦   isArrayLike.d.ts
+¦   ¦   ¦   ¦   isArrayLikeObject.d.ts
+¦   ¦   ¦   ¦   isBoolean.d.ts
+¦   ¦   ¦   ¦   isBuffer.d.ts
+¦   ¦   ¦   ¦   isDate.d.ts
+¦   ¦   ¦   ¦   isElement.d.ts
+¦   ¦   ¦   ¦   isEmpty.d.ts
+¦   ¦   ¦   ¦   isEqual.d.ts
+¦   ¦   ¦   ¦   isEqualWith.d.ts
+¦   ¦   ¦   ¦   isError.d.ts
+¦   ¦   ¦   ¦   isFinite.d.ts
+¦   ¦   ¦   ¦   isFunction.d.ts
+¦   ¦   ¦   ¦   isInteger.d.ts
+¦   ¦   ¦   ¦   isLength.d.ts
+¦   ¦   ¦   ¦   isMap.d.ts
+¦   ¦   ¦   ¦   isMatch.d.ts
+¦   ¦   ¦   ¦   isMatchWith.d.ts
+¦   ¦   ¦   ¦   isNaN.d.ts
+¦   ¦   ¦   ¦   isNative.d.ts
+¦   ¦   ¦   ¦   isNil.d.ts
+¦   ¦   ¦   ¦   isNull.d.ts
+¦   ¦   ¦   ¦   isNumber.d.ts
+¦   ¦   ¦   ¦   isObject.d.ts
+¦   ¦   ¦   ¦   isObjectLike.d.ts
+¦   ¦   ¦   ¦   isPlainObject.d.ts
+¦   ¦   ¦   ¦   isRegExp.d.ts
+¦   ¦   ¦   ¦   isSafeInteger.d.ts
+¦   ¦   ¦   ¦   isSet.d.ts
+¦   ¦   ¦   ¦   isString.d.ts
+¦   ¦   ¦   ¦   isSymbol.d.ts
+¦   ¦   ¦   ¦   isTypedArray.d.ts
+¦   ¦   ¦   ¦   isUndefined.d.ts
+¦   ¦   ¦   ¦   isWeakMap.d.ts
+¦   ¦   ¦   ¦   isWeakSet.d.ts
+¦   ¦   ¦   ¦   iteratee.d.ts
+¦   ¦   ¦   ¦   join.d.ts
+¦   ¦   ¦   ¦   kebabCase.d.ts
+¦   ¦   ¦   ¦   keyBy.d.ts
+¦   ¦   ¦   ¦   keys.d.ts
+¦   ¦   ¦   ¦   keysIn.d.ts
+¦   ¦   ¦   ¦   last.d.ts
+¦   ¦   ¦   ¦   lastIndexOf.d.ts
+¦   ¦   ¦   ¦   LICENSE
+¦   ¦   ¦   ¦   lowerCase.d.ts
+¦   ¦   ¦   ¦   lowerFirst.d.ts
+¦   ¦   ¦   ¦   lt.d.ts
+¦   ¦   ¦   ¦   lte.d.ts
+¦   ¦   ¦   ¦   map.d.ts
+¦   ¦   ¦   ¦   mapKeys.d.ts
+¦   ¦   ¦   ¦   mapValues.d.ts
+¦   ¦   ¦   ¦   matches.d.ts
+¦   ¦   ¦   ¦   matchesProperty.d.ts
+¦   ¦   ¦   ¦   max.d.ts
+¦   ¦   ¦   ¦   maxBy.d.ts
+¦   ¦   ¦   ¦   mean.d.ts
+¦   ¦   ¦   ¦   meanBy.d.ts
+¦   ¦   ¦   ¦   memoize.d.ts
+¦   ¦   ¦   ¦   merge.d.ts
+¦   ¦   ¦   ¦   mergeWith.d.ts
+¦   ¦   ¦   ¦   method.d.ts
+¦   ¦   ¦   ¦   methodOf.d.ts
+¦   ¦   ¦   ¦   min.d.ts
+¦   ¦   ¦   ¦   minBy.d.ts
+¦   ¦   ¦   ¦   mixin.d.ts
+¦   ¦   ¦   ¦   multiply.d.ts
+¦   ¦   ¦   ¦   negate.d.ts
+¦   ¦   ¦   ¦   noConflict.d.ts
+¦   ¦   ¦   ¦   noop.d.ts
+¦   ¦   ¦   ¦   now.d.ts
+¦   ¦   ¦   ¦   nth.d.ts
+¦   ¦   ¦   ¦   nthArg.d.ts
+¦   ¦   ¦   ¦   omit.d.ts
+¦   ¦   ¦   ¦   omitBy.d.ts
+¦   ¦   ¦   ¦   once.d.ts
+¦   ¦   ¦   ¦   orderBy.d.ts
+¦   ¦   ¦   ¦   over.d.ts
+¦   ¦   ¦   ¦   overArgs.d.ts
+¦   ¦   ¦   ¦   overEvery.d.ts
+¦   ¦   ¦   ¦   overSome.d.ts
+¦   ¦   ¦   ¦   package.json
+¦   ¦   ¦   ¦   pad.d.ts
+¦   ¦   ¦   ¦   padEnd.d.ts
+¦   ¦   ¦   ¦   padStart.d.ts
+¦   ¦   ¦   ¦   parseInt.d.ts
+¦   ¦   ¦   ¦   partial.d.ts
+¦   ¦   ¦   ¦   partialRight.d.ts
+¦   ¦   ¦   ¦   partition.d.ts
+¦   ¦   ¦   ¦   pick.d.ts
+¦   ¦   ¦   ¦   pickBy.d.ts
+¦   ¦   ¦   ¦   property.d.ts
+¦   ¦   ¦   ¦   propertyOf.d.ts
+¦   ¦   ¦   ¦   pull.d.ts
+¦   ¦   ¦   ¦   pullAll.d.ts
+¦   ¦   ¦   ¦   pullAllBy.d.ts
+¦   ¦   ¦   ¦   pullAllWith.d.ts
+¦   ¦   ¦   ¦   pullAt.d.ts
+¦   ¦   ¦   ¦   random.d.ts
+¦   ¦   ¦   ¦   range.d.ts
+¦   ¦   ¦   ¦   rangeRight.d.ts
+¦   ¦   ¦   ¦   README.md
+¦   ¦   ¦   ¦   rearg.d.ts
+¦   ¦   ¦   ¦   reduce.d.ts
+¦   ¦   ¦   ¦   reduceRight.d.ts
+¦   ¦   ¦   ¦   reject.d.ts
+¦   ¦   ¦   ¦   remove.d.ts
+¦   ¦   ¦   ¦   repeat.d.ts
+¦   ¦   ¦   ¦   replace.d.ts
+¦   ¦   ¦   ¦   rest.d.ts
+¦   ¦   ¦   ¦   result.d.ts
+¦   ¦   ¦   ¦   reverse.d.ts
+¦   ¦   ¦   ¦   round.d.ts
+¦   ¦   ¦   ¦   runInContext.d.ts
+¦   ¦   ¦   ¦   sample.d.ts
+¦   ¦   ¦   ¦   sampleSize.d.ts
+¦   ¦   ¦   ¦   set.d.ts
+¦   ¦   ¦   ¦   setWith.d.ts
+¦   ¦   ¦   ¦   shuffle.d.ts
+¦   ¦   ¦   ¦   size.d.ts
+¦   ¦   ¦   ¦   slice.d.ts
+¦   ¦   ¦   ¦   snakeCase.d.ts
+¦   ¦   ¦   ¦   some.d.ts
+¦   ¦   ¦   ¦   sortBy.d.ts
+¦   ¦   ¦   ¦   sortedIndex.d.ts
+¦   ¦   ¦   ¦   sortedIndexBy.d.ts
+¦   ¦   ¦   ¦   sortedIndexOf.d.ts
+¦   ¦   ¦   ¦   sortedLastIndex.d.ts
+¦   ¦   ¦   ¦   sortedLastIndexBy.d.ts
+¦   ¦   ¦   ¦   sortedLastIndexOf.d.ts
+¦   ¦   ¦   ¦   sortedUniq.d.ts
+¦   ¦   ¦   ¦   sortedUniqBy.d.ts
+¦   ¦   ¦   ¦   split.d.ts
+¦   ¦   ¦   ¦   spread.d.ts
+¦   ¦   ¦   ¦   startCase.d.ts
+¦   ¦   ¦   ¦   startsWith.d.ts
+¦   ¦   ¦   ¦   stubFalse.d.ts
+¦   ¦   ¦   ¦   stubTrue.d.ts
+¦   ¦   ¦   ¦   subtract.d.ts
+¦   ¦   ¦   ¦   sum.d.ts
+¦   ¦   ¦   ¦   sumBy.d.ts
+¦   ¦   ¦   ¦   tail.d.ts
+¦   ¦   ¦   ¦   take.d.ts
+¦   ¦   ¦   ¦   takeRight.d.ts
+¦   ¦   ¦   ¦   takeRightWhile.d.ts
+¦   ¦   ¦   ¦   takeWhile.d.ts
+¦   ¦   ¦   ¦   tap.d.ts
+¦   ¦   ¦   ¦   template.d.ts
+¦   ¦   ¦   ¦   throttle.d.ts
+¦   ¦   ¦   ¦   thru.d.ts
+¦   ¦   ¦   ¦   times.d.ts
+¦   ¦   ¦   ¦   toArray.d.ts
+¦   ¦   ¦   ¦   toFinite.d.ts
+¦   ¦   ¦   ¦   toInteger.d.ts
+¦   ¦   ¦   ¦   toLength.d.ts
+¦   ¦   ¦   ¦   toLower.d.ts
+¦   ¦   ¦   ¦   toNumber.d.ts
+¦   ¦   ¦   ¦   toPairs.d.ts
+¦   ¦   ¦   ¦   toPairsIn.d.ts
+¦   ¦   ¦   ¦   toPath.d.ts
+¦   ¦   ¦   ¦   toPlainObject.d.ts
+¦   ¦   ¦   ¦   toSafeInteger.d.ts
+¦   ¦   ¦   ¦   toString.d.ts
+¦   ¦   ¦   ¦   toUpper.d.ts
+¦   ¦   ¦   ¦   transform.d.ts
+¦   ¦   ¦   ¦   trim.d.ts
+¦   ¦   ¦   ¦   trimEnd.d.ts
+¦   ¦   ¦   ¦   trimStart.d.ts
+¦   ¦   ¦   ¦   truncate.d.ts
+¦   ¦   ¦   ¦   unary.d.ts
+¦   ¦   ¦   ¦   unescape.d.ts
+¦   ¦   ¦   ¦   union.d.ts
+¦   ¦   ¦   ¦   unionBy.d.ts
+¦   ¦   ¦   ¦   unionWith.d.ts
+¦   ¦   ¦   ¦   uniq.d.ts
+¦   ¦   ¦   ¦   uniqBy.d.ts
+¦   ¦   ¦   ¦   uniqueId.d.ts
+¦   ¦   ¦   ¦   uniqWith.d.ts
+¦   ¦   ¦   ¦   unset.d.ts
+¦   ¦   ¦   ¦   unzip.d.ts
+¦   ¦   ¦   ¦   unzipWith.d.ts
+¦   ¦   ¦   ¦   update.d.ts
+¦   ¦   ¦   ¦   updateWith.d.ts
+¦   ¦   ¦   ¦   upperCase.d.ts
+¦   ¦   ¦   ¦   upperFirst.d.ts
+¦   ¦   ¦   ¦   values.d.ts
+¦   ¦   ¦   ¦   valuesIn.d.ts
+¦   ¦   ¦   ¦   without.d.ts
+¦   ¦   ¦   ¦   words.d.ts
+¦   ¦   ¦   ¦   wrap.d.ts
+¦   ¦   ¦   ¦   xor.d.ts
+¦   ¦   ¦   ¦   xorBy.d.ts
+¦   ¦   ¦   ¦   xorWith.d.ts
+¦   ¦   ¦   ¦   zip.d.ts
+¦   ¦   ¦   ¦   zipObject.d.ts
+¦   ¦   ¦   ¦   zipObjectDeep.d.ts
+¦   ¦   ¦   ¦   zipWith.d.ts
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---common
+¦   ¦   ¦   ¦       array.d.ts
+¦   ¦   ¦   ¦       collection.d.ts
+¦   ¦   ¦   ¦       common.d.ts
+¦   ¦   ¦   ¦       date.d.ts
+¦   ¦   ¦   ¦       function.d.ts
+¦   ¦   ¦   ¦       lang.d.ts
+¦   ¦   ¦   ¦       math.d.ts
+¦   ¦   ¦   ¦       number.d.ts
+¦   ¦   ¦   ¦       object.d.ts
+¦   ¦   ¦   ¦       seq.d.ts
+¦   ¦   ¦   ¦       string.d.ts
+¦   ¦   ¦   ¦       util.d.ts
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---fp
+¦   ¦   ¦           add.d.ts
+¦   ¦   ¦           after.d.ts
+¦   ¦   ¦           all.d.ts
+¦   ¦   ¦           allPass.d.ts
+¦   ¦   ¦           always.d.ts
+¦   ¦   ¦           any.d.ts
+¦   ¦   ¦           anyPass.d.ts
+¦   ¦   ¦           apply.d.ts
+¦   ¦   ¦           ary.d.ts
+¦   ¦   ¦           assign.d.ts
+¦   ¦   ¦           assignAll.d.ts
+¦   ¦   ¦           assignAllWith.d.ts
+¦   ¦   ¦           assignIn.d.ts
+¦   ¦   ¦           assignInAll.d.ts
+¦   ¦   ¦           assignInAllWith.d.ts
+¦   ¦   ¦           assignInWith.d.ts
+¦   ¦   ¦           assignWith.d.ts
+¦   ¦   ¦           assoc.d.ts
+¦   ¦   ¦           assocPath.d.ts
+¦   ¦   ¦           at.d.ts
+¦   ¦   ¦           attempt.d.ts
+¦   ¦   ¦           before.d.ts
+¦   ¦   ¦           bind.d.ts
+¦   ¦   ¦           bindAll.d.ts
+¦   ¦   ¦           bindKey.d.ts
+¦   ¦   ¦           camelCase.d.ts
+¦   ¦   ¦           capitalize.d.ts
+¦   ¦   ¦           castArray.d.ts
+¦   ¦   ¦           ceil.d.ts
+¦   ¦   ¦           chunk.d.ts
+¦   ¦   ¦           clamp.d.ts
+¦   ¦   ¦           clone.d.ts
+¦   ¦   ¦           cloneDeep.d.ts
+¦   ¦   ¦           cloneDeepWith.d.ts
+¦   ¦   ¦           cloneWith.d.ts
+¦   ¦   ¦           compact.d.ts
+¦   ¦   ¦           complement.d.ts
+¦   ¦   ¦           compose.d.ts
+¦   ¦   ¦           concat.d.ts
+¦   ¦   ¦           cond.d.ts
+¦   ¦   ¦           conforms.d.ts
+¦   ¦   ¦           conformsTo.d.ts
+¦   ¦   ¦           constant.d.ts
+¦   ¦   ¦           contains.d.ts
+¦   ¦   ¦           convert.d.ts
+¦   ¦   ¦           countBy.d.ts
+¦   ¦   ¦           create.d.ts
+¦   ¦   ¦           curry.d.ts
+¦   ¦   ¦           curryN.d.ts
+¦   ¦   ¦           curryRight.d.ts
+¦   ¦   ¦           curryRightN.d.ts
+¦   ¦   ¦           debounce.d.ts
+¦   ¦   ¦           deburr.d.ts
+¦   ¦   ¦           defaults.d.ts
+¦   ¦   ¦           defaultsAll.d.ts
+¦   ¦   ¦           defaultsDeep.d.ts
+¦   ¦   ¦           defaultsDeepAll.d.ts
+¦   ¦   ¦           defaultTo.d.ts
+¦   ¦   ¦           defer.d.ts
+¦   ¦   ¦           delay.d.ts
+¦   ¦   ¦           difference.d.ts
+¦   ¦   ¦           differenceBy.d.ts
+¦   ¦   ¦           differenceWith.d.ts
+¦   ¦   ¦           dissoc.d.ts
+¦   ¦   ¦           dissocPath.d.ts
+¦   ¦   ¦           divide.d.ts
+¦   ¦   ¦           drop.d.ts
+¦   ¦   ¦           dropLast.d.ts
+¦   ¦   ¦           dropLastWhile.d.ts
+¦   ¦   ¦           dropRight.d.ts
+¦   ¦   ¦           dropRightWhile.d.ts
+¦   ¦   ¦           dropWhile.d.ts
+¦   ¦   ¦           each.d.ts
+¦   ¦   ¦           eachRight.d.ts
+¦   ¦   ¦           endsWith.d.ts
+¦   ¦   ¦           entries.d.ts
+¦   ¦   ¦           entriesIn.d.ts
+¦   ¦   ¦           eq.d.ts
+¦   ¦   ¦           equals.d.ts
+¦   ¦   ¦           escape.d.ts
+¦   ¦   ¦           escapeRegExp.d.ts
+¦   ¦   ¦           every.d.ts
+¦   ¦   ¦           extend.d.ts
+¦   ¦   ¦           extendAll.d.ts
+¦   ¦   ¦           extendAllWith.d.ts
+¦   ¦   ¦           extendWith.d.ts
+¦   ¦   ¦           F.d.ts
+¦   ¦   ¦           fill.d.ts
+¦   ¦   ¦           filter.d.ts
+¦   ¦   ¦           find.d.ts
+¦   ¦   ¦           findFrom.d.ts
+¦   ¦   ¦           findIndex.d.ts
+¦   ¦   ¦           findIndexFrom.d.ts
+¦   ¦   ¦           findKey.d.ts
+¦   ¦   ¦           findLast.d.ts
+¦   ¦   ¦           findLastFrom.d.ts
+¦   ¦   ¦           findLastIndex.d.ts
+¦   ¦   ¦           findLastIndexFrom.d.ts
+¦   ¦   ¦           findLastKey.d.ts
+¦   ¦   ¦           first.d.ts
+¦   ¦   ¦           flatMap.d.ts
+¦   ¦   ¦           flatMapDeep.d.ts
+¦   ¦   ¦           flatMapDepth.d.ts
+¦   ¦   ¦           flatten.d.ts
+¦   ¦   ¦           flattenDeep.d.ts
+¦   ¦   ¦           flattenDepth.d.ts
+¦   ¦   ¦           flip.d.ts
+¦   ¦   ¦           floor.d.ts
+¦   ¦   ¦           flow.d.ts
+¦   ¦   ¦           flowRight.d.ts
+¦   ¦   ¦           forEach.d.ts
+¦   ¦   ¦           forEachRight.d.ts
+¦   ¦   ¦           forIn.d.ts
+¦   ¦   ¦           forInRight.d.ts
+¦   ¦   ¦           forOwn.d.ts
+¦   ¦   ¦           forOwnRight.d.ts
+¦   ¦   ¦           fromPairs.d.ts
+¦   ¦   ¦           functions.d.ts
+¦   ¦   ¦           functionsIn.d.ts
+¦   ¦   ¦           get.d.ts
+¦   ¦   ¦           getOr.d.ts
+¦   ¦   ¦           groupBy.d.ts
+¦   ¦   ¦           gt.d.ts
+¦   ¦   ¦           gte.d.ts
+¦   ¦   ¦           has.d.ts
+¦   ¦   ¦           hasIn.d.ts
+¦   ¦   ¦           head.d.ts
+¦   ¦   ¦           identical.d.ts
+¦   ¦   ¦           identity.d.ts
+¦   ¦   ¦           includes.d.ts
+¦   ¦   ¦           includesFrom.d.ts
+¦   ¦   ¦           indexBy.d.ts
+¦   ¦   ¦           indexOf.d.ts
+¦   ¦   ¦           indexOfFrom.d.ts
+¦   ¦   ¦           init.d.ts
+¦   ¦   ¦           initial.d.ts
+¦   ¦   ¦           inRange.d.ts
+¦   ¦   ¦           intersection.d.ts
+¦   ¦   ¦           intersectionBy.d.ts
+¦   ¦   ¦           intersectionWith.d.ts
+¦   ¦   ¦           invert.d.ts
+¦   ¦   ¦           invertBy.d.ts
+¦   ¦   ¦           invertObj.d.ts
+¦   ¦   ¦           invoke.d.ts
+¦   ¦   ¦           invokeArgs.d.ts
+¦   ¦   ¦           invokeArgsMap.d.ts
+¦   ¦   ¦           invokeMap.d.ts
+¦   ¦   ¦           isArguments.d.ts
+¦   ¦   ¦           isArray.d.ts
+¦   ¦   ¦           isArrayBuffer.d.ts
+¦   ¦   ¦           isArrayLike.d.ts
+¦   ¦   ¦           isArrayLikeObject.d.ts
+¦   ¦   ¦           isBoolean.d.ts
+¦   ¦   ¦           isBuffer.d.ts
+¦   ¦   ¦           isDate.d.ts
+¦   ¦   ¦           isElement.d.ts
+¦   ¦   ¦           isEmpty.d.ts
+¦   ¦   ¦           isEqual.d.ts
+¦   ¦   ¦           isEqualWith.d.ts
+¦   ¦   ¦           isError.d.ts
+¦   ¦   ¦           isFinite.d.ts
+¦   ¦   ¦           isFunction.d.ts
+¦   ¦   ¦           isInteger.d.ts
+¦   ¦   ¦           isLength.d.ts
+¦   ¦   ¦           isMap.d.ts
+¦   ¦   ¦           isMatch.d.ts
+¦   ¦   ¦           isMatchWith.d.ts
+¦   ¦   ¦           isNaN.d.ts
+¦   ¦   ¦           isNative.d.ts
+¦   ¦   ¦           isNil.d.ts
+¦   ¦   ¦           isNull.d.ts
+¦   ¦   ¦           isNumber.d.ts
+¦   ¦   ¦           isObject.d.ts
+¦   ¦   ¦           isObjectLike.d.ts
+¦   ¦   ¦           isPlainObject.d.ts
+¦   ¦   ¦           isRegExp.d.ts
+¦   ¦   ¦           isSafeInteger.d.ts
+¦   ¦   ¦           isSet.d.ts
+¦   ¦   ¦           isString.d.ts
+¦   ¦   ¦           isSymbol.d.ts
+¦   ¦   ¦           isTypedArray.d.ts
+¦   ¦   ¦           isUndefined.d.ts
+¦   ¦   ¦           isWeakMap.d.ts
+¦   ¦   ¦           isWeakSet.d.ts
+¦   ¦   ¦           iteratee.d.ts
+¦   ¦   ¦           join.d.ts
+¦   ¦   ¦           juxt.d.ts
+¦   ¦   ¦           kebabCase.d.ts
+¦   ¦   ¦           keyBy.d.ts
+¦   ¦   ¦           keys.d.ts
+¦   ¦   ¦           keysIn.d.ts
+¦   ¦   ¦           last.d.ts
+¦   ¦   ¦           lastIndexOf.d.ts
+¦   ¦   ¦           lastIndexOfFrom.d.ts
+¦   ¦   ¦           lowerCase.d.ts
+¦   ¦   ¦           lowerFirst.d.ts
+¦   ¦   ¦           lt.d.ts
+¦   ¦   ¦           lte.d.ts
+¦   ¦   ¦           map.d.ts
+¦   ¦   ¦           mapKeys.d.ts
+¦   ¦   ¦           mapValues.d.ts
+¦   ¦   ¦           matches.d.ts
+¦   ¦   ¦           matchesProperty.d.ts
+¦   ¦   ¦           max.d.ts
+¦   ¦   ¦           maxBy.d.ts
+¦   ¦   ¦           mean.d.ts
+¦   ¦   ¦           meanBy.d.ts
+¦   ¦   ¦           memoize.d.ts
+¦   ¦   ¦           merge.d.ts
+¦   ¦   ¦           mergeAll.d.ts
+¦   ¦   ¦           mergeAllWith.d.ts
+¦   ¦   ¦           mergeWith.d.ts
+¦   ¦   ¦           method.d.ts
+¦   ¦   ¦           methodOf.d.ts
+¦   ¦   ¦           min.d.ts
+¦   ¦   ¦           minBy.d.ts
+¦   ¦   ¦           multiply.d.ts
+¦   ¦   ¦           nAry.d.ts
+¦   ¦   ¦           negate.d.ts
+¦   ¦   ¦           noConflict.d.ts
+¦   ¦   ¦           noop.d.ts
+¦   ¦   ¦           now.d.ts
+¦   ¦   ¦           nth.d.ts
+¦   ¦   ¦           nthArg.d.ts
+¦   ¦   ¦           omit.d.ts
+¦   ¦   ¦           omitAll.d.ts
+¦   ¦   ¦           omitBy.d.ts
+¦   ¦   ¦           once.d.ts
+¦   ¦   ¦           orderBy.d.ts
+¦   ¦   ¦           over.d.ts
+¦   ¦   ¦           overArgs.d.ts
+¦   ¦   ¦           overEvery.d.ts
+¦   ¦   ¦           overSome.d.ts
+¦   ¦   ¦           pad.d.ts
+¦   ¦   ¦           padChars.d.ts
+¦   ¦   ¦           padCharsEnd.d.ts
+¦   ¦   ¦           padCharsStart.d.ts
+¦   ¦   ¦           padEnd.d.ts
+¦   ¦   ¦           padStart.d.ts
+¦   ¦   ¦           parseInt.d.ts
+¦   ¦   ¦           partial.d.ts
+¦   ¦   ¦           partialRight.d.ts
+¦   ¦   ¦           partition.d.ts
+¦   ¦   ¦           path.d.ts
+¦   ¦   ¦           pathEq.d.ts
+¦   ¦   ¦           pathOr.d.ts
+¦   ¦   ¦           paths.d.ts
+¦   ¦   ¦           pick.d.ts
+¦   ¦   ¦           pickAll.d.ts
+¦   ¦   ¦           pickBy.d.ts
+¦   ¦   ¦           pipe.d.ts
+¦   ¦   ¦           placeholder.d.ts
+¦   ¦   ¦           pluck.d.ts
+¦   ¦   ¦           prop.d.ts
+¦   ¦   ¦           propEq.d.ts
+¦   ¦   ¦           property.d.ts
+¦   ¦   ¦           propertyOf.d.ts
+¦   ¦   ¦           propOr.d.ts
+¦   ¦   ¦           props.d.ts
+¦   ¦   ¦           pull.d.ts
+¦   ¦   ¦           pullAll.d.ts
+¦   ¦   ¦           pullAllBy.d.ts
+¦   ¦   ¦           pullAllWith.d.ts
+¦   ¦   ¦           pullAt.d.ts
+¦   ¦   ¦           random.d.ts
+¦   ¦   ¦           range.d.ts
+¦   ¦   ¦           rangeRight.d.ts
+¦   ¦   ¦           rangeStep.d.ts
+¦   ¦   ¦           rangeStepRight.d.ts
+¦   ¦   ¦           rearg.d.ts
+¦   ¦   ¦           reduce.d.ts
+¦   ¦   ¦           reduceRight.d.ts
+¦   ¦   ¦           reject.d.ts
+¦   ¦   ¦           remove.d.ts
+¦   ¦   ¦           repeat.d.ts
+¦   ¦   ¦           replace.d.ts
+¦   ¦   ¦           rest.d.ts
+¦   ¦   ¦           restFrom.d.ts
+¦   ¦   ¦           result.d.ts
+¦   ¦   ¦           reverse.d.ts
+¦   ¦   ¦           round.d.ts
+¦   ¦   ¦           runInContext.d.ts
+¦   ¦   ¦           sample.d.ts
+¦   ¦   ¦           sampleSize.d.ts
+¦   ¦   ¦           set.d.ts
+¦   ¦   ¦           setWith.d.ts
+¦   ¦   ¦           shuffle.d.ts
+¦   ¦   ¦           size.d.ts
+¦   ¦   ¦           slice.d.ts
+¦   ¦   ¦           snakeCase.d.ts
+¦   ¦   ¦           some.d.ts
+¦   ¦   ¦           sortBy.d.ts
+¦   ¦   ¦           sortedIndex.d.ts
+¦   ¦   ¦           sortedIndexBy.d.ts
+¦   ¦   ¦           sortedIndexOf.d.ts
+¦   ¦   ¦           sortedLastIndex.d.ts
+¦   ¦   ¦           sortedLastIndexBy.d.ts
+¦   ¦   ¦           sortedLastIndexOf.d.ts
+¦   ¦   ¦           sortedUniq.d.ts
+¦   ¦   ¦           sortedUniqBy.d.ts
+¦   ¦   ¦           split.d.ts
+¦   ¦   ¦           spread.d.ts
+¦   ¦   ¦           spreadFrom.d.ts
+¦   ¦   ¦           startCase.d.ts
+¦   ¦   ¦           startsWith.d.ts
+¦   ¦   ¦           stubArray.d.ts
+¦   ¦   ¦           stubFalse.d.ts
+¦   ¦   ¦           stubObject.d.ts
+¦   ¦   ¦           stubString.d.ts
+¦   ¦   ¦           stubTrue.d.ts
+¦   ¦   ¦           subtract.d.ts
+¦   ¦   ¦           sum.d.ts
+¦   ¦   ¦           sumBy.d.ts
+¦   ¦   ¦           symmetricDifference.d.ts
+¦   ¦   ¦           symmetricDifferenceBy.d.ts
+¦   ¦   ¦           symmetricDifferenceWith.d.ts
+¦   ¦   ¦           T.d.ts
+¦   ¦   ¦           tail.d.ts
+¦   ¦   ¦           take.d.ts
+¦   ¦   ¦           takeLast.d.ts
+¦   ¦   ¦           takeLastWhile.d.ts
+¦   ¦   ¦           takeRight.d.ts
+¦   ¦   ¦           takeRightWhile.d.ts
+¦   ¦   ¦           takeWhile.d.ts
+¦   ¦   ¦           tap.d.ts
+¦   ¦   ¦           template.d.ts
+¦   ¦   ¦           throttle.d.ts
+¦   ¦   ¦           thru.d.ts
+¦   ¦   ¦           times.d.ts
+¦   ¦   ¦           toArray.d.ts
+¦   ¦   ¦           toFinite.d.ts
+¦   ¦   ¦           toInteger.d.ts
+¦   ¦   ¦           toLength.d.ts
+¦   ¦   ¦           toLower.d.ts
+¦   ¦   ¦           toNumber.d.ts
+¦   ¦   ¦           toPairs.d.ts
+¦   ¦   ¦           toPairsIn.d.ts
+¦   ¦   ¦           toPath.d.ts
+¦   ¦   ¦           toPlainObject.d.ts
+¦   ¦   ¦           toSafeInteger.d.ts
+¦   ¦   ¦           toString.d.ts
+¦   ¦   ¦           toUpper.d.ts
+¦   ¦   ¦           transform.d.ts
+¦   ¦   ¦           trim.d.ts
+¦   ¦   ¦           trimChars.d.ts
+¦   ¦   ¦           trimCharsEnd.d.ts
+¦   ¦   ¦           trimCharsStart.d.ts
+¦   ¦   ¦           trimEnd.d.ts
+¦   ¦   ¦           trimStart.d.ts
+¦   ¦   ¦           truncate.d.ts
+¦   ¦   ¦           unapply.d.ts
+¦   ¦   ¦           unary.d.ts
+¦   ¦   ¦           unescape.d.ts
+¦   ¦   ¦           union.d.ts
+¦   ¦   ¦           unionBy.d.ts
+¦   ¦   ¦           unionWith.d.ts
+¦   ¦   ¦           uniq.d.ts
+¦   ¦   ¦           uniqBy.d.ts
+¦   ¦   ¦           uniqueId.d.ts
+¦   ¦   ¦           uniqWith.d.ts
+¦   ¦   ¦           unnest.d.ts
+¦   ¦   ¦           unset.d.ts
+¦   ¦   ¦           unzip.d.ts
+¦   ¦   ¦           unzipWith.d.ts
+¦   ¦   ¦           update.d.ts
+¦   ¦   ¦           updateWith.d.ts
+¦   ¦   ¦           upperCase.d.ts
+¦   ¦   ¦           upperFirst.d.ts
+¦   ¦   ¦           useWith.d.ts
+¦   ¦   ¦           values.d.ts
+¦   ¦   ¦           valuesIn.d.ts
+¦   ¦   ¦           where.d.ts
+¦   ¦   ¦           whereEq.d.ts
+¦   ¦   ¦           without.d.ts
+¦   ¦   ¦           words.d.ts
+¦   ¦   ¦           wrap.d.ts
+¦   ¦   ¦           xor.d.ts
+¦   ¦   ¦           xorBy.d.ts
+¦   ¦   ¦           xorWith.d.ts
+¦   ¦   ¦           zip.d.ts
+¦   ¦   ¦           zipAll.d.ts
+¦   ¦   ¦           zipObj.d.ts
+¦   ¦   ¦           zipObject.d.ts
+¦   ¦   ¦           zipObjectDeep.d.ts
+¦   ¦   ¦           zipWith.d.ts
+¦   ¦   ¦           __.d.ts
+¦   ¦   ¦           
+¦   ¦   +---ndarray
+¦   ¦   ¦       index.d.ts
+¦   ¦   ¦       LICENSE
+¦   ¦   ¦       package.json
+¦   ¦   ¦       README.md
+¦   ¦   ¦       
 ¦   ¦   +---node
 ¦   ¦   ¦   ¦   assert.d.ts
 ¦   ¦   ¦   ¦   async_hooks.d.ts
@@ -1073,6 +3070,22 @@ C:.
 ¦   ¦               package.json
 ¦   ¦               README.md
 ¦   ¦               
+¦   +---b4a
+¦   ¦   ¦   browser.js
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   react-native.js
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           ascii.js
+¦   ¦           base64.js
+¦   ¦           hex.js
+¦   ¦           latin1.js
+¦   ¦           utf16le.js
+¦   ¦           utf8.js
+¦   ¦           
 ¦   +---balanced-match
 ¦   ¦   ¦   LICENSE.md
 ¦   ¦   ¦   package.json
@@ -1093,6 +3106,222 @@ C:.
 ¦   ¦               index.js.map
 ¦   ¦               package.json
 ¦   ¦               
+¦   +---bare-events
+¦   ¦   ¦   global.d.ts
+¦   ¦   ¦   global.js
+¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   web.d.ts
+¦   ¦   ¦   web.js
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           errors.js
+¦   ¦           
+¦   +---bare-fs
+¦   ¦   ¦   binding.c
+¦   ¦   ¦   binding.js
+¦   ¦   ¦   CMakeLists.txt
+¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   promises.d.ts
+¦   ¦   ¦   promises.js
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦   ¦       constants.d.ts
+¦   ¦   ¦       constants.js
+¦   ¦   ¦       errors.d.ts
+¦   ¦   ¦       errors.js
+¦   ¦   ¦       
+¦   ¦   +---prebuilds
+¦   ¦       +---android-arm
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---android-arm64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---android-ia32
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---android-x64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-arm64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-x64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64-simulator
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-x64-simulator
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-arm64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-x64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-arm64
+¦   ¦       ¦       bare-fs.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-x64
+¦   ¦               bare-fs.bare
+¦   ¦               
+¦   +---bare-os
+¦   ¦   ¦   binding.c
+¦   ¦   ¦   binding.js
+¦   ¦   ¦   CMakeLists.txt
+¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦   ¦       constants.js
+¦   ¦   ¦       errors.js
+¦   ¦   ¦       
+¦   ¦   +---prebuilds
+¦   ¦       +---android-arm
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---android-arm64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---android-ia32
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---android-x64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-arm64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-x64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64-simulator
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-x64-simulator
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-arm64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-x64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-arm64
+¦   ¦       ¦       bare-os.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-x64
+¦   ¦               bare-os.bare
+¦   ¦               
+¦   +---bare-path
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   NOTICE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           constants.js
+¦   ¦           posix.js
+¦   ¦           shared.js
+¦   ¦           win32.js
+¦   ¦           
+¦   +---bare-stream
+¦   ¦       global.js
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       promises.js
+¦   ¦       README.md
+¦   ¦       web.d.ts
+¦   ¦       web.js
+¦   ¦       
+¦   +---bare-url
+¦   ¦   ¦   binding.c
+¦   ¦   ¦   binding.js
+¦   ¦   ¦   CMakeLists.txt
+¦   ¦   ¦   global.d.ts
+¦   ¦   ¦   global.js
+¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦   ¦       errors.d.ts
+¦   ¦   ¦       errors.js
+¦   ¦   ¦       url-search-params.d.ts
+¦   ¦   ¦       url-search-params.js
+¦   ¦   ¦       
+¦   ¦   +---prebuilds
+¦   ¦       +---android-arm
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---android-arm64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---android-ia32
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---android-x64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-arm64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---darwin-x64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-arm64-simulator
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---ios-x64-simulator
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-arm64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---linux-x64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-arm64
+¦   ¦       ¦       bare-url.bare
+¦   ¦       ¦       
+¦   ¦       +---win32-x64
+¦   ¦               bare-url.bare
+¦   ¦               
+¦   +---base64-js
+¦   ¦       base64js.min.js
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---basic-auth
 ¦   ¦       HISTORY.md
 ¦   ¦       index.js
@@ -1173,6 +3402,20 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       readme.md
 ¦   ¦       
+¦   +---bl
+¦   ¦   ¦   .travis.yml
+¦   ¦   ¦   bl.js
+¦   ¦   ¦   BufferList.js
+¦   ¦   ¦   LICENSE.md
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---test
+¦   ¦           convert.js
+¦   ¦           indexOf.js
+¦   ¦           isBufferList.js
+¦   ¦           test.js
+¦   ¦           
 ¦   +---body-parser
 ¦   ¦   ¦   index.js
 ¦   ¦   ¦   LICENSE
@@ -1223,6 +3466,14 @@ C:.
 ¦   ¦           stringify.js
 ¦   ¦           utils.js
 ¦   ¦           
+¦   +---buffer
+¦   ¦       AUTHORS.md
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---buffer-equal-constant-time
 ¦   ¦       .npmignore
 ¦   ¦       .travis.yml
@@ -1338,6 +3589,26 @@ C:.
 ¦   ¦   +---types
 ¦   ¦           index.d.ts
 ¦   ¦           
+¦   +---chownr
+¦   ¦   ¦   LICENSE.md
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦       +---commonjs
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.js
+¦   ¦       ¦       index.js.map
+¦   ¦       ¦       package.json
+¦   ¦       ¦       
+¦   ¦       +---esm
+¦   ¦               index.d.ts
+¦   ¦               index.d.ts.map
+¦   ¦               index.js
+¦   ¦               index.js.map
+¦   ¦               package.json
+¦   ¦               
 ¦   +---cloudinary
 ¦   ¦   ¦   babel.config.js
 ¦   ¦   ¦   CHANGELOG.md
@@ -1414,6 +3685,33 @@ C:.
 ¦   ¦   +---types
 ¦   ¦           index.d.ts
 ¦   ¦           
+¦   +---color
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---color-convert
+¦   ¦       CHANGELOG.md
+¦   ¦       conversions.js
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       route.js
+¦   ¦       
+¦   +---color-name
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---color-string
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---combined-stream
 ¦   ¦   ¦   License
 ¦   ¦   ¦   package.json
@@ -1475,6 +3773,23 @@ C:.
 ¦   ¦           index.js
 ¦   ¦           node.js
 ¦   ¦           
+¦   +---decompress-response
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       license
+¦   ¦       package.json
+¦   ¦       readme.md
+¦   ¦       
+¦   +---deep-extend
+¦   ¦   ¦   CHANGELOG.md
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           deep-extend.js
+¦   ¦           
 ¦   +---delayed-stream
 ¦   ¦   ¦   .npmignore
 ¦   ¦   ¦   License
@@ -1496,6 +3811,18 @@ C:.
 ¦   ¦       +---browser
 ¦   ¦               index.js
 ¦   ¦               
+¦   +---detect-libc
+¦   ¦   ¦   index.d.ts
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           detect-libc.js
+¦   ¦           elf.js
+¦   ¦           filesystem.js
+¦   ¦           process.js
+¦   ¦           
 ¦   +---dotenv
 ¦   ¦   ¦   CHANGELOG.md
 ¦   ¦   ¦   config.d.ts
@@ -1558,6 +3885,12 @@ C:.
 ¦   ¦       README.md
 ¦   ¦       
 ¦   +---encodeurl
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---end-of-stream
 ¦   ¦       index.js
 ¦   ¦       LICENSE
 ¦   ¦       package.json
@@ -1657,6 +3990,23 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       README.md
 ¦   ¦       
+¦   +---events-universal
+¦   ¦       bare.js
+¦   ¦       default.js
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       react-native.js
+¦   ¦       README.md
+¦   ¦       
+¦   +---expand-template
+¦   ¦       .travis.yml
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       test.js
+¦   ¦       
 ¦   +---express
 ¦   ¦   ¦   index.js
 ¦   ¦   ¦   LICENSE
@@ -1671,6 +4021,13 @@ C:.
 ¦   ¦           utils.js
 ¦   ¦           view.js
 ¦   ¦           
+¦   +---fast-fifo
+¦   ¦       fixed-size.js
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---fill-range
 ¦   ¦       index.js
 ¦   ¦       LICENSE
@@ -1702,6 +4059,13 @@ C:.
 ¦   ¦       
 ¦   +---fresh
 ¦   ¦       HISTORY.md
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---fs-constants
+¦   ¦       browser.js
 ¦   ¦       index.js
 ¦   ¦       LICENSE
 ¦   ¦       package.json
@@ -1760,6 +4124,25 @@ C:.
 ¦   ¦   ¦       
 ¦   ¦   +---test
 ¦   ¦           index.js
+¦   ¦           
+¦   +---github-from-package
+¦   ¦   ¦   .travis.yml
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   readme.markdown
+¦   ¦   ¦   
+¦   ¦   +---example
+¦   ¦   ¦       package.json
+¦   ¦   ¦       url.js
+¦   ¦   ¦       
+¦   ¦   +---test
+¦   ¦           a.json
+¦   ¦           b.json
+¦   ¦           c.json
+¦   ¦           d.json
+¦   ¦           e.json
+¦   ¦           url.js
 ¦   ¦           
 ¦   +---glob-parent
 ¦   ¦       CHANGELOG.md
@@ -1924,6 +4307,13 @@ C:.
 ¦   ¦   +---types
 ¦   ¦           encodings.d.ts
 ¦   ¦           
+¦   +---ieee754
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---ignore-by-default
 ¦   ¦       index.js
 ¦   ¦       LICENSE
@@ -1933,6 +4323,19 @@ C:.
 ¦   +---inherits
 ¦   ¦       inherits.js
 ¦   ¦       inherits_browser.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---ini
+¦   ¦       ini.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---iota-array
+¦   ¦       .npmignore
+¦   ¦       iota.js
 ¦   ¦       LICENSE
 ¦   ¦       package.json
 ¦   ¦       README.md
@@ -1947,6 +4350,12 @@ C:.
 ¦   ¦           ipaddr.js
 ¦   ¦           ipaddr.js.d.ts
 ¦   ¦           
+¦   +---is-arrayish
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---is-binary-path
 ¦   ¦       index.d.ts
 ¦   ¦       index.js
@@ -1954,6 +4363,15 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       readme.md
 ¦   ¦       
+¦   +---is-buffer
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---test
+¦   ¦           basic.js
+¦   ¦           
 ¦   +---is-extglob
 ¦   ¦       index.js
 ¦   ¦       LICENSE
@@ -3193,6 +5611,13 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       README.md
 ¦   ¦       
+¦   +---mimic-response
+¦   ¦       index.d.ts
+¦   ¦       index.js
+¦   ¦       license
+¦   ¦       package.json
+¦   ¦       readme.md
+¦   ¦       
 ¦   +---minimatch
 ¦   ¦   ¦   LICENSE.md
 ¦   ¦   ¦   package.json
@@ -3253,6 +5678,92 @@ C:.
 ¦   ¦               unescape.js
 ¦   ¦               unescape.js.map
 ¦   ¦               
+¦   +---minimist
+¦   ¦   ¦   .eslintrc
+¦   ¦   ¦   .nycrc
+¦   ¦   ¦   CHANGELOG.md
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---.github
+¦   ¦   ¦       FUNDING.yml
+¦   ¦   ¦       
+¦   ¦   +---example
+¦   ¦   ¦       parse.js
+¦   ¦   ¦       
+¦   ¦   +---test
+¦   ¦           all_bool.js
+¦   ¦           bool.js
+¦   ¦           dash.js
+¦   ¦           default_bool.js
+¦   ¦           dotted.js
+¦   ¦           kv_short.js
+¦   ¦           long.js
+¦   ¦           num.js
+¦   ¦           parse.js
+¦   ¦           parse_modified.js
+¦   ¦           proto.js
+¦   ¦           short.js
+¦   ¦           stop_early.js
+¦   ¦           unknown.js
+¦   ¦           whitespace.js
+¦   ¦           
+¦   +---minipass
+¦   ¦   ¦   LICENSE.md
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦       +---commonjs
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.js
+¦   ¦       ¦       index.js.map
+¦   ¦       ¦       package.json
+¦   ¦       ¦       
+¦   ¦       +---esm
+¦   ¦               index.d.ts
+¦   ¦               index.d.ts.map
+¦   ¦               index.js
+¦   ¦               index.js.map
+¦   ¦               package.json
+¦   ¦               
+¦   +---minizlib
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦       +---commonjs
+¦   ¦       ¦       constants.d.ts
+¦   ¦       ¦       constants.d.ts.map
+¦   ¦       ¦       constants.js
+¦   ¦       ¦       constants.js.map
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.js
+¦   ¦       ¦       index.js.map
+¦   ¦       ¦       package.json
+¦   ¦       ¦       
+¦   ¦       +---esm
+¦   ¦               constants.d.ts
+¦   ¦               constants.d.ts.map
+¦   ¦               constants.js
+¦   ¦               constants.js.map
+¦   ¦               index.d.ts
+¦   ¦               index.d.ts.map
+¦   ¦               index.js
+¦   ¦               index.js.map
+¦   ¦               package.json
+¦   ¦               
+¦   +---mkdirp-classic
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---morgan
 ¦   ¦   ¦   HISTORY.md
 ¦   ¦   ¦   index.js
@@ -3346,6 +5857,24 @@ C:.
 ¦   ¦           disk.js
 ¦   ¦           memory.js
 ¦   ¦           
+¦   +---napi-build-utils
+¦   ¦   ¦   index.js
+¦   ¦   ¦   index.md
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---.github
+¦   ¦       +---workflows
+¦   ¦               run-npm-tests.yml
+¦   ¦               
+¦   +---ndarray
+¦   ¦       .travis.yml
+¦   ¦       LICENSE
+¦   ¦       ndarray.js
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---negotiator
 ¦   ¦   ¦   HISTORY.md
 ¦   ¦   ¦   index.js
@@ -3359,6 +5888,13 @@ C:.
 ¦   ¦           language.js
 ¦   ¦           mediaType.js
 ¦   ¦           
+¦   +---node-abi
+¦   ¦       abi_registry.json
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---node-addon-api
 ¦   ¦   ¦   common.gypi
 ¦   ¦   ¦   except.gypi
@@ -3531,6 +6067,276 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       README.md
 ¦   ¦       
+¦   +---onnxruntime-common
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦   ¦   +---cjs
+¦   ¦   ¦   ¦       backend-impl.d.ts
+¦   ¦   ¦   ¦       backend-impl.d.ts.map
+¦   ¦   ¦   ¦       backend-impl.js
+¦   ¦   ¦   ¦       backend-impl.js.map
+¦   ¦   ¦   ¦       backend.d.ts
+¦   ¦   ¦   ¦       backend.d.ts.map
+¦   ¦   ¦   ¦       backend.js
+¦   ¦   ¦   ¦       backend.js.map
+¦   ¦   ¦   ¦       env-impl.d.ts
+¦   ¦   ¦   ¦       env-impl.d.ts.map
+¦   ¦   ¦   ¦       env-impl.js
+¦   ¦   ¦   ¦       env-impl.js.map
+¦   ¦   ¦   ¦       env.d.ts
+¦   ¦   ¦   ¦       env.d.ts.map
+¦   ¦   ¦   ¦       env.js
+¦   ¦   ¦   ¦       env.js.map
+¦   ¦   ¦   ¦       index.d.ts
+¦   ¦   ¦   ¦       index.d.ts.map
+¦   ¦   ¦   ¦       index.js
+¦   ¦   ¦   ¦       index.js.map
+¦   ¦   ¦   ¦       inference-session-impl.d.ts
+¦   ¦   ¦   ¦       inference-session-impl.d.ts.map
+¦   ¦   ¦   ¦       inference-session-impl.js
+¦   ¦   ¦   ¦       inference-session-impl.js.map
+¦   ¦   ¦   ¦       inference-session.d.ts
+¦   ¦   ¦   ¦       inference-session.d.ts.map
+¦   ¦   ¦   ¦       inference-session.js
+¦   ¦   ¦   ¦       inference-session.js.map
+¦   ¦   ¦   ¦       onnx-model.d.ts
+¦   ¦   ¦   ¦       onnx-model.d.ts.map
+¦   ¦   ¦   ¦       onnx-model.js
+¦   ¦   ¦   ¦       onnx-model.js.map
+¦   ¦   ¦   ¦       onnx-value.d.ts
+¦   ¦   ¦   ¦       onnx-value.d.ts.map
+¦   ¦   ¦   ¦       onnx-value.js
+¦   ¦   ¦   ¦       onnx-value.js.map
+¦   ¦   ¦   ¦       package.json
+¦   ¦   ¦   ¦       tensor-conversion-impl.d.ts
+¦   ¦   ¦   ¦       tensor-conversion-impl.d.ts.map
+¦   ¦   ¦   ¦       tensor-conversion-impl.js
+¦   ¦   ¦   ¦       tensor-conversion-impl.js.map
+¦   ¦   ¦   ¦       tensor-conversion.d.ts
+¦   ¦   ¦   ¦       tensor-conversion.d.ts.map
+¦   ¦   ¦   ¦       tensor-conversion.js
+¦   ¦   ¦   ¦       tensor-conversion.js.map
+¦   ¦   ¦   ¦       tensor-factory-impl.d.ts
+¦   ¦   ¦   ¦       tensor-factory-impl.d.ts.map
+¦   ¦   ¦   ¦       tensor-factory-impl.js
+¦   ¦   ¦   ¦       tensor-factory-impl.js.map
+¦   ¦   ¦   ¦       tensor-factory.d.ts
+¦   ¦   ¦   ¦       tensor-factory.d.ts.map
+¦   ¦   ¦   ¦       tensor-factory.js
+¦   ¦   ¦   ¦       tensor-factory.js.map
+¦   ¦   ¦   ¦       tensor-impl-type-mapping.d.ts
+¦   ¦   ¦   ¦       tensor-impl-type-mapping.d.ts.map
+¦   ¦   ¦   ¦       tensor-impl-type-mapping.js
+¦   ¦   ¦   ¦       tensor-impl-type-mapping.js.map
+¦   ¦   ¦   ¦       tensor-impl.d.ts
+¦   ¦   ¦   ¦       tensor-impl.d.ts.map
+¦   ¦   ¦   ¦       tensor-impl.js
+¦   ¦   ¦   ¦       tensor-impl.js.map
+¦   ¦   ¦   ¦       tensor-utils-impl.d.ts
+¦   ¦   ¦   ¦       tensor-utils-impl.d.ts.map
+¦   ¦   ¦   ¦       tensor-utils-impl.js
+¦   ¦   ¦   ¦       tensor-utils-impl.js.map
+¦   ¦   ¦   ¦       tensor-utils.d.ts
+¦   ¦   ¦   ¦       tensor-utils.d.ts.map
+¦   ¦   ¦   ¦       tensor-utils.js
+¦   ¦   ¦   ¦       tensor-utils.js.map
+¦   ¦   ¦   ¦       tensor.d.ts
+¦   ¦   ¦   ¦       tensor.d.ts.map
+¦   ¦   ¦   ¦       tensor.js
+¦   ¦   ¦   ¦       tensor.js.map
+¦   ¦   ¦   ¦       trace.d.ts
+¦   ¦   ¦   ¦       trace.d.ts.map
+¦   ¦   ¦   ¦       trace.js
+¦   ¦   ¦   ¦       trace.js.map
+¦   ¦   ¦   ¦       training-session-impl.d.ts
+¦   ¦   ¦   ¦       training-session-impl.d.ts.map
+¦   ¦   ¦   ¦       training-session-impl.js
+¦   ¦   ¦   ¦       training-session-impl.js.map
+¦   ¦   ¦   ¦       training-session.d.ts
+¦   ¦   ¦   ¦       training-session.d.ts.map
+¦   ¦   ¦   ¦       training-session.js
+¦   ¦   ¦   ¦       training-session.js.map
+¦   ¦   ¦   ¦       version.d.ts
+¦   ¦   ¦   ¦       version.d.ts.map
+¦   ¦   ¦   ¦       version.js
+¦   ¦   ¦   ¦       version.js.map
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---esm
+¦   ¦   ¦           backend-impl.d.ts
+¦   ¦   ¦           backend-impl.d.ts.map
+¦   ¦   ¦           backend-impl.js
+¦   ¦   ¦           backend-impl.js.map
+¦   ¦   ¦           backend.d.ts
+¦   ¦   ¦           backend.d.ts.map
+¦   ¦   ¦           backend.js
+¦   ¦   ¦           backend.js.map
+¦   ¦   ¦           env-impl.d.ts
+¦   ¦   ¦           env-impl.d.ts.map
+¦   ¦   ¦           env-impl.js
+¦   ¦   ¦           env-impl.js.map
+¦   ¦   ¦           env.d.ts
+¦   ¦   ¦           env.d.ts.map
+¦   ¦   ¦           env.js
+¦   ¦   ¦           env.js.map
+¦   ¦   ¦           index.d.ts
+¦   ¦   ¦           index.d.ts.map
+¦   ¦   ¦           index.js
+¦   ¦   ¦           index.js.map
+¦   ¦   ¦           inference-session-impl.d.ts
+¦   ¦   ¦           inference-session-impl.d.ts.map
+¦   ¦   ¦           inference-session-impl.js
+¦   ¦   ¦           inference-session-impl.js.map
+¦   ¦   ¦           inference-session.d.ts
+¦   ¦   ¦           inference-session.d.ts.map
+¦   ¦   ¦           inference-session.js
+¦   ¦   ¦           inference-session.js.map
+¦   ¦   ¦           onnx-model.d.ts
+¦   ¦   ¦           onnx-model.d.ts.map
+¦   ¦   ¦           onnx-model.js
+¦   ¦   ¦           onnx-model.js.map
+¦   ¦   ¦           onnx-value.d.ts
+¦   ¦   ¦           onnx-value.d.ts.map
+¦   ¦   ¦           onnx-value.js
+¦   ¦   ¦           onnx-value.js.map
+¦   ¦   ¦           package.json
+¦   ¦   ¦           tensor-conversion-impl.d.ts
+¦   ¦   ¦           tensor-conversion-impl.d.ts.map
+¦   ¦   ¦           tensor-conversion-impl.js
+¦   ¦   ¦           tensor-conversion-impl.js.map
+¦   ¦   ¦           tensor-conversion.d.ts
+¦   ¦   ¦           tensor-conversion.d.ts.map
+¦   ¦   ¦           tensor-conversion.js
+¦   ¦   ¦           tensor-conversion.js.map
+¦   ¦   ¦           tensor-factory-impl.d.ts
+¦   ¦   ¦           tensor-factory-impl.d.ts.map
+¦   ¦   ¦           tensor-factory-impl.js
+¦   ¦   ¦           tensor-factory-impl.js.map
+¦   ¦   ¦           tensor-factory.d.ts
+¦   ¦   ¦           tensor-factory.d.ts.map
+¦   ¦   ¦           tensor-factory.js
+¦   ¦   ¦           tensor-factory.js.map
+¦   ¦   ¦           tensor-impl-type-mapping.d.ts
+¦   ¦   ¦           tensor-impl-type-mapping.d.ts.map
+¦   ¦   ¦           tensor-impl-type-mapping.js
+¦   ¦   ¦           tensor-impl-type-mapping.js.map
+¦   ¦   ¦           tensor-impl.d.ts
+¦   ¦   ¦           tensor-impl.d.ts.map
+¦   ¦   ¦           tensor-impl.js
+¦   ¦   ¦           tensor-impl.js.map
+¦   ¦   ¦           tensor-utils-impl.d.ts
+¦   ¦   ¦           tensor-utils-impl.d.ts.map
+¦   ¦   ¦           tensor-utils-impl.js
+¦   ¦   ¦           tensor-utils-impl.js.map
+¦   ¦   ¦           tensor-utils.d.ts
+¦   ¦   ¦           tensor-utils.d.ts.map
+¦   ¦   ¦           tensor-utils.js
+¦   ¦   ¦           tensor-utils.js.map
+¦   ¦   ¦           tensor.d.ts
+¦   ¦   ¦           tensor.d.ts.map
+¦   ¦   ¦           tensor.js
+¦   ¦   ¦           tensor.js.map
+¦   ¦   ¦           trace.d.ts
+¦   ¦   ¦           trace.d.ts.map
+¦   ¦   ¦           trace.js
+¦   ¦   ¦           trace.js.map
+¦   ¦   ¦           training-session-impl.d.ts
+¦   ¦   ¦           training-session-impl.d.ts.map
+¦   ¦   ¦           training-session-impl.js
+¦   ¦   ¦           training-session-impl.js.map
+¦   ¦   ¦           training-session.d.ts
+¦   ¦   ¦           training-session.d.ts.map
+¦   ¦   ¦           training-session.js
+¦   ¦   ¦           training-session.js.map
+¦   ¦   ¦           version.d.ts
+¦   ¦   ¦           version.d.ts.map
+¦   ¦   ¦           version.js
+¦   ¦   ¦           version.js.map
+¦   ¦   ¦           
+¦   ¦   +---lib
+¦   ¦           backend-impl.ts
+¦   ¦           backend.ts
+¦   ¦           env-impl.ts
+¦   ¦           env.ts
+¦   ¦           index.ts
+¦   ¦           inference-session-impl.ts
+¦   ¦           inference-session.ts
+¦   ¦           onnx-model.ts
+¦   ¦           onnx-value.ts
+¦   ¦           tensor-conversion-impl.ts
+¦   ¦           tensor-conversion.ts
+¦   ¦           tensor-factory-impl.ts
+¦   ¦           tensor-factory.ts
+¦   ¦           tensor-impl-type-mapping.ts
+¦   ¦           tensor-impl.ts
+¦   ¦           tensor-utils-impl.ts
+¦   ¦           tensor-utils.ts
+¦   ¦           tensor.ts
+¦   ¦           trace.ts
+¦   ¦           training-session-impl.ts
+¦   ¦           training-session.ts
+¦   ¦           version.ts
+¦   ¦           
+¦   +---onnxruntime-node
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---bin
+¦   ¦   ¦   +---napi-v3
+¦   ¦   ¦       +---darwin
+¦   ¦   ¦       ¦   +---arm64
+¦   ¦   ¦       ¦   ¦       libonnxruntime.1.17.3.dylib
+¦   ¦   ¦       ¦   ¦       onnxruntime_binding.node
+¦   ¦   ¦       ¦   ¦       
+¦   ¦   ¦       ¦   +---x64
+¦   ¦   ¦       ¦           libonnxruntime.1.17.3.dylib
+¦   ¦   ¦       ¦           onnxruntime_binding.node
+¦   ¦   ¦       ¦           
+¦   ¦   ¦       +---linux
+¦   ¦   ¦       ¦   +---arm64
+¦   ¦   ¦       ¦   ¦       libonnxruntime.so.1.17.3
+¦   ¦   ¦       ¦   ¦       onnxruntime_binding.node
+¦   ¦   ¦       ¦   ¦       
+¦   ¦   ¦       ¦   +---x64
+¦   ¦   ¦       ¦           libonnxruntime.so.1.17.3
+¦   ¦   ¦       ¦           libonnxruntime_providers_shared.so
+¦   ¦   ¦       ¦           onnxruntime_binding.node
+¦   ¦   ¦       ¦           
+¦   ¦   ¦       +---win32
+¦   ¦   ¦           +---arm64
+¦   ¦   ¦           ¦       DirectML.dll
+¦   ¦   ¦           ¦       onnxruntime.dll
+¦   ¦   ¦           ¦       onnxruntime_binding.node
+¦   ¦   ¦           ¦       
+¦   ¦   ¦           +---x64
+¦   ¦   ¦                   DirectML.dll
+¦   ¦   ¦                   onnxruntime.dll
+¦   ¦   ¦                   onnxruntime_binding.node
+¦   ¦   ¦                   
+¦   ¦   +---dist
+¦   ¦   ¦       backend.js
+¦   ¦   ¦       backend.js.map
+¦   ¦   ¦       binding.js
+¦   ¦   ¦       binding.js.map
+¦   ¦   ¦       index.js
+¦   ¦   ¦       index.js.map
+¦   ¦   ¦       version.js
+¦   ¦   ¦       version.js.map
+¦   ¦   ¦       
+¦   ¦   +---lib
+¦   ¦   ¦       backend.ts
+¦   ¦   ¦       binding.ts
+¦   ¦   ¦       index.ts
+¦   ¦   ¦       version.ts
+¦   ¦   ¦       
+¦   ¦   +---script
+¦   ¦           build.js
+¦   ¦           build.ts
+¦   ¦           install.js
+¦   ¦           prepack.js
+¦   ¦           prepack.ts
+¦   ¦           
 ¦   +---parseurl
 ¦   ¦       HISTORY.md
 ¦   ¦       index.js
@@ -3561,6 +6367,76 @@ C:.
 ¦   ¦           scan.js
 ¦   ¦           utils.js
 ¦   ¦           
+¦   +---prebuild-install
+¦   ¦   ¦   asset.js
+¦   ¦   ¦   bin.js
+¦   ¦   ¦   CHANGELOG.md
+¦   ¦   ¦   CONTRIBUTING.md
+¦   ¦   ¦   download.js
+¦   ¦   ¦   error.js
+¦   ¦   ¦   help.txt
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   log.js
+¦   ¦   ¦   package.json
+¦   ¦   ¦   proxy.js
+¦   ¦   ¦   rc.js
+¦   ¦   ¦   README.md
+¦   ¦   ¦   util.js
+¦   ¦   ¦   
+¦   ¦       +---chownr
+¦   ¦       ¦       chownr.js
+¦   ¦       ¦       LICENSE
+¦   ¦       ¦       package.json
+¦   ¦       ¦       README.md
+¦   ¦       ¦       
+¦   ¦       +---tar-fs
+¦   ¦       ¦   ¦   .travis.yml
+¦   ¦       ¦   ¦   index.js
+¦   ¦       ¦   ¦   LICENSE
+¦   ¦       ¦   ¦   package.json
+¦   ¦       ¦   ¦   README.md
+¦   ¦       ¦   ¦   
+¦   ¦       ¦   +---test
+¦   ¦       ¦       ¦   index.js
+¦   ¦       ¦       ¦   
+¦   ¦       ¦       +---fixtures
+¦   ¦       ¦           ¦   invalid.tar
+¦   ¦       ¦           ¦   
+¦   ¦       ¦           +---a
+¦   ¦       ¦           ¦       hello.txt
+¦   ¦       ¦           ¦       
+¦   ¦       ¦           +---b
+¦   ¦       ¦           ¦   +---a
+¦   ¦       ¦           ¦           test.txt
+¦   ¦       ¦           ¦           
+¦   ¦       ¦           +---d
+¦   ¦       ¦           ¦   ¦   file1
+¦   ¦       ¦           ¦   ¦   file2
+¦   ¦       ¦           ¦   ¦   
+¦   ¦       ¦           ¦   +---sub-dir
+¦   ¦       ¦           ¦   ¦       file5
+¦   ¦       ¦           ¦   ¦       
+¦   ¦       ¦           ¦   +---sub-files
+¦   ¦       ¦           ¦           file3
+¦   ¦       ¦           ¦           file4
+¦   ¦       ¦           ¦           
+¦   ¦       ¦           +---e
+¦   ¦       ¦               ¦   file
+¦   ¦       ¦               ¦   
+¦   ¦       ¦               +---directory
+¦   ¦       ¦                       .ignore
+¦   ¦       ¦                       
+¦   ¦       +---tar-stream
+¦   ¦               extract.js
+¦   ¦               headers.js
+¦   ¦               index.js
+¦   ¦               LICENSE
+¦   ¦               pack.js
+¦   ¦               package.json
+¦   ¦               README.md
+¦   ¦               sandbox.js
+¦   ¦               
 ¦   +---proxy-addr
 ¦   ¦       HISTORY.md
 ¦   ¦       index.js
@@ -3594,6 +6470,20 @@ C:.
 ¦   ¦               out1
 ¦   ¦               out2
 ¦   ¦               
+¦   +---pump
+¦   ¦   ¦   .travis.yml
+¦   ¦   ¦   empty.js
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   SECURITY.md
+¦   ¦   ¦   test-browser.js
+¦   ¦   ¦   test-node.js
+¦   ¦   ¦   
+¦   ¦   +---.github
+¦   ¦           FUNDING.yml
+¦   ¦           
 ¦   +---qs
 ¦   ¦   ¦   .editorconfig
 ¦   ¦   ¦   .nycrc
@@ -3638,6 +6528,24 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       README.md
 ¦   ¦       
+¦   +---rc
+¦   ¦   ¦   browser.js
+¦   ¦   ¦   cli.js
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE.APACHE2
+¦   ¦   ¦   LICENSE.BSD
+¦   ¦   ¦   LICENSE.MIT
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦   ¦       utils.js
+¦   ¦   ¦       
+¦   ¦   +---test
+¦   ¦           ini.js
+¦   ¦           nested-env-vars.js
+¦   ¦           test.js
+¦   ¦           
 ¦   +---readable-stream
 ¦   ¦   ¦   CONTRIBUTING.md
 ¦   ¦   ¦   errors-browser.js
@@ -3790,6 +6698,819 @@ C:.
 ¦   ¦   +---test
 ¦   ¦           index.js
 ¦   ¦           
+¦   +---sharp
+¦   ¦   ¦   binding.gyp
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---build
+¦   ¦   ¦   +---Release
+¦   ¦   ¦           libglib-2.0-0.dll
+¦   ¦   ¦           libgobject-2.0-0.dll
+¦   ¦   ¦           libvips-42.dll
+¦   ¦   ¦           libvips-cpp.dll
+¦   ¦   ¦           sharp-win32-x64.node
+¦   ¦   ¦           
+¦   ¦   +---install
+¦   ¦   ¦       can-compile.js
+¦   ¦   ¦       dll-copy.js
+¦   ¦   ¦       libvips.js
+¦   ¦   ¦       
+¦   ¦   +---lib
+¦   ¦   ¦       agent.js
+¦   ¦   ¦       channel.js
+¦   ¦   ¦       colour.js
+¦   ¦   ¦       composite.js
+¦   ¦   ¦       constructor.js
+¦   ¦   ¦       index.d.ts
+¦   ¦   ¦       index.js
+¦   ¦   ¦       input.js
+¦   ¦   ¦       is.js
+¦   ¦   ¦       libvips.js
+¦   ¦   ¦       operation.js
+¦   ¦   ¦       output.js
+¦   ¦   ¦       platform.js
+¦   ¦   ¦       resize.js
+¦   ¦   ¦       sharp.js
+¦   ¦   ¦       utility.js
+¦   ¦   ¦       
+¦   ¦   ¦   +---node-addon-api
+¦   ¦   ¦       ¦   common.gypi
+¦   ¦   ¦       ¦   except.gypi
+¦   ¦   ¦       ¦   index.js
+¦   ¦   ¦       ¦   LICENSE.md
+¦   ¦   ¦       ¦   napi-inl.deprecated.h
+¦   ¦   ¦       ¦   napi-inl.h
+¦   ¦   ¦       ¦   napi.h
+¦   ¦   ¦       ¦   node_api.gyp
+¦   ¦   ¦       ¦   noexcept.gypi
+¦   ¦   ¦       ¦   nothing.c
+¦   ¦   ¦       ¦   package-support.json
+¦   ¦   ¦       ¦   package.json
+¦   ¦   ¦       ¦   README.md
+¦   ¦   ¦       ¦   
+¦   ¦   ¦       +---tools
+¦   ¦   ¦               check-napi.js
+¦   ¦   ¦               clang-format.js
+¦   ¦   ¦               conversion.js
+¦   ¦   ¦               eslint-format.js
+¦   ¦   ¦               README.md
+¦   ¦   ¦               
+¦   ¦   +---src
+¦   ¦   ¦   ¦   common.cc
+¦   ¦   ¦   ¦   common.h
+¦   ¦   ¦   ¦   metadata.cc
+¦   ¦   ¦   ¦   metadata.h
+¦   ¦   ¦   ¦   operations.cc
+¦   ¦   ¦   ¦   operations.h
+¦   ¦   ¦   ¦   pipeline.cc
+¦   ¦   ¦   ¦   pipeline.h
+¦   ¦   ¦   ¦   sharp.cc
+¦   ¦   ¦   ¦   stats.cc
+¦   ¦   ¦   ¦   stats.h
+¦   ¦   ¦   ¦   utilities.cc
+¦   ¦   ¦   ¦   utilities.h
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---libvips
+¦   ¦   ¦       +---cplusplus
+¦   ¦   ¦               VConnection.cpp
+¦   ¦   ¦               VError.cpp
+¦   ¦   ¦               VImage.cpp
+¦   ¦   ¦               VInterpolate.cpp
+¦   ¦   ¦               vips-operators.cpp
+¦   ¦   ¦               VRegion.cpp
+¦   ¦   ¦               
+¦   ¦   +---vendor
+¦   ¦       +---8.14.5
+¦   ¦           +---win32-x64
+¦   ¦               ¦   platform.json
+¦   ¦               ¦   THIRD-PARTY-NOTICES.md
+¦   ¦               ¦   versions.json
+¦   ¦               ¦   
+¦   ¦               +---include
+¦   ¦               ¦   ¦   archive.h
+¦   ¦               ¦   ¦   archive_entry.h
+¦   ¦               ¦   ¦   cgif.h
+¦   ¦               ¦   ¦   expat.h
+¦   ¦               ¦   ¦   expat_config.h
+¦   ¦               ¦   ¦   expat_external.h
+¦   ¦               ¦   ¦   ffi.h
+¦   ¦               ¦   ¦   ffitarget.h
+¦   ¦               ¦   ¦   jconfig.h
+¦   ¦               ¦   ¦   jerror.h
+¦   ¦               ¦   ¦   jmorecfg.h
+¦   ¦               ¦   ¦   jpeglib.h
+¦   ¦               ¦   ¦   lcms2.h
+¦   ¦               ¦   ¦   lcms2_plugin.h
+¦   ¦               ¦   ¦   libimagequant.h
+¦   ¦               ¦   ¦   libintl.h
+¦   ¦               ¦   ¦   png.h
+¦   ¦               ¦   ¦   pngconf.h
+¦   ¦               ¦   ¦   pnglibconf.h
+¦   ¦               ¦   ¦   spng.h
+¦   ¦               ¦   ¦   tiff.h
+¦   ¦               ¦   ¦   tiffconf.h
+¦   ¦               ¦   ¦   tiffio.h
+¦   ¦               ¦   ¦   tiffvers.h
+¦   ¦               ¦   ¦   zconf.h
+¦   ¦               ¦   ¦   zlib.h
+¦   ¦               ¦   ¦   zlib_name_mangling.h
+¦   ¦               ¦   ¦   
+¦   ¦               ¦   +---aom
+¦   ¦               ¦   ¦       aom.h
+¦   ¦               ¦   ¦       aomcx.h
+¦   ¦               ¦   ¦       aomdx.h
+¦   ¦               ¦   ¦       aom_codec.h
+¦   ¦               ¦   ¦       aom_decoder.h
+¦   ¦               ¦   ¦       aom_encoder.h
+¦   ¦               ¦   ¦       aom_external_partition.h
+¦   ¦               ¦   ¦       aom_frame_buffer.h
+¦   ¦               ¦   ¦       aom_image.h
+¦   ¦               ¦   ¦       aom_integer.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---cairo
+¦   ¦               ¦   ¦       cairo-deprecated.h
+¦   ¦               ¦   ¦       cairo-features.h
+¦   ¦               ¦   ¦       cairo-ft.h
+¦   ¦               ¦   ¦       cairo-gobject.h
+¦   ¦               ¦   ¦       cairo-svg.h
+¦   ¦               ¦   ¦       cairo-version.h
+¦   ¦               ¦   ¦       cairo.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---fontconfig
+¦   ¦               ¦   ¦       fcfreetype.h
+¦   ¦               ¦   ¦       fcprivate.h
+¦   ¦               ¦   ¦       fontconfig.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---freetype2
+¦   ¦               ¦   ¦   ¦   ft2build.h
+¦   ¦               ¦   ¦   ¦   
+¦   ¦               ¦   ¦   +---freetype
+¦   ¦               ¦   ¦       ¦   freetype.h
+¦   ¦               ¦   ¦       ¦   ftadvanc.h
+¦   ¦               ¦   ¦       ¦   ftbbox.h
+¦   ¦               ¦   ¦       ¦   ftbdf.h
+¦   ¦               ¦   ¦       ¦   ftbitmap.h
+¦   ¦               ¦   ¦       ¦   ftbzip2.h
+¦   ¦               ¦   ¦       ¦   ftcache.h
+¦   ¦               ¦   ¦       ¦   ftchapters.h
+¦   ¦               ¦   ¦       ¦   ftcid.h
+¦   ¦               ¦   ¦       ¦   ftcolor.h
+¦   ¦               ¦   ¦       ¦   ftdriver.h
+¦   ¦               ¦   ¦       ¦   fterrdef.h
+¦   ¦               ¦   ¦       ¦   fterrors.h
+¦   ¦               ¦   ¦       ¦   ftfntfmt.h
+¦   ¦               ¦   ¦       ¦   ftgasp.h
+¦   ¦               ¦   ¦       ¦   ftglyph.h
+¦   ¦               ¦   ¦       ¦   ftgxval.h
+¦   ¦               ¦   ¦       ¦   ftgzip.h
+¦   ¦               ¦   ¦       ¦   ftimage.h
+¦   ¦               ¦   ¦       ¦   ftincrem.h
+¦   ¦               ¦   ¦       ¦   ftlcdfil.h
+¦   ¦               ¦   ¦       ¦   ftlist.h
+¦   ¦               ¦   ¦       ¦   ftlzw.h
+¦   ¦               ¦   ¦       ¦   ftmac.h
+¦   ¦               ¦   ¦       ¦   ftmm.h
+¦   ¦               ¦   ¦       ¦   ftmodapi.h
+¦   ¦               ¦   ¦       ¦   ftmoderr.h
+¦   ¦               ¦   ¦       ¦   ftotval.h
+¦   ¦               ¦   ¦       ¦   ftoutln.h
+¦   ¦               ¦   ¦       ¦   ftparams.h
+¦   ¦               ¦   ¦       ¦   ftpfr.h
+¦   ¦               ¦   ¦       ¦   ftrender.h
+¦   ¦               ¦   ¦       ¦   ftsizes.h
+¦   ¦               ¦   ¦       ¦   ftsnames.h
+¦   ¦               ¦   ¦       ¦   ftstroke.h
+¦   ¦               ¦   ¦       ¦   ftsynth.h
+¦   ¦               ¦   ¦       ¦   ftsystem.h
+¦   ¦               ¦   ¦       ¦   fttrigon.h
+¦   ¦               ¦   ¦       ¦   fttypes.h
+¦   ¦               ¦   ¦       ¦   ftwinfnt.h
+¦   ¦               ¦   ¦       ¦   otsvg.h
+¦   ¦               ¦   ¦       ¦   t1tables.h
+¦   ¦               ¦   ¦       ¦   ttnameid.h
+¦   ¦               ¦   ¦       ¦   tttables.h
+¦   ¦               ¦   ¦       ¦   tttags.h
+¦   ¦               ¦   ¦       ¦   
+¦   ¦               ¦   ¦       +---config
+¦   ¦               ¦   ¦               ftconfig.h
+¦   ¦               ¦   ¦               ftheader.h
+¦   ¦               ¦   ¦               ftmodule.h
+¦   ¦               ¦   ¦               ftoption.h
+¦   ¦               ¦   ¦               ftstdlib.h
+¦   ¦               ¦   ¦               integer-types.h
+¦   ¦               ¦   ¦               mac-support.h
+¦   ¦               ¦   ¦               public-macros.h
+¦   ¦               ¦   ¦               
+¦   ¦               ¦   +---fribidi
+¦   ¦               ¦   ¦       fribidi-arabic.h
+¦   ¦               ¦   ¦       fribidi-begindecls.h
+¦   ¦               ¦   ¦       fribidi-bidi-types-list.h
+¦   ¦               ¦   ¦       fribidi-bidi-types.h
+¦   ¦               ¦   ¦       fribidi-bidi.h
+¦   ¦               ¦   ¦       fribidi-brackets.h
+¦   ¦               ¦   ¦       fribidi-char-sets-list.h
+¦   ¦               ¦   ¦       fribidi-char-sets.h
+¦   ¦               ¦   ¦       fribidi-common.h
+¦   ¦               ¦   ¦       fribidi-config.h
+¦   ¦               ¦   ¦       fribidi-deprecated.h
+¦   ¦               ¦   ¦       fribidi-enddecls.h
+¦   ¦               ¦   ¦       fribidi-flags.h
+¦   ¦               ¦   ¦       fribidi-joining-types-list.h
+¦   ¦               ¦   ¦       fribidi-joining-types.h
+¦   ¦               ¦   ¦       fribidi-joining.h
+¦   ¦               ¦   ¦       fribidi-mirroring.h
+¦   ¦               ¦   ¦       fribidi-shape.h
+¦   ¦               ¦   ¦       fribidi-types.h
+¦   ¦               ¦   ¦       fribidi-unicode-version.h
+¦   ¦               ¦   ¦       fribidi-unicode.h
+¦   ¦               ¦   ¦       fribidi.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---gdk-pixbuf-2.0
+¦   ¦               ¦   ¦   +---gdk-pixbuf
+¦   ¦               ¦   ¦           gdk-pixbuf-animation.h
+¦   ¦               ¦   ¦           gdk-pixbuf-autocleanups.h
+¦   ¦               ¦   ¦           gdk-pixbuf-core.h
+¦   ¦               ¦   ¦           gdk-pixbuf-enum-types.h
+¦   ¦               ¦   ¦           gdk-pixbuf-features.h
+¦   ¦               ¦   ¦           gdk-pixbuf-io.h
+¦   ¦               ¦   ¦           gdk-pixbuf-loader.h
+¦   ¦               ¦   ¦           gdk-pixbuf-macros.h
+¦   ¦               ¦   ¦           gdk-pixbuf-marshal.h
+¦   ¦               ¦   ¦           gdk-pixbuf-simple-anim.h
+¦   ¦               ¦   ¦           gdk-pixbuf-transform.h
+¦   ¦               ¦   ¦           gdk-pixbuf.h
+¦   ¦               ¦   ¦           gdk-pixdata.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---gio-win32-2.0
+¦   ¦               ¦   ¦   +---gio
+¦   ¦               ¦   ¦           gregistrysettingsbackend.h
+¦   ¦               ¦   ¦           gwin32inputstream.h
+¦   ¦               ¦   ¦           gwin32outputstream.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---glib-2.0
+¦   ¦               ¦   ¦   ¦   glib-object.h
+¦   ¦               ¦   ¦   ¦   glib-unix.h
+¦   ¦               ¦   ¦   ¦   glib.h
+¦   ¦               ¦   ¦   ¦   gmodule.h
+¦   ¦               ¦   ¦   ¦   msvc_recommended_pragmas.h
+¦   ¦               ¦   ¦   ¦   
+¦   ¦               ¦   ¦   +---gio
+¦   ¦               ¦   ¦   ¦       gaction.h
+¦   ¦               ¦   ¦   ¦       gactiongroup.h
+¦   ¦               ¦   ¦   ¦       gactiongroupexporter.h
+¦   ¦               ¦   ¦   ¦       gactionmap.h
+¦   ¦               ¦   ¦   ¦       gappinfo.h
+¦   ¦               ¦   ¦   ¦       gapplication.h
+¦   ¦               ¦   ¦   ¦       gapplicationcommandline.h
+¦   ¦               ¦   ¦   ¦       gasyncinitable.h
+¦   ¦               ¦   ¦   ¦       gasyncresult.h
+¦   ¦               ¦   ¦   ¦       gbufferedinputstream.h
+¦   ¦               ¦   ¦   ¦       gbufferedoutputstream.h
+¦   ¦               ¦   ¦   ¦       gbytesicon.h
+¦   ¦               ¦   ¦   ¦       gcancellable.h
+¦   ¦               ¦   ¦   ¦       gcharsetconverter.h
+¦   ¦               ¦   ¦   ¦       gcontenttype.h
+¦   ¦               ¦   ¦   ¦       gconverter.h
+¦   ¦               ¦   ¦   ¦       gconverterinputstream.h
+¦   ¦               ¦   ¦   ¦       gconverteroutputstream.h
+¦   ¦               ¦   ¦   ¦       gcredentials.h
+¦   ¦               ¦   ¦   ¦       gdatagrambased.h
+¦   ¦               ¦   ¦   ¦       gdatainputstream.h
+¦   ¦               ¦   ¦   ¦       gdataoutputstream.h
+¦   ¦               ¦   ¦   ¦       gdbusactiongroup.h
+¦   ¦               ¦   ¦   ¦       gdbusaddress.h
+¦   ¦               ¦   ¦   ¦       gdbusauthobserver.h
+¦   ¦               ¦   ¦   ¦       gdbusconnection.h
+¦   ¦               ¦   ¦   ¦       gdbuserror.h
+¦   ¦               ¦   ¦   ¦       gdbusinterface.h
+¦   ¦               ¦   ¦   ¦       gdbusinterfaceskeleton.h
+¦   ¦               ¦   ¦   ¦       gdbusintrospection.h
+¦   ¦               ¦   ¦   ¦       gdbusmenumodel.h
+¦   ¦               ¦   ¦   ¦       gdbusmessage.h
+¦   ¦               ¦   ¦   ¦       gdbusmethodinvocation.h
+¦   ¦               ¦   ¦   ¦       gdbusnameowning.h
+¦   ¦               ¦   ¦   ¦       gdbusnamewatching.h
+¦   ¦               ¦   ¦   ¦       gdbusobject.h
+¦   ¦               ¦   ¦   ¦       gdbusobjectmanager.h
+¦   ¦               ¦   ¦   ¦       gdbusobjectmanagerclient.h
+¦   ¦               ¦   ¦   ¦       gdbusobjectmanagerserver.h
+¦   ¦               ¦   ¦   ¦       gdbusobjectproxy.h
+¦   ¦               ¦   ¦   ¦       gdbusobjectskeleton.h
+¦   ¦               ¦   ¦   ¦       gdbusproxy.h
+¦   ¦               ¦   ¦   ¦       gdbusserver.h
+¦   ¦               ¦   ¦   ¦       gdbusutils.h
+¦   ¦               ¦   ¦   ¦       gdebugcontroller.h
+¦   ¦               ¦   ¦   ¦       gdebugcontrollerdbus.h
+¦   ¦               ¦   ¦   ¦       gdrive.h
+¦   ¦               ¦   ¦   ¦       gdtlsclientconnection.h
+¦   ¦               ¦   ¦   ¦       gdtlsconnection.h
+¦   ¦               ¦   ¦   ¦       gdtlsserverconnection.h
+¦   ¦               ¦   ¦   ¦       gemblem.h
+¦   ¦               ¦   ¦   ¦       gemblemedicon.h
+¦   ¦               ¦   ¦   ¦       gfile.h
+¦   ¦               ¦   ¦   ¦       gfileattribute.h
+¦   ¦               ¦   ¦   ¦       gfileenumerator.h
+¦   ¦               ¦   ¦   ¦       gfileicon.h
+¦   ¦               ¦   ¦   ¦       gfileinfo.h
+¦   ¦               ¦   ¦   ¦       gfileinputstream.h
+¦   ¦               ¦   ¦   ¦       gfileiostream.h
+¦   ¦               ¦   ¦   ¦       gfilemonitor.h
+¦   ¦               ¦   ¦   ¦       gfilenamecompleter.h
+¦   ¦               ¦   ¦   ¦       gfileoutputstream.h
+¦   ¦               ¦   ¦   ¦       gfilterinputstream.h
+¦   ¦               ¦   ¦   ¦       gfilteroutputstream.h
+¦   ¦               ¦   ¦   ¦       gicon.h
+¦   ¦               ¦   ¦   ¦       ginetaddress.h
+¦   ¦               ¦   ¦   ¦       ginetaddressmask.h
+¦   ¦               ¦   ¦   ¦       ginetsocketaddress.h
+¦   ¦               ¦   ¦   ¦       ginitable.h
+¦   ¦               ¦   ¦   ¦       ginputstream.h
+¦   ¦               ¦   ¦   ¦       gio-autocleanups.h
+¦   ¦               ¦   ¦   ¦       gio-visibility.h
+¦   ¦               ¦   ¦   ¦       gio.h
+¦   ¦               ¦   ¦   ¦       gioenums.h
+¦   ¦               ¦   ¦   ¦       gioenumtypes.h
+¦   ¦               ¦   ¦   ¦       gioerror.h
+¦   ¦               ¦   ¦   ¦       giomodule.h
+¦   ¦               ¦   ¦   ¦       gioscheduler.h
+¦   ¦               ¦   ¦   ¦       giostream.h
+¦   ¦               ¦   ¦   ¦       giotypes.h
+¦   ¦               ¦   ¦   ¦       glistmodel.h
+¦   ¦               ¦   ¦   ¦       gliststore.h
+¦   ¦               ¦   ¦   ¦       gloadableicon.h
+¦   ¦               ¦   ¦   ¦       gmemoryinputstream.h
+¦   ¦               ¦   ¦   ¦       gmemorymonitor.h
+¦   ¦               ¦   ¦   ¦       gmemoryoutputstream.h
+¦   ¦               ¦   ¦   ¦       gmenu.h
+¦   ¦               ¦   ¦   ¦       gmenuexporter.h
+¦   ¦               ¦   ¦   ¦       gmenumodel.h
+¦   ¦               ¦   ¦   ¦       gmount.h
+¦   ¦               ¦   ¦   ¦       gmountoperation.h
+¦   ¦               ¦   ¦   ¦       gnativesocketaddress.h
+¦   ¦               ¦   ¦   ¦       gnativevolumemonitor.h
+¦   ¦               ¦   ¦   ¦       gnetworkaddress.h
+¦   ¦               ¦   ¦   ¦       gnetworking.h
+¦   ¦               ¦   ¦   ¦       gnetworkmonitor.h
+¦   ¦               ¦   ¦   ¦       gnetworkservice.h
+¦   ¦               ¦   ¦   ¦       gnotification.h
+¦   ¦               ¦   ¦   ¦       goutputstream.h
+¦   ¦               ¦   ¦   ¦       gpermission.h
+¦   ¦               ¦   ¦   ¦       gpollableinputstream.h
+¦   ¦               ¦   ¦   ¦       gpollableoutputstream.h
+¦   ¦               ¦   ¦   ¦       gpollableutils.h
+¦   ¦               ¦   ¦   ¦       gpowerprofilemonitor.h
+¦   ¦               ¦   ¦   ¦       gpropertyaction.h
+¦   ¦               ¦   ¦   ¦       gproxy.h
+¦   ¦               ¦   ¦   ¦       gproxyaddress.h
+¦   ¦               ¦   ¦   ¦       gproxyaddressenumerator.h
+¦   ¦               ¦   ¦   ¦       gproxyresolver.h
+¦   ¦               ¦   ¦   ¦       gremoteactiongroup.h
+¦   ¦               ¦   ¦   ¦       gresolver.h
+¦   ¦               ¦   ¦   ¦       gresource.h
+¦   ¦               ¦   ¦   ¦       gseekable.h
+¦   ¦               ¦   ¦   ¦       gsettings.h
+¦   ¦               ¦   ¦   ¦       gsettingsbackend.h
+¦   ¦               ¦   ¦   ¦       gsettingsschema.h
+¦   ¦               ¦   ¦   ¦       gsimpleaction.h
+¦   ¦               ¦   ¦   ¦       gsimpleactiongroup.h
+¦   ¦               ¦   ¦   ¦       gsimpleasyncresult.h
+¦   ¦               ¦   ¦   ¦       gsimpleiostream.h
+¦   ¦               ¦   ¦   ¦       gsimplepermission.h
+¦   ¦               ¦   ¦   ¦       gsimpleproxyresolver.h
+¦   ¦               ¦   ¦   ¦       gsocket.h
+¦   ¦               ¦   ¦   ¦       gsocketaddress.h
+¦   ¦               ¦   ¦   ¦       gsocketaddressenumerator.h
+¦   ¦               ¦   ¦   ¦       gsocketclient.h
+¦   ¦               ¦   ¦   ¦       gsocketconnectable.h
+¦   ¦               ¦   ¦   ¦       gsocketconnection.h
+¦   ¦               ¦   ¦   ¦       gsocketcontrolmessage.h
+¦   ¦               ¦   ¦   ¦       gsocketlistener.h
+¦   ¦               ¦   ¦   ¦       gsocketservice.h
+¦   ¦               ¦   ¦   ¦       gsrvtarget.h
+¦   ¦               ¦   ¦   ¦       gsubprocess.h
+¦   ¦               ¦   ¦   ¦       gsubprocesslauncher.h
+¦   ¦               ¦   ¦   ¦       gtask.h
+¦   ¦               ¦   ¦   ¦       gtcpconnection.h
+¦   ¦               ¦   ¦   ¦       gtcpwrapperconnection.h
+¦   ¦               ¦   ¦   ¦       gtestdbus.h
+¦   ¦               ¦   ¦   ¦       gthemedicon.h
+¦   ¦               ¦   ¦   ¦       gthreadedsocketservice.h
+¦   ¦               ¦   ¦   ¦       gtlsbackend.h
+¦   ¦               ¦   ¦   ¦       gtlscertificate.h
+¦   ¦               ¦   ¦   ¦       gtlsclientconnection.h
+¦   ¦               ¦   ¦   ¦       gtlsconnection.h
+¦   ¦               ¦   ¦   ¦       gtlsdatabase.h
+¦   ¦               ¦   ¦   ¦       gtlsfiledatabase.h
+¦   ¦               ¦   ¦   ¦       gtlsinteraction.h
+¦   ¦               ¦   ¦   ¦       gtlspassword.h
+¦   ¦               ¦   ¦   ¦       gtlsserverconnection.h
+¦   ¦               ¦   ¦   ¦       gunixconnection.h
+¦   ¦               ¦   ¦   ¦       gunixcredentialsmessage.h
+¦   ¦               ¦   ¦   ¦       gunixfdlist.h
+¦   ¦               ¦   ¦   ¦       gunixsocketaddress.h
+¦   ¦               ¦   ¦   ¦       gvfs.h
+¦   ¦               ¦   ¦   ¦       gvolume.h
+¦   ¦               ¦   ¦   ¦       gvolumemonitor.h
+¦   ¦               ¦   ¦   ¦       gzlibcompressor.h
+¦   ¦               ¦   ¦   ¦       gzlibdecompressor.h
+¦   ¦               ¦   ¦   ¦       
+¦   ¦               ¦   ¦   +---glib
+¦   ¦               ¦   ¦   ¦   ¦   galloca.h
+¦   ¦               ¦   ¦   ¦   ¦   garray.h
+¦   ¦               ¦   ¦   ¦   ¦   gasyncqueue.h
+¦   ¦               ¦   ¦   ¦   ¦   gatomic.h
+¦   ¦               ¦   ¦   ¦   ¦   gbacktrace.h
+¦   ¦               ¦   ¦   ¦   ¦   gbase64.h
+¦   ¦               ¦   ¦   ¦   ¦   gbitlock.h
+¦   ¦               ¦   ¦   ¦   ¦   gbookmarkfile.h
+¦   ¦               ¦   ¦   ¦   ¦   gbytes.h
+¦   ¦               ¦   ¦   ¦   ¦   gcharset.h
+¦   ¦               ¦   ¦   ¦   ¦   gchecksum.h
+¦   ¦               ¦   ¦   ¦   ¦   gconvert.h
+¦   ¦               ¦   ¦   ¦   ¦   gdataset.h
+¦   ¦               ¦   ¦   ¦   ¦   gdate.h
+¦   ¦               ¦   ¦   ¦   ¦   gdatetime.h
+¦   ¦               ¦   ¦   ¦   ¦   gdir.h
+¦   ¦               ¦   ¦   ¦   ¦   genviron.h
+¦   ¦               ¦   ¦   ¦   ¦   gerror.h
+¦   ¦               ¦   ¦   ¦   ¦   gfileutils.h
+¦   ¦               ¦   ¦   ¦   ¦   ggettext.h
+¦   ¦               ¦   ¦   ¦   ¦   ghash.h
+¦   ¦               ¦   ¦   ¦   ¦   ghmac.h
+¦   ¦               ¦   ¦   ¦   ¦   ghook.h
+¦   ¦               ¦   ¦   ¦   ¦   ghostutils.h
+¦   ¦               ¦   ¦   ¦   ¦   gi18n-lib.h
+¦   ¦               ¦   ¦   ¦   ¦   gi18n.h
+¦   ¦               ¦   ¦   ¦   ¦   giochannel.h
+¦   ¦               ¦   ¦   ¦   ¦   gkeyfile.h
+¦   ¦               ¦   ¦   ¦   ¦   glib-autocleanups.h
+¦   ¦               ¦   ¦   ¦   ¦   glib-typeof.h
+¦   ¦               ¦   ¦   ¦   ¦   glib-visibility.h
+¦   ¦               ¦   ¦   ¦   ¦   glist.h
+¦   ¦               ¦   ¦   ¦   ¦   gmacros.h
+¦   ¦               ¦   ¦   ¦   ¦   gmain.h
+¦   ¦               ¦   ¦   ¦   ¦   gmappedfile.h
+¦   ¦               ¦   ¦   ¦   ¦   gmarkup.h
+¦   ¦               ¦   ¦   ¦   ¦   gmem.h
+¦   ¦               ¦   ¦   ¦   ¦   gmessages.h
+¦   ¦               ¦   ¦   ¦   ¦   gnode.h
+¦   ¦               ¦   ¦   ¦   ¦   goption.h
+¦   ¦               ¦   ¦   ¦   ¦   gpathbuf.h
+¦   ¦               ¦   ¦   ¦   ¦   gpattern.h
+¦   ¦               ¦   ¦   ¦   ¦   gpoll.h
+¦   ¦               ¦   ¦   ¦   ¦   gprimes.h
+¦   ¦               ¦   ¦   ¦   ¦   gprintf.h
+¦   ¦               ¦   ¦   ¦   ¦   gqsort.h
+¦   ¦               ¦   ¦   ¦   ¦   gquark.h
+¦   ¦               ¦   ¦   ¦   ¦   gqueue.h
+¦   ¦               ¦   ¦   ¦   ¦   grand.h
+¦   ¦               ¦   ¦   ¦   ¦   grcbox.h
+¦   ¦               ¦   ¦   ¦   ¦   grefcount.h
+¦   ¦               ¦   ¦   ¦   ¦   grefstring.h
+¦   ¦               ¦   ¦   ¦   ¦   gscanner.h
+¦   ¦               ¦   ¦   ¦   ¦   gsequence.h
+¦   ¦               ¦   ¦   ¦   ¦   gshell.h
+¦   ¦               ¦   ¦   ¦   ¦   gslice.h
+¦   ¦               ¦   ¦   ¦   ¦   gslist.h
+¦   ¦               ¦   ¦   ¦   ¦   gspawn.h
+¦   ¦               ¦   ¦   ¦   ¦   gstdio.h
+¦   ¦               ¦   ¦   ¦   ¦   gstrfuncs.h
+¦   ¦               ¦   ¦   ¦   ¦   gstring.h
+¦   ¦               ¦   ¦   ¦   ¦   gstringchunk.h
+¦   ¦               ¦   ¦   ¦   ¦   gstrvbuilder.h
+¦   ¦               ¦   ¦   ¦   ¦   gtestutils.h
+¦   ¦               ¦   ¦   ¦   ¦   gthread.h
+¦   ¦               ¦   ¦   ¦   ¦   gthreadpool.h
+¦   ¦               ¦   ¦   ¦   ¦   gtimer.h
+¦   ¦               ¦   ¦   ¦   ¦   gtimezone.h
+¦   ¦               ¦   ¦   ¦   ¦   gtrashstack.h
+¦   ¦               ¦   ¦   ¦   ¦   gtree.h
+¦   ¦               ¦   ¦   ¦   ¦   gtypes.h
+¦   ¦               ¦   ¦   ¦   ¦   gunicode.h
+¦   ¦               ¦   ¦   ¦   ¦   guri.h
+¦   ¦               ¦   ¦   ¦   ¦   gutils.h
+¦   ¦               ¦   ¦   ¦   ¦   guuid.h
+¦   ¦               ¦   ¦   ¦   ¦   gvariant.h
+¦   ¦               ¦   ¦   ¦   ¦   gvarianttype.h
+¦   ¦               ¦   ¦   ¦   ¦   gversion.h
+¦   ¦               ¦   ¦   ¦   ¦   gversionmacros.h
+¦   ¦               ¦   ¦   ¦   ¦   gwin32.h
+¦   ¦               ¦   ¦   ¦   ¦   
+¦   ¦               ¦   ¦   ¦   +---deprecated
+¦   ¦               ¦   ¦   ¦           gallocator.h
+¦   ¦               ¦   ¦   ¦           gcache.h
+¦   ¦               ¦   ¦   ¦           gcompletion.h
+¦   ¦               ¦   ¦   ¦           gmain.h
+¦   ¦               ¦   ¦   ¦           grel.h
+¦   ¦               ¦   ¦   ¦           gthread.h
+¦   ¦               ¦   ¦   ¦           
+¦   ¦               ¦   ¦   +---gmodule
+¦   ¦               ¦   ¦   ¦       gmodule-visibility.h
+¦   ¦               ¦   ¦   ¦       
+¦   ¦               ¦   ¦   +---gobject
+¦   ¦               ¦   ¦           gbinding.h
+¦   ¦               ¦   ¦           gbindinggroup.h
+¦   ¦               ¦   ¦           gboxed.h
+¦   ¦               ¦   ¦           gclosure.h
+¦   ¦               ¦   ¦           genums.h
+¦   ¦               ¦   ¦           glib-enumtypes.h
+¦   ¦               ¦   ¦           glib-types.h
+¦   ¦               ¦   ¦           gmarshal.h
+¦   ¦               ¦   ¦           gobject-autocleanups.h
+¦   ¦               ¦   ¦           gobject-visibility.h
+¦   ¦               ¦   ¦           gobject.h
+¦   ¦               ¦   ¦           gobjectnotifyqueue.c
+¦   ¦               ¦   ¦           gparam.h
+¦   ¦               ¦   ¦           gparamspecs.h
+¦   ¦               ¦   ¦           gsignal.h
+¦   ¦               ¦   ¦           gsignalgroup.h
+¦   ¦               ¦   ¦           gsourceclosure.h
+¦   ¦               ¦   ¦           gtype.h
+¦   ¦               ¦   ¦           gtypemodule.h
+¦   ¦               ¦   ¦           gtypeplugin.h
+¦   ¦               ¦   ¦           gvalue.h
+¦   ¦               ¦   ¦           gvaluearray.h
+¦   ¦               ¦   ¦           gvaluecollector.h
+¦   ¦               ¦   ¦           gvaluetypes.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---harfbuzz
+¦   ¦               ¦   ¦       hb-aat-layout.h
+¦   ¦               ¦   ¦       hb-aat.h
+¦   ¦               ¦   ¦       hb-blob.h
+¦   ¦               ¦   ¦       hb-buffer.h
+¦   ¦               ¦   ¦       hb-cairo.h
+¦   ¦               ¦   ¦       hb-common.h
+¦   ¦               ¦   ¦       hb-cplusplus.hh
+¦   ¦               ¦   ¦       hb-deprecated.h
+¦   ¦               ¦   ¦       hb-draw.h
+¦   ¦               ¦   ¦       hb-face.h
+¦   ¦               ¦   ¦       hb-features.h
+¦   ¦               ¦   ¦       hb-font.h
+¦   ¦               ¦   ¦       hb-ft.h
+¦   ¦               ¦   ¦       hb-glib.h
+¦   ¦               ¦   ¦       hb-gobject-enums.h
+¦   ¦               ¦   ¦       hb-gobject-structs.h
+¦   ¦               ¦   ¦       hb-gobject.h
+¦   ¦               ¦   ¦       hb-map.h
+¦   ¦               ¦   ¦       hb-ot-color.h
+¦   ¦               ¦   ¦       hb-ot-deprecated.h
+¦   ¦               ¦   ¦       hb-ot-font.h
+¦   ¦               ¦   ¦       hb-ot-layout.h
+¦   ¦               ¦   ¦       hb-ot-math.h
+¦   ¦               ¦   ¦       hb-ot-meta.h
+¦   ¦               ¦   ¦       hb-ot-metrics.h
+¦   ¦               ¦   ¦       hb-ot-name.h
+¦   ¦               ¦   ¦       hb-ot-shape.h
+¦   ¦               ¦   ¦       hb-ot-var.h
+¦   ¦               ¦   ¦       hb-ot.h
+¦   ¦               ¦   ¦       hb-paint.h
+¦   ¦               ¦   ¦       hb-set.h
+¦   ¦               ¦   ¦       hb-shape-plan.h
+¦   ¦               ¦   ¦       hb-shape.h
+¦   ¦               ¦   ¦       hb-style.h
+¦   ¦               ¦   ¦       hb-subset-repacker.h
+¦   ¦               ¦   ¦       hb-subset.h
+¦   ¦               ¦   ¦       hb-unicode.h
+¦   ¦               ¦   ¦       hb-version.h
+¦   ¦               ¦   ¦       hb.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---libexif
+¦   ¦               ¦   ¦       exif-byte-order.h
+¦   ¦               ¦   ¦       exif-content.h
+¦   ¦               ¦   ¦       exif-data-type.h
+¦   ¦               ¦   ¦       exif-data.h
+¦   ¦               ¦   ¦       exif-entry.h
+¦   ¦               ¦   ¦       exif-format.h
+¦   ¦               ¦   ¦       exif-ifd.h
+¦   ¦               ¦   ¦       exif-loader.h
+¦   ¦               ¦   ¦       exif-log.h
+¦   ¦               ¦   ¦       exif-mem.h
+¦   ¦               ¦   ¦       exif-mnote-data.h
+¦   ¦               ¦   ¦       exif-tag.h
+¦   ¦               ¦   ¦       exif-utils.h
+¦   ¦               ¦   ¦       _stdint.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---libheif
+¦   ¦               ¦   ¦       heif.h
+¦   ¦               ¦   ¦       heif_cxx.h
+¦   ¦               ¦   ¦       heif_plugin.h
+¦   ¦               ¦   ¦       heif_version.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---libpng16
+¦   ¦               ¦   ¦       png.h
+¦   ¦               ¦   ¦       pngconf.h
+¦   ¦               ¦   ¦       pnglibconf.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---librsvg-2.0
+¦   ¦               ¦   ¦   +---librsvg
+¦   ¦               ¦   ¦           rsvg-cairo.h
+¦   ¦               ¦   ¦           rsvg-features.h
+¦   ¦               ¦   ¦           rsvg-version.h
+¦   ¦               ¦   ¦           rsvg.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---libxml2
+¦   ¦               ¦   ¦   +---libxml
+¦   ¦               ¦   ¦           c14n.h
+¦   ¦               ¦   ¦           catalog.h
+¦   ¦               ¦   ¦           chvalid.h
+¦   ¦               ¦   ¦           debugXML.h
+¦   ¦               ¦   ¦           dict.h
+¦   ¦               ¦   ¦           encoding.h
+¦   ¦               ¦   ¦           entities.h
+¦   ¦               ¦   ¦           globals.h
+¦   ¦               ¦   ¦           hash.h
+¦   ¦               ¦   ¦           HTMLparser.h
+¦   ¦               ¦   ¦           HTMLtree.h
+¦   ¦               ¦   ¦           list.h
+¦   ¦               ¦   ¦           nanoftp.h
+¦   ¦               ¦   ¦           nanohttp.h
+¦   ¦               ¦   ¦           parser.h
+¦   ¦               ¦   ¦           parserInternals.h
+¦   ¦               ¦   ¦           pattern.h
+¦   ¦               ¦   ¦           relaxng.h
+¦   ¦               ¦   ¦           SAX.h
+¦   ¦               ¦   ¦           SAX2.h
+¦   ¦               ¦   ¦           schemasInternals.h
+¦   ¦               ¦   ¦           schematron.h
+¦   ¦               ¦   ¦           threads.h
+¦   ¦               ¦   ¦           tree.h
+¦   ¦               ¦   ¦           uri.h
+¦   ¦               ¦   ¦           valid.h
+¦   ¦               ¦   ¦           xinclude.h
+¦   ¦               ¦   ¦           xlink.h
+¦   ¦               ¦   ¦           xmlautomata.h
+¦   ¦               ¦   ¦           xmlerror.h
+¦   ¦               ¦   ¦           xmlexports.h
+¦   ¦               ¦   ¦           xmlIO.h
+¦   ¦               ¦   ¦           xmlmemory.h
+¦   ¦               ¦   ¦           xmlmodule.h
+¦   ¦               ¦   ¦           xmlreader.h
+¦   ¦               ¦   ¦           xmlregexp.h
+¦   ¦               ¦   ¦           xmlsave.h
+¦   ¦               ¦   ¦           xmlschemas.h
+¦   ¦               ¦   ¦           xmlschemastypes.h
+¦   ¦               ¦   ¦           xmlstring.h
+¦   ¦               ¦   ¦           xmlunicode.h
+¦   ¦               ¦   ¦           xmlversion.h
+¦   ¦               ¦   ¦           xmlwriter.h
+¦   ¦               ¦   ¦           xpath.h
+¦   ¦               ¦   ¦           xpathInternals.h
+¦   ¦               ¦   ¦           xpointer.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---orc-0.4
+¦   ¦               ¦   ¦   +---orc
+¦   ¦               ¦   ¦           orc-stdint.h
+¦   ¦               ¦   ¦           orc.h
+¦   ¦               ¦   ¦           orcarm.h
+¦   ¦               ¦   ¦           orcbytecode.h
+¦   ¦               ¦   ¦           orcbytecodes.h
+¦   ¦               ¦   ¦           orccode.h
+¦   ¦               ¦   ¦           orccompiler.h
+¦   ¦               ¦   ¦           orcconstant.h
+¦   ¦               ¦   ¦           orccpu.h
+¦   ¦               ¦   ¦           orccpuinsn.h
+¦   ¦               ¦   ¦           orcdebug.h
+¦   ¦               ¦   ¦           orcemulateopcodes.h
+¦   ¦               ¦   ¦           orcexecutor.h
+¦   ¦               ¦   ¦           orcfunctions.h
+¦   ¦               ¦   ¦           orcinstruction.h
+¦   ¦               ¦   ¦           orcinternal.h
+¦   ¦               ¦   ¦           orclimits.h
+¦   ¦               ¦   ¦           orcmips.h
+¦   ¦               ¦   ¦           orcmmx.h
+¦   ¦               ¦   ¦           orcneon.h
+¦   ¦               ¦   ¦           orconce.h
+¦   ¦               ¦   ¦           orcopcode.h
+¦   ¦               ¦   ¦           orcparse.h
+¦   ¦               ¦   ¦           orcpowerpc.h
+¦   ¦               ¦   ¦           orcprogram.h
+¦   ¦               ¦   ¦           orcrule.h
+¦   ¦               ¦   ¦           orcsse.h
+¦   ¦               ¦   ¦           orctarget.h
+¦   ¦               ¦   ¦           orcutils.h
+¦   ¦               ¦   ¦           orcvariable.h
+¦   ¦               ¦   ¦           orcx86.h
+¦   ¦               ¦   ¦           orcx86insn.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---pango-1.0
+¦   ¦               ¦   ¦   +---pango
+¦   ¦               ¦   ¦           pango-attributes.h
+¦   ¦               ¦   ¦           pango-bidi-type.h
+¦   ¦               ¦   ¦           pango-break.h
+¦   ¦               ¦   ¦           pango-color.h
+¦   ¦               ¦   ¦           pango-context.h
+¦   ¦               ¦   ¦           pango-coverage.h
+¦   ¦               ¦   ¦           pango-direction.h
+¦   ¦               ¦   ¦           pango-engine.h
+¦   ¦               ¦   ¦           pango-enum-types.h
+¦   ¦               ¦   ¦           pango-features.h
+¦   ¦               ¦   ¦           pango-font.h
+¦   ¦               ¦   ¦           pango-fontmap.h
+¦   ¦               ¦   ¦           pango-fontset-simple.h
+¦   ¦               ¦   ¦           pango-fontset.h
+¦   ¦               ¦   ¦           pango-glyph-item.h
+¦   ¦               ¦   ¦           pango-glyph.h
+¦   ¦               ¦   ¦           pango-gravity.h
+¦   ¦               ¦   ¦           pango-item.h
+¦   ¦               ¦   ¦           pango-language.h
+¦   ¦               ¦   ¦           pango-layout.h
+¦   ¦               ¦   ¦           pango-markup.h
+¦   ¦               ¦   ¦           pango-matrix.h
+¦   ¦               ¦   ¦           pango-modules.h
+¦   ¦               ¦   ¦           pango-ot.h
+¦   ¦               ¦   ¦           pango-renderer.h
+¦   ¦               ¦   ¦           pango-script.h
+¦   ¦               ¦   ¦           pango-tabs.h
+¦   ¦               ¦   ¦           pango-types.h
+¦   ¦               ¦   ¦           pango-utils.h
+¦   ¦               ¦   ¦           pango-version-macros.h
+¦   ¦               ¦   ¦           pango.h
+¦   ¦               ¦   ¦           pangocairo.h
+¦   ¦               ¦   ¦           pangofc-decoder.h
+¦   ¦               ¦   ¦           pangofc-font.h
+¦   ¦               ¦   ¦           pangofc-fontmap.h
+¦   ¦               ¦   ¦           pangoft2.h
+¦   ¦               ¦   ¦           pangowin32.h
+¦   ¦               ¦   ¦           
+¦   ¦               ¦   +---pixman-1
+¦   ¦               ¦   ¦       pixman-version.h
+¦   ¦               ¦   ¦       pixman.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---vips
+¦   ¦               ¦   ¦       arithmetic.h
+¦   ¦               ¦   ¦       basic.h
+¦   ¦               ¦   ¦       buf.h
+¦   ¦               ¦   ¦       colour.h
+¦   ¦               ¦   ¦       connection.h
+¦   ¦               ¦   ¦       conversion.h
+¦   ¦               ¦   ¦       convolution.h
+¦   ¦               ¦   ¦       create.h
+¦   ¦               ¦   ¦       dbuf.h
+¦   ¦               ¦   ¦       debug.h
+¦   ¦               ¦   ¦       draw.h
+¦   ¦               ¦   ¦       enumtypes.h
+¦   ¦               ¦   ¦       error.h
+¦   ¦               ¦   ¦       foreign.h
+¦   ¦               ¦   ¦       format.h
+¦   ¦               ¦   ¦       freqfilt.h
+¦   ¦               ¦   ¦       gate.h
+¦   ¦               ¦   ¦       generate.h
+¦   ¦               ¦   ¦       header.h
+¦   ¦               ¦   ¦       histogram.h
+¦   ¦               ¦   ¦       image.h
+¦   ¦               ¦   ¦       interpolate.h
+¦   ¦               ¦   ¦       memory.h
+¦   ¦               ¦   ¦       morphology.h
+¦   ¦               ¦   ¦       mosaicing.h
+¦   ¦               ¦   ¦       object.h
+¦   ¦               ¦   ¦       operation.h
+¦   ¦               ¦   ¦       private.h
+¦   ¦               ¦   ¦       rect.h
+¦   ¦               ¦   ¦       region.h
+¦   ¦               ¦   ¦       resample.h
+¦   ¦               ¦   ¦       sbuf.h
+¦   ¦               ¦   ¦       semaphore.h
+¦   ¦               ¦   ¦       thread.h
+¦   ¦               ¦   ¦       threadpool.h
+¦   ¦               ¦   ¦       transform.h
+¦   ¦               ¦   ¦       type.h
+¦   ¦               ¦   ¦       util.h
+¦   ¦               ¦   ¦       VConnection8.h
+¦   ¦               ¦   ¦       vector.h
+¦   ¦               ¦   ¦       VError8.h
+¦   ¦               ¦   ¦       version.h
+¦   ¦               ¦   ¦       VImage8.h
+¦   ¦               ¦   ¦       VInterpolate8.h
+¦   ¦               ¦   ¦       vips.h
+¦   ¦               ¦   ¦       vips8
+¦   ¦               ¦   ¦       VRegion8.h
+¦   ¦               ¦   ¦       
+¦   ¦               ¦   +---webp
+¦   ¦               ¦       ¦   decode.h
+¦   ¦               ¦       ¦   demux.h
+¦   ¦               ¦       ¦   encode.h
+¦   ¦               ¦       ¦   mux.h
+¦   ¦               ¦       ¦   mux_types.h
+¦   ¦               ¦       ¦   types.h
+¦   ¦               ¦       ¦   
+¦   ¦               ¦       +---sharpyuv
+¦   ¦               ¦               sharpyuv.h
+¦   ¦               ¦               sharpyuv_csp.h
+¦   ¦               ¦               
+¦   ¦               +---lib
+¦   ¦                   ¦   libglib-2.0-0.dll
+¦   ¦                   ¦   libglib-2.0.lib
+¦   ¦                   ¦   libgobject-2.0-0.dll
+¦   ¦                   ¦   libgobject-2.0.lib
+¦   ¦                   ¦   libvips-42.dll
+¦   ¦                   ¦   libvips.lib
+¦   ¦                   ¦   
+¦   ¦                   +---glib-2.0
+¦   ¦                       +---include
+¦   ¦                               glibconfig.h
+¦   ¦                               
 ¦   +---side-channel
 ¦   ¦   ¦   .editorconfig
 ¦   ¦   ¦   .eslintrc
@@ -3863,6 +7584,34 @@ C:.
 ¦   ¦   +---test
 ¦   ¦           index.js
 ¦   ¦           
+¦   +---simple-concat
+¦   ¦   ¦   .travis.yml
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---test
+¦   ¦           basic.js
+¦   ¦           
+¦   +---simple-get
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---.github
+¦   ¦       ¦   dependabot.yml
+¦   ¦       ¦   
+¦   ¦       +---workflows
+¦   ¦               ci.yml
+¦   ¦               
+¦   +---simple-swizzle
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---simple-update-notifier
 ¦   ¦   ¦   LICENSE
 ¦   ¦   ¦   package.json
@@ -3910,6 +7659,12 @@ C:.
 ¦   ¦   +---test
 ¦   ¦           test.js
 ¦   ¦           
+¦   +---streamx
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---string_decoder
 ¦   ¦   ¦   LICENSE
 ¦   ¦   ¦   package.json
@@ -3925,6 +7680,12 @@ C:.
 ¦   ¦               package.json
 ¦   ¦               README.md
 ¦   ¦               
+¦   +---strip-json-comments
+¦   ¦       index.js
+¦   ¦       license
+¦   ¦       package.json
+¦   ¦       readme.md
+¦   ¦       
 ¦   +---supports-color
 ¦   ¦       browser.js
 ¦   ¦       index.js
@@ -3932,6 +7693,296 @@ C:.
 ¦   ¦       package.json
 ¦   ¦       readme.md
 ¦   ¦       
+¦   +---tar
+¦   ¦   ¦   LICENSE.md
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦       +---commonjs
+¦   ¦       ¦       create.d.ts
+¦   ¦       ¦       create.d.ts.map
+¦   ¦       ¦       create.js
+¦   ¦       ¦       create.js.map
+¦   ¦       ¦       cwd-error.d.ts
+¦   ¦       ¦       cwd-error.d.ts.map
+¦   ¦       ¦       cwd-error.js
+¦   ¦       ¦       cwd-error.js.map
+¦   ¦       ¦       extract.d.ts
+¦   ¦       ¦       extract.d.ts.map
+¦   ¦       ¦       extract.js
+¦   ¦       ¦       extract.js.map
+¦   ¦       ¦       get-write-flag.d.ts
+¦   ¦       ¦       get-write-flag.d.ts.map
+¦   ¦       ¦       get-write-flag.js
+¦   ¦       ¦       get-write-flag.js.map
+¦   ¦       ¦       header.d.ts
+¦   ¦       ¦       header.d.ts.map
+¦   ¦       ¦       header.js
+¦   ¦       ¦       header.js.map
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.js
+¦   ¦       ¦       index.js.map
+¦   ¦       ¦       index.min.js
+¦   ¦       ¦       index.min.js.map
+¦   ¦       ¦       large-numbers.d.ts
+¦   ¦       ¦       large-numbers.d.ts.map
+¦   ¦       ¦       large-numbers.js
+¦   ¦       ¦       large-numbers.js.map
+¦   ¦       ¦       list.d.ts
+¦   ¦       ¦       list.d.ts.map
+¦   ¦       ¦       list.js
+¦   ¦       ¦       list.js.map
+¦   ¦       ¦       make-command.d.ts
+¦   ¦       ¦       make-command.d.ts.map
+¦   ¦       ¦       make-command.js
+¦   ¦       ¦       make-command.js.map
+¦   ¦       ¦       mkdir.d.ts
+¦   ¦       ¦       mkdir.d.ts.map
+¦   ¦       ¦       mkdir.js
+¦   ¦       ¦       mkdir.js.map
+¦   ¦       ¦       mode-fix.d.ts
+¦   ¦       ¦       mode-fix.d.ts.map
+¦   ¦       ¦       mode-fix.js
+¦   ¦       ¦       mode-fix.js.map
+¦   ¦       ¦       normalize-unicode.d.ts
+¦   ¦       ¦       normalize-unicode.d.ts.map
+¦   ¦       ¦       normalize-unicode.js
+¦   ¦       ¦       normalize-unicode.js.map
+¦   ¦       ¦       normalize-windows-path.d.ts
+¦   ¦       ¦       normalize-windows-path.d.ts.map
+¦   ¦       ¦       normalize-windows-path.js
+¦   ¦       ¦       normalize-windows-path.js.map
+¦   ¦       ¦       options.d.ts
+¦   ¦       ¦       options.d.ts.map
+¦   ¦       ¦       options.js
+¦   ¦       ¦       options.js.map
+¦   ¦       ¦       pack.d.ts
+¦   ¦       ¦       pack.d.ts.map
+¦   ¦       ¦       pack.js
+¦   ¦       ¦       pack.js.map
+¦   ¦       ¦       package.json
+¦   ¦       ¦       parse.d.ts
+¦   ¦       ¦       parse.d.ts.map
+¦   ¦       ¦       parse.js
+¦   ¦       ¦       parse.js.map
+¦   ¦       ¦       path-reservations.d.ts
+¦   ¦       ¦       path-reservations.d.ts.map
+¦   ¦       ¦       path-reservations.js
+¦   ¦       ¦       path-reservations.js.map
+¦   ¦       ¦       pax.d.ts
+¦   ¦       ¦       pax.d.ts.map
+¦   ¦       ¦       pax.js
+¦   ¦       ¦       pax.js.map
+¦   ¦       ¦       process-umask.d.ts
+¦   ¦       ¦       process-umask.d.ts.map
+¦   ¦       ¦       process-umask.js
+¦   ¦       ¦       process-umask.js.map
+¦   ¦       ¦       read-entry.d.ts
+¦   ¦       ¦       read-entry.d.ts.map
+¦   ¦       ¦       read-entry.js
+¦   ¦       ¦       read-entry.js.map
+¦   ¦       ¦       replace.d.ts
+¦   ¦       ¦       replace.d.ts.map
+¦   ¦       ¦       replace.js
+¦   ¦       ¦       replace.js.map
+¦   ¦       ¦       strip-absolute-path.d.ts
+¦   ¦       ¦       strip-absolute-path.d.ts.map
+¦   ¦       ¦       strip-absolute-path.js
+¦   ¦       ¦       strip-absolute-path.js.map
+¦   ¦       ¦       strip-trailing-slashes.d.ts
+¦   ¦       ¦       strip-trailing-slashes.d.ts.map
+¦   ¦       ¦       strip-trailing-slashes.js
+¦   ¦       ¦       strip-trailing-slashes.js.map
+¦   ¦       ¦       symlink-error.d.ts
+¦   ¦       ¦       symlink-error.d.ts.map
+¦   ¦       ¦       symlink-error.js
+¦   ¦       ¦       symlink-error.js.map
+¦   ¦       ¦       types.d.ts
+¦   ¦       ¦       types.d.ts.map
+¦   ¦       ¦       types.js
+¦   ¦       ¦       types.js.map
+¦   ¦       ¦       unpack.d.ts
+¦   ¦       ¦       unpack.d.ts.map
+¦   ¦       ¦       unpack.js
+¦   ¦       ¦       unpack.js.map
+¦   ¦       ¦       update.d.ts
+¦   ¦       ¦       update.d.ts.map
+¦   ¦       ¦       update.js
+¦   ¦       ¦       update.js.map
+¦   ¦       ¦       warn-method.d.ts
+¦   ¦       ¦       warn-method.d.ts.map
+¦   ¦       ¦       warn-method.js
+¦   ¦       ¦       warn-method.js.map
+¦   ¦       ¦       winchars.d.ts
+¦   ¦       ¦       winchars.d.ts.map
+¦   ¦       ¦       winchars.js
+¦   ¦       ¦       winchars.js.map
+¦   ¦       ¦       write-entry.d.ts
+¦   ¦       ¦       write-entry.d.ts.map
+¦   ¦       ¦       write-entry.js
+¦   ¦       ¦       write-entry.js.map
+¦   ¦       ¦       
+¦   ¦       +---esm
+¦   ¦               create.d.ts
+¦   ¦               create.d.ts.map
+¦   ¦               create.js
+¦   ¦               create.js.map
+¦   ¦               cwd-error.d.ts
+¦   ¦               cwd-error.d.ts.map
+¦   ¦               cwd-error.js
+¦   ¦               cwd-error.js.map
+¦   ¦               extract.d.ts
+¦   ¦               extract.d.ts.map
+¦   ¦               extract.js
+¦   ¦               extract.js.map
+¦   ¦               get-write-flag.d.ts
+¦   ¦               get-write-flag.d.ts.map
+¦   ¦               get-write-flag.js
+¦   ¦               get-write-flag.js.map
+¦   ¦               header.d.ts
+¦   ¦               header.d.ts.map
+¦   ¦               header.js
+¦   ¦               header.js.map
+¦   ¦               index.d.ts
+¦   ¦               index.d.ts.map
+¦   ¦               index.js
+¦   ¦               index.js.map
+¦   ¦               index.min.js
+¦   ¦               index.min.js.map
+¦   ¦               large-numbers.d.ts
+¦   ¦               large-numbers.d.ts.map
+¦   ¦               large-numbers.js
+¦   ¦               large-numbers.js.map
+¦   ¦               list.d.ts
+¦   ¦               list.d.ts.map
+¦   ¦               list.js
+¦   ¦               list.js.map
+¦   ¦               make-command.d.ts
+¦   ¦               make-command.d.ts.map
+¦   ¦               make-command.js
+¦   ¦               make-command.js.map
+¦   ¦               mkdir.d.ts
+¦   ¦               mkdir.d.ts.map
+¦   ¦               mkdir.js
+¦   ¦               mkdir.js.map
+¦   ¦               mode-fix.d.ts
+¦   ¦               mode-fix.d.ts.map
+¦   ¦               mode-fix.js
+¦   ¦               mode-fix.js.map
+¦   ¦               normalize-unicode.d.ts
+¦   ¦               normalize-unicode.d.ts.map
+¦   ¦               normalize-unicode.js
+¦   ¦               normalize-unicode.js.map
+¦   ¦               normalize-windows-path.d.ts
+¦   ¦               normalize-windows-path.d.ts.map
+¦   ¦               normalize-windows-path.js
+¦   ¦               normalize-windows-path.js.map
+¦   ¦               options.d.ts
+¦   ¦               options.d.ts.map
+¦   ¦               options.js
+¦   ¦               options.js.map
+¦   ¦               pack.d.ts
+¦   ¦               pack.d.ts.map
+¦   ¦               pack.js
+¦   ¦               pack.js.map
+¦   ¦               package.json
+¦   ¦               parse.d.ts
+¦   ¦               parse.d.ts.map
+¦   ¦               parse.js
+¦   ¦               parse.js.map
+¦   ¦               path-reservations.d.ts
+¦   ¦               path-reservations.d.ts.map
+¦   ¦               path-reservations.js
+¦   ¦               path-reservations.js.map
+¦   ¦               pax.d.ts
+¦   ¦               pax.d.ts.map
+¦   ¦               pax.js
+¦   ¦               pax.js.map
+¦   ¦               process-umask.d.ts
+¦   ¦               process-umask.d.ts.map
+¦   ¦               process-umask.js
+¦   ¦               process-umask.js.map
+¦   ¦               read-entry.d.ts
+¦   ¦               read-entry.d.ts.map
+¦   ¦               read-entry.js
+¦   ¦               read-entry.js.map
+¦   ¦               replace.d.ts
+¦   ¦               replace.d.ts.map
+¦   ¦               replace.js
+¦   ¦               replace.js.map
+¦   ¦               strip-absolute-path.d.ts
+¦   ¦               strip-absolute-path.d.ts.map
+¦   ¦               strip-absolute-path.js
+¦   ¦               strip-absolute-path.js.map
+¦   ¦               strip-trailing-slashes.d.ts
+¦   ¦               strip-trailing-slashes.d.ts.map
+¦   ¦               strip-trailing-slashes.js
+¦   ¦               strip-trailing-slashes.js.map
+¦   ¦               symlink-error.d.ts
+¦   ¦               symlink-error.d.ts.map
+¦   ¦               symlink-error.js
+¦   ¦               symlink-error.js.map
+¦   ¦               types.d.ts
+¦   ¦               types.d.ts.map
+¦   ¦               types.js
+¦   ¦               types.js.map
+¦   ¦               unpack.d.ts
+¦   ¦               unpack.d.ts.map
+¦   ¦               unpack.js
+¦   ¦               unpack.js.map
+¦   ¦               update.d.ts
+¦   ¦               update.d.ts.map
+¦   ¦               update.js
+¦   ¦               update.js.map
+¦   ¦               warn-method.d.ts
+¦   ¦               warn-method.d.ts.map
+¦   ¦               warn-method.js
+¦   ¦               warn-method.js.map
+¦   ¦               winchars.d.ts
+¦   ¦               winchars.d.ts.map
+¦   ¦               winchars.js
+¦   ¦               winchars.js.map
+¦   ¦               write-entry.d.ts
+¦   ¦               write-entry.d.ts.map
+¦   ¦               write-entry.js
+¦   ¦               write-entry.js.map
+¦   ¦               
+¦   +---tar-fs
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---tar-stream
+¦   ¦       constants.js
+¦   ¦       extract.js
+¦   ¦       headers.js
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       pack.js
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
+¦   +---teex
+¦   ¦       example.js
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       test.js
+¦   ¦       
+¦   +---text-decoder
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           pass-through-decoder.js
+¦   ¦           utf8-decoder.js
+¦   ¦           
 ¦   +---to-regex-range
 ¦   ¦       index.js
 ¦   ¦       LICENSE
@@ -3972,6 +8023,12 @@ C:.
 ¦   ¦           index.js
 ¦   ¦           package.json
 ¦   ¦           
+¦   +---tunnel-agent
+¦   ¦       index.js
+¦   ¦       LICENSE
+¦   ¦       package.json
+¦   ¦       README.md
+¦   ¦       
 ¦   +---type-is
 ¦   ¦       HISTORY.md
 ¦   ¦       index.js
@@ -4088,28 +8145,106 @@ C:.
 ¦   ¦       wrappy.js
 ¦   ¦       
 ¦   +---ws
-¦       ¦   browser.js
-¦       ¦   index.js
+¦   ¦   ¦   browser.js
+¦   ¦   ¦   index.js
+¦   ¦   ¦   LICENSE
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   wrapper.mjs
+¦   ¦   ¦   
+¦   ¦   +---lib
+¦   ¦           buffer-util.js
+¦   ¦           constants.js
+¦   ¦           event-target.js
+¦   ¦           extension.js
+¦   ¦           limiter.js
+¦   ¦           permessage-deflate.js
+¦   ¦           receiver.js
+¦   ¦           sender.js
+¦   ¦           stream.js
+¦   ¦           subprotocol.js
+¦   ¦           validation.js
+¦   ¦           websocket-server.js
+¦   ¦           websocket.js
+¦   ¦           
+¦   +---yallist
+¦   ¦   ¦   LICENSE.md
+¦   ¦   ¦   package.json
+¦   ¦   ¦   README.md
+¦   ¦   ¦   
+¦   ¦   +---dist
+¦   ¦       +---commonjs
+¦   ¦       ¦       index.d.ts
+¦   ¦       ¦       index.d.ts.map
+¦   ¦       ¦       index.js
+¦   ¦       ¦       index.js.map
+¦   ¦       ¦       package.json
+¦   ¦       ¦       
+¦   ¦       +---esm
+¦   ¦               index.d.ts
+¦   ¦               index.d.ts.map
+¦   ¦               index.js
+¦   ¦               index.js.map
+¦   ¦               package.json
+¦   ¦               
+¦   +---zod
+¦       ¦   index.d.ts
 ¦       ¦   LICENSE
 ¦       ¦   package.json
 ¦       ¦   README.md
-¦       ¦   wrapper.mjs
 ¦       ¦   
 ¦       +---lib
-¦               buffer-util.js
-¦               constants.js
-¦               event-target.js
-¦               extension.js
-¦               limiter.js
-¦               permessage-deflate.js
-¦               receiver.js
-¦               sender.js
-¦               stream.js
-¦               subprotocol.js
-¦               validation.js
-¦               websocket-server.js
-¦               websocket.js
-¦               
+¦           ¦   errors.d.ts
+¦           ¦   errors.js
+¦           ¦   external.d.ts
+¦           ¦   external.js
+¦           ¦   index.d.ts
+¦           ¦   index.js
+¦           ¦   index.mjs
+¦           ¦   index.umd.js
+¦           ¦   types.d.ts
+¦           ¦   types.js
+¦           ¦   ZodError.d.ts
+¦           ¦   ZodError.js
+¦           ¦   
+¦           +---benchmarks
+¦           ¦       discriminatedUnion.d.ts
+¦           ¦       discriminatedUnion.js
+¦           ¦       index.d.ts
+¦           ¦       index.js
+¦           ¦       object.d.ts
+¦           ¦       object.js
+¦           ¦       primitives.d.ts
+¦           ¦       primitives.js
+¦           ¦       realworld.d.ts
+¦           ¦       realworld.js
+¦           ¦       string.d.ts
+¦           ¦       string.js
+¦           ¦       union.d.ts
+¦           ¦       union.js
+¦           ¦       
+¦           +---helpers
+¦           ¦       enumUtil.d.ts
+¦           ¦       enumUtil.js
+¦           ¦       errorUtil.d.ts
+¦           ¦       errorUtil.js
+¦           ¦       parseUtil.d.ts
+¦           ¦       parseUtil.js
+¦           ¦       partialUtil.d.ts
+¦           ¦       partialUtil.js
+¦           ¦       typeAliases.d.ts
+¦           ¦       typeAliases.js
+¦           ¦       util.d.ts
+¦           ¦       util.js
+¦           ¦       
+¦           +---locales
+¦           ¦       en.d.ts
+¦           ¦       en.js
+¦           ¦       
+¦           +---__tests__
+¦                   Mocker.d.ts
+¦                   Mocker.js
+¦                   
 +---re-shop-docs
 ¦       ARCHIVO 00_INDICE_GENERAL.txt
 ¦       ARCHIVO 01_ARQUITECTURA_DEL_SISTEMA.txt
@@ -4146,6 +8281,7 @@ C:.
 ¦   ¦       authRoutes.js
 ¦   ¦       orders.js
 ¦   ¦       productRoutes.js
+¦   ¦       uploadRoutes.js
 ¦   ¦       
 ¦   +---utils
 +---uploads

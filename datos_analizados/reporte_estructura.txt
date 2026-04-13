@@ -2,7 +2,7 @@
    REPORTE COMPLETO DE ESTRUCTURA - RESHOP PARAGUAY
 ============================================================
 
-Fecha: dom 12/04/2026 18:44:31,38
+Fecha: lun 13/04/2026 10:06:57,58
 Propietaria: Luciana Noelia Da Silva
 Desarrollador: Pedro Jose Pirovani
 
@@ -23,6 +23,7 @@ NOTA: El arbol de archivos se encuentra en:
     - authRoutes.js 
     - orders.js 
     - productRoutes.js 
+    - uploadRoutes.js 
   [OK] src\controllers  
   [OK] src\middleware  
   [OK] src\models  
