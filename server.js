@@ -675,11 +675,11 @@ app.get('/api/products/:id', async (req, res) => {
         }
         
         // Consulta separada al vendedor
-        const { data: seller, error: sellerError } = await supabase
-            .from('users')
-            .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address_visible')
-            .eq('id', product.seller_id)
-            .single();
+const { data: seller, error: sellerError } = await supabaseAdmin  // ← Cambiar aquí
+    .from('users')
+    .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address_visible')
+    .eq('id', product.seller_id)
+    .single();
         
         if (!sellerError && seller) {
             product.seller = seller;
@@ -1537,4 +1537,4 @@ app.listen(PORT, () => {
     console.log('');
 });
 
-module.exports = app;
+module.exports = app;"// force-redeploy $(date)" 
