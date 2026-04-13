@@ -346,7 +346,7 @@
             { href:'index.html',    icon:'fas fa-home',         label:'Inicio',   pages:['index.html',''] },
             { href:'my-orders.html',icon:'fas fa-receipt',      label:'Pedidos',  pages:['my-orders.html','order-detail.html'] },
             { href:'cart.html',     icon:'fas fa-shopping-bag', label:'Carrito',  pages:['cart.html','checkout.html'], badge:count },
-            { href: user?(user.role==='seller'||user.role==='admin'?'dashboard-vendedor.html':'my-orders.html'):'login.html',
+            { href: user?(user.role==='seller'||user.role==='admin'?'dashboard-vendedor.html':'profile.html'):'login.html',
               icon: user?'fas fa-user-circle':'fas fa-sign-in-alt', label: user?'Mi Perfil':'Entrar',
               pages:['login.html','register.html','profile.html','dashboard-vendedor.html','admin-dashboard.html'] }
         ];
