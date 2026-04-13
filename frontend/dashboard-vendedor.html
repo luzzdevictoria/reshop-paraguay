@@ -2,9 +2,10 @@
 ================================================================================
 ARCHIVO: frontend/dashboard-vendedor.html
 PROYECTO: ReShop Paraguay
-VERSION: 2.3.1 (Mobile-First + Cámara + Cloudinary + Mensajería + Eliminar Fondo + Loader Visual)
+VERSION: 2.4.0 (Mobile-First + Cámara + Cloudinary + Mensajería + Eliminar Fondo + Loader Visual)
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Panel del vendedor. 
              - Tablas convertidas a tarjetas en móvil
              - Botones táctiles grandes
@@ -13,6 +14,15 @@ DESCRIPCION: Panel del vendedor.
              - Sistema de mensajería para vendedores
              - 🆕 Eliminación automática de fondo en fotos de producto
              - 🆕 Loader visual con animación de colores del tema ReShop
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-09 - Creación inicial del panel vendedor
+2026-04-10 - Implementación de tabs y CRUD de productos
+2026-04-11 - Agregado sistema de mensajería y filtros
+2026-04-12 - Agregado cámara con cambio frontal/trasera
+2026-04-13 - [ADD] Eliminación de fondo con IMG.LY (gratis, sin límites)
+2026-04-13 - [FIX] applyBackgroundRemoval ahora usa endpoint del backend
+2026-04-13 - [FIX] capturePhoto no sobrescribe el preview temporal
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -404,7 +414,7 @@ DESCRIPCION: Panel del vendedor.
                 </button>
             </div>
             <div id="productsContainer">
-                                <div class="loader-container">
+                <div class="loader-container">
                     <div class="three-body"></div>
                     <p>Cargando tus productos...</p>
                 </div>
@@ -869,7 +879,7 @@ DESCRIPCION: Panel del vendedor.
                 <span class="remove-image" onclick="removeImageFromPreview(this)">×</span>
             `;
             preview.appendChild(item);
-            return item; // 🆕 Retornar referencia para poder actualizar después
+            return item;
         }
 
         function updateImagePreviewsWithUrls() {
@@ -933,7 +943,7 @@ DESCRIPCION: Panel del vendedor.
         }
 
         // ============================================================
-        // 🆕 FUNCIÓN: ELIMINAR FONDO CON IMGLY + LOADER VISUAL
+        // 🆕 FUNCIÓN: ELIMINAR FONDO CON ENDPOINT DEL BACKEND (IMG.LY)
         // ============================================================
         async function applyBackgroundRemoval() {
             if (!lastCapturedBlob || !currentPreviewItem) {
@@ -943,7 +953,7 @@ DESCRIPCION: Panel del vendedor.
 
             const removeBgBtn = document.getElementById('removeBgBtn');
             
-            // 🆕 Mostrar loader visual con animación de colores del tema
+            // Mostrar loader visual con animación de colores del tema
             showBgRemovalLoader();
             
             removeBgBtn.disabled = true;
@@ -951,47 +961,52 @@ DESCRIPCION: Panel del vendedor.
             currentPreviewItem.classList.add('processing');
 
             try {
-                // 🆕 Importar librería dinámicamente (solo cuando se necesita)
-                const removeBackground = (await import('https://unpkg.com/@imgly/background-removal@1.5.5/dist/background-removal.esm.js')).default;
-                
-                // Procesar la imagen (la librería devuelve un Blob con fondo transparente)
-                const cleanedBlob = await removeBackground(lastCapturedBlob, {
-                    publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal-data@1.5.5/dist/',
+                // Enviar la imagen al backend para eliminar fondo
+                const formData = new FormData();
+                formData.append('image', lastCapturedBlob, 'photo.jpg');
+
+                const response = await fetch(`${API_URL}/api/remove-background`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
                 });
 
-                // Crear URL para preview
-                const cleanedUrl = URL.createObjectURL(cleanedBlob);
-                
-                // Actualizar preview visualmente
-                const img = currentPreviewItem.querySelector('img');
-                if (img) {
-                    img.src = cleanedUrl;
-                    img.style.background = 'url(\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAHUlEQVQ4jWNgYGAQIYAJglEDhoUBg9+FowbQ2gAARjwKARjtnN8AAAAASUVORK5CYII=\') repeat';
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Error al eliminar fondo');
                 }
+
+                const data = await response.json();
                 
-                // Subir nueva versión a Cloudinary
-                const file = new File([cleanedBlob], `no-bg_${Date.now()}.png`, { type: 'image/png' });
-                const cloudinaryUrl = await uploadImageToCloudinary(file);
-                
-                if (cloudinaryUrl) {
-                    // Actualizar array de URLs: reemplazar la URL anterior si existe, o agregar nueva
+                if (data.success && data.url) {
+                    // Actualizar preview visualmente con la imagen sin fondo
+                    const img = currentPreviewItem.querySelector('img');
+                    if (img) {
+                        img.src = data.url;
+                        img.style.background = 'url(\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAHUlEQVQ4jWNgYGAQIYAJglEDhoUBg9+FowbQ2gAARjwKARjtnN8AAAAASUVORK5CYII=\') repeat';
+                    }
+                    
+                    // Actualizar array de URLs: reemplazar la URL anterior si existe
                     const oldUrl = currentPreviewItem.getAttribute('data-url');
                     if (oldUrl) {
                         const index = uploadedImageUrls.indexOf(oldUrl);
-                        if (index !== -1) uploadedImageUrls[index] = cloudinaryUrl;
+                        if (index !== -1) uploadedImageUrls[index] = data.url;
                     } else {
-                        uploadedImageUrls.push(cloudinaryUrl);
+                        uploadedImageUrls.push(data.url);
                     }
+                    
                     // Actualizar atributo data-url
-                    currentPreviewItem.setAttribute('data-url', cloudinaryUrl);
+                    currentPreviewItem.setAttribute('data-url', data.url);
                     showToastMessage('✨ ¡Fondo eliminado exitosamente!', 'success');
+                } else {
+                    throw new Error(data.error || 'Error al procesar la imagen');
                 }
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error en applyBackgroundRemoval:', error);
                 showToastMessage('Error al eliminar fondo: ' + error.message, 'error');
             } finally {
-                // 🆕 Ocultar loader visual
+                // Ocultar loader visual
                 hideBgRemovalLoader();
                 
                 // Restaurar botón y estado
@@ -1062,7 +1077,7 @@ DESCRIPCION: Panel del vendedor.
             }
             document.getElementById('cameraOverlay').classList.remove('is-open');
             
-            // 🆕 Ocultar botón de eliminar fondo al cerrar cámara
+            // Ocultar botón de eliminar fondo al cerrar cámara
             const removeBgBtn = document.getElementById('removeBgBtn');
             if (removeBgBtn) {
                 removeBgBtn.style.display = 'none';
@@ -1074,6 +1089,9 @@ DESCRIPCION: Panel del vendedor.
             currentPreviewItem = null;
         }
 
+        // ============================================================
+        // CAPTURAR FOTO - Versión mejorada (no sobrescribe preview)
+        // ============================================================
         function capturePhoto() {
             const video = document.getElementById('cameraVideo');
             const canvas = document.getElementById('cameraCanvas');
@@ -1090,33 +1108,45 @@ DESCRIPCION: Panel del vendedor.
                     return;
                 }
                 
-                // 🆕 GUARDAR BLOB ORIGINAL PARA ELIMINAR FONDO DESPUÉS
+                // Guardar BLOB original para eliminar fondo después
                 lastCapturedBlob = blob;
                 
-                // Mostrar preview temporal
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    // 🆕 Guardar referencia al item creado para poder actualizarlo después
-                    currentPreviewItem = addImagePreview(e.target.result, null);
-                };
-                reader.readAsDataURL(blob);
+                // Crear preview temporal con URL de objeto local
+                const localUrl = URL.createObjectURL(blob);
+                currentPreviewItem = addImagePreview(localUrl, null);
                 
-                // Subir imagen original a Cloudinary (backup)
-                const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-                const url = await uploadImageToCloudinary(file);
-                if (url) {
-                    uploadedImageUrls.push(url);
-                    // Actualizar data-url del preview
-                    if (currentPreviewItem) {
-                        currentPreviewItem.setAttribute('data-url', url);
-                    }
-                    updateImagePreviewsWithUrls();
-                }
-                
-                // 🆕 MOSTRAR BOTÓN DE ELIMINAR FONDO
+                // Mostrar botón eliminar fondo
                 const removeBgBtn = document.getElementById('removeBgBtn');
                 if (removeBgBtn) {
                     removeBgBtn.style.display = 'flex';
+                }
+                
+                // Marcar como "subiendo"
+                if (currentPreviewItem) {
+                    currentPreviewItem.classList.add('processing');
+                }
+                
+                // Subir imagen original a Cloudinary en segundo plano
+                const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                const url = await uploadImageToCloudinary(file);
+                
+                if (url) {
+                    uploadedImageUrls.push(url);
+                    // Actualizar solo este item, no regenerar todo el preview
+                    if (currentPreviewItem) {
+                        currentPreviewItem.setAttribute('data-url', url);
+                        currentPreviewItem.classList.remove('processing');
+                        // Reemplazar URL local por URL de Cloudinary
+                        const img = currentPreviewItem.querySelector('img');
+                        if (img) img.src = url;
+                    }
+                } else {
+                    // Si falló la subida, remover el preview
+                    if (currentPreviewItem) {
+                        currentPreviewItem.remove();
+                        currentPreviewItem = null;
+                    }
+                    showToastMessage('Error al subir imagen', 'error');
                 }
                 
                 // No cerrar cámara automáticamente para permitir eliminar fondo
@@ -1130,7 +1160,7 @@ DESCRIPCION: Panel del vendedor.
         document.getElementById('capturePhotoBtn').addEventListener('click', capturePhoto);
         document.getElementById('switchCameraBtn').addEventListener('click', switchCamera);
         
-        // 🆕 Event listener para botón eliminar fondo
+        // Event listener para botón eliminar fondo
         document.getElementById('removeBgBtn')?.addEventListener('click', applyBackgroundRemoval);
         
         document.getElementById('uploadFileBtn').addEventListener('click', () => {
@@ -1250,7 +1280,7 @@ DESCRIPCION: Panel del vendedor.
             document.getElementById('imagePreview').innerHTML = '';
             document.getElementById('modalMessage').innerHTML = '';
             document.getElementById('fileInputArea').style.display = 'none';
-			document.getElementById('origin').value = 'PAR'; // 🆕 Valor por defecto Paraguay
+			document.getElementById('origin').value = 'PAR';
             document.getElementById('productModal').classList.add('is-open');
         }
 
@@ -1273,7 +1303,7 @@ DESCRIPCION: Panel del vendedor.
                 document.getElementById('condition').value = p.condition || 'good';
                 document.getElementById('brand').value = p.brand || '';
                 document.getElementById('color').value = p.color || '';
-				document.getElementById('origin').value = p.origin || 'PAR'; // 🆕 Cargar origen
+				document.getElementById('origin').value = p.origin || 'PAR';
                 document.getElementById('modalMessage').innerHTML = '';
                 document.getElementById('fileInputArea').style.display = 'none';
                 
@@ -1307,7 +1337,7 @@ DESCRIPCION: Panel del vendedor.
             stopCamera();
             document.getElementById('productModal').classList.remove('is-open');
             
-            // 🆕 Asegurar que el botón de eliminar fondo esté oculto
+            // Asegurar que el botón de eliminar fondo esté oculto
             const removeBgBtn = document.getElementById('removeBgBtn');
             if (removeBgBtn) {
                 removeBgBtn.style.display = 'none';
@@ -1369,12 +1399,19 @@ DESCRIPCION: Panel del vendedor.
             return d.innerHTML;
         }
 
-                // Inicializar
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Inicializar
         loadProducts();
-        updateHeaderUnreadBadge();  // Actualizar badge del header
-        setInterval(() => updateHeaderUnreadBadge(), 30000);  // Actualizar cada 30 segundos
+        updateHeaderUnreadBadge();
+        setInterval(() => updateHeaderUnreadBadge(), 30000);
 		
-		        // 🆕 Escuchar cambios en el filtro de origen
+		// Escuchar cambios en el filtro de origen
         document.getElementById('sellerOriginFilter')?.addEventListener('change', () => {
             loadProducts();
         });

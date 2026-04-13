@@ -2,14 +2,15 @@
 ================================================================================
 ARCHIVO: server.js
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 3.6.0 - CLOUDINARY + WATERMARK (MARCA DE AGUA)
+VERSION: 3.7.0 - CLOUDINARY + WATERMARK (TEXTO) + BG REMOVAL GRATIS
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: API REST principal de ReShop Paraguay.
              Inicializa Express, middlewares, rutas y endpoints.
-             AGREGADO: Cloudinary para imágenes con WATERMARK (logo ReShop)
+             AGREGADO: Cloudinary para imágenes con WATERMARK de TEXTO.
+             AGREGADO: Eliminación de fondo GRATIS con IMG.LY (sin API keys, sin límites)
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-09 - Creacion inicial del servidor
@@ -26,6 +27,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Endpoint GET /api/products/seller/:sellerId para productos por vendedor
 2026-04-11 - [ADD] Cloudinary para imágenes (endpoint /api/upload-image, compresión automática)
 2026-04-13 - [ADD] WATERMARK: Marca de agua con logo de ReShop en todas las imágenes subidas
+2026-04-13 - [FIX] WATERMARK: Cambiado a texto (ReShop PY) porque el logo no existía en Cloudinary
+2026-04-13 - [ADD] Eliminación de fondo GRATIS con @imgly/background-removal-node (sin API key, sin límites)
 ================================================================================
 */
 
@@ -37,6 +40,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
+const { removeBackground } = require('@imgly/background-removal-node');
 
 dotenv.config();
 
@@ -44,7 +48,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURACIÓN CLOUDINARY (con watermark)
+// CONFIGURACIÓN CLOUDINARY (con watermark de texto)
 // ============================================================
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -53,6 +57,7 @@ cloudinary.config({
 });
 
 console.log('✅ Cloudinary configurado:', cloudinary.config().cloud_name);
+console.log('✅ IMG.LY background removal configurado (gratis, sin límites)');
 
 // ============================================================
 // NOTIFICACIONES PUSH (OneSignal via REST API - con axios)
@@ -241,13 +246,14 @@ app.get('/api/health', (req, res) => {
 app.get('/', (req, res) => {
     res.json({ 
         name: 'ReShop Paraguay API', 
-        version: '3.6.0', 
+        version: '3.7.0', 
         status: 'active',
         endpoints: {
             health: 'GET /api/health',
             products: 'GET /api/products',
             productsBySeller: 'GET /api/products/seller/:sellerId',
-            uploadImage: 'POST /api/upload-image (Cloudinary + Watermark)',
+            uploadImage: 'POST /api/upload-image (Cloudinary + Watermark texto)',
+            removeBackground: 'POST /api/remove-background (gratis, sin límites)',
             reviews: 'GET/POST /api/products/:id/reviews, GET /api/products/:id/rating',
             auth: 'POST /api/auth/register, POST /api/auth/login',
             admin: 'GET /api/admin/users, GET /api/admin/products, GET /api/admin/orders',
@@ -257,7 +263,7 @@ app.get('/', (req, res) => {
 });
 
 // ============================================================
-// 🆕 ENDPOINT: SUBIR IMAGEN A CLOUDINARY CON WATERMARK
+// ENDPOINT: SUBIR IMAGEN A CLOUDINARY CON WATERMARK (TEXTO)
 // ============================================================
 app.post('/api/upload-image', authenticateToken, upload.single('image'), async (req, res) => {
     try {
@@ -272,15 +278,19 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), async (
                     transformation: [
                         { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                         { fetch_format: 'webp' },
-                        // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                        // WATERMARK - Marca de agua con TEXTO (no requiere logo subido)
                         { 
-                            overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo en Cloudinary
-                            gravity: 'south_east',   // Esquina inferior derecha
-                            x: 15,                   // Margen horizontal (px)
-                            y: 15,                   // Margen vertical (px)
-                            width: 80,               // Ancho del logo (px)
-                            crop: 'scale',
-                            opacity: 70              // Opacidad 70% (sutil pero visible)
+                            overlay: {
+                                font_family: 'Arial',
+                                font_size: 18,
+                                font_weight: 'bold',
+                                text: 'ReShop PY'
+                            },
+                            gravity: 'south_east',
+                            x: 10,
+                            y: 10,
+                            color: '#FFFFFF',
+                            opacity: 70
                         }
                     ]
                 },
@@ -302,6 +312,85 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), async (
         });
     } catch (error) {
         console.error('❌ Error subiendo imagen a Cloudinary:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
+// 🆕 ENDPOINT: ELIMINAR FONDO GRATIS CON IMG.LY
+// ============================================================
+app.post('/api/remove-background', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'No se envió ninguna imagen' });
+        }
+
+        console.log('🖼️ Eliminando fondo con IMG.LY (gratis, sin límites)...');
+        console.log(`📏 Tamaño original: ${(req.file.buffer.length / 1024).toFixed(2)} KB`);
+
+        // Eliminar fondo - la primera vez descarga los modelos (~40MB)
+        const cleanedBlob = await removeBackground(req.file.buffer, {
+            model: 'small',        // Modelo pequeño: 40MB, más rápido
+            output: {
+                format: 'image/png',    // PNG mantiene transparencia
+                quality: 0.9
+            },
+            progress: (key, current, total) => {
+                console.log(`📥 ${key}: ${current}/${total}`);
+            }
+        });
+
+        console.log(`✅ Fondo eliminado. Tamaño resultante: ${(cleanedBlob.length / 1024).toFixed(2)} KB`);
+
+        // Subir a Cloudinary con watermark
+        const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `reshop-products/${req.user.id}`,
+                    transformation: [
+                        { width: 800, height: 800, crop: 'limit', quality: 'auto' },
+                        { fetch_format: 'webp' },
+                        // WATERMARK - Marca de agua con TEXTO
+                        { 
+                            overlay: {
+                                font_family: 'Arial',
+                                font_size: 18,
+                                font_weight: 'bold',
+                                text: 'ReShop PY'
+                            },
+                            gravity: 'south_east',
+                            x: 10,
+                            y: 10,
+                            color: '#FFFFFF',
+                            opacity: 70
+                        }
+                    ]
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            uploadStream.end(cleanedBlob);
+        });
+
+        res.json({ 
+            success: true, 
+            url: result.secure_url,
+            message: 'Fondo eliminado correctamente (sin costo, sin límites)'
+        });
+
+    } catch (error) {
+        console.error('❌ Error en remove-background:', error);
+        
+        // Si el error es porque falta instalar la librería
+        if (error.code === 'MODULE_NOT_FOUND') {
+            return res.status(500).json({ 
+                success: false, 
+                error: 'Librería de eliminación de fondo no instalada. Ejecuta: npm install @imgly/background-removal-node' 
+            });
+        }
+        
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -525,7 +614,7 @@ app.get('/api/products/:id', async (req, res) => {
 });
 
 // ============================================================
-// CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY + WATERMARK
+// CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY + WATERMARK TEXTO
 // ============================================================
 app.post('/api/products', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -546,14 +635,18 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
                             transformation: [
                                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                                 { fetch_format: 'webp' },
-                                // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                                // WATERMARK - Marca de agua con TEXTO
                                 { 
-                                    overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo
+                                    overlay: {
+                                        font_family: 'Arial',
+                                        font_size: 18,
+                                        font_weight: 'bold',
+                                        text: 'ReShop PY'
+                                    },
                                     gravity: 'south_east',
-                                    x: 15,
-                                    y: 15,
-                                    width: 80,
-                                    crop: 'scale',
+                                    x: 10,
+                                    y: 10,
+                                    color: '#FFFFFF',
                                     opacity: 70
                                 }
                             ]
@@ -601,7 +694,7 @@ app.post('/api/products', authenticateToken, upload.array('images', 5), async (r
 });
 
 // ============================================================
-// ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY + WATERMARK
+// ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY + WATERMARK TEXTO
 // ============================================================
 app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
     try {
@@ -632,14 +725,18 @@ app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async
                             transformation: [
                                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                                 { fetch_format: 'webp' },
-                                // 🆕 WATERMARK - Marca de agua con logo de ReShop
+                                // WATERMARK - Marca de agua con TEXTO
                                 { 
-                                    overlay: 'reshop-logo',  // ⚠️ CAMBIAR por el Public ID de tu logo
+                                    overlay: {
+                                        font_family: 'Arial',
+                                        font_size: 18,
+                                        font_weight: 'bold',
+                                        text: 'ReShop PY'
+                                    },
                                     gravity: 'south_east',
-                                    x: 15,
-                                    y: 15,
-                                    width: 80,
-                                    crop: 'scale',
+                                    x: 10,
+                                    y: 10,
+                                    color: '#FFFFFF',
                                     opacity: 70
                                 }
                             ]
@@ -1317,12 +1414,14 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log('');
     console.log('='.repeat(60));
-    console.log('  🛍️  RESHOP PARAGUAY API v3.6.0');
-    console.log('  ☁️  Cloudinary + WATERMARK integrado');
+    console.log('  🛍️  RESHOP PARAGUAY API v3.7.0');
+    console.log('  ☁️  Cloudinary + WATERMARK (texto)');
+    console.log('  🆓  IMG.LY para eliminar fondo (GRATIS, sin límites)');
     console.log('='.repeat(60));
     console.log(`📍 Servidor: http://localhost:${PORT}`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
-    console.log(`📸 Upload: POST /api/upload-image (con marca de agua)`);
+    console.log(`📸 Upload: POST /api/upload-image (con marca de agua texto)`);
+    console.log(`✨ Remove BG: POST /api/remove-background (gratis, sin límites)`);
     console.log(`📦 Products: http://localhost:${PORT}/api/products`);
     console.log(`👤 Seller Products: http://localhost:${PORT}/api/products/seller/:sellerId`);
     console.log(`⭐ Reviews: GET/POST /api/products/:id/reviews`);
@@ -1331,9 +1430,9 @@ app.listen(PORT, () => {
     console.log('='.repeat(60));
     console.log('✅ CORS configurado | JWT_SECRET activo');
     console.log('✅ supabaseAdmin activo para bypass RLS');
-    console.log('✅ Endpoint /api/products/seller/:sellerId agregado');
-    console.log('✅ Cloudinary listo | Compresión 800x800 | WebP');
-    console.log('✅ WATERMARK activo | Logo ReShop en esquina inferior derecha');
+    console.log('✅ Watermark de TEXTO (ya no depende de logo en Cloudinary)');
+    console.log('✅ Eliminación de fondo GRATIS con IMG.LY (sin API key, sin límites)');
+    console.log('⚠️  La primera vez que se use remove-background descargará ~40MB de modelos');
     console.log('');
 });
 
