@@ -279,7 +279,7 @@ const result = await new Promise((resolve, reject) => {
                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                 { fetch_format: 'webp' },
                 { 
-                    overlay: 'reshop-public/assets/reshop-logo',,
+                    overlay: 'reshop-public/assets/reshop-logo',
                     gravity: 'south_east',
                     x: 15,
                     y: 15,
@@ -717,46 +717,27 @@ app.get('/api/products/:id', async (req, res) => {
 // ============================================================
 // CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY + WATERMARK TEXTO
 // ============================================================
-app.post('/api/products', authenticateToken, upload.array('images', 5), async (req, res) => {
+app.post('/api/products', authenticateToken, upload.none(), async (req, res) => {
     try {
-        const { title, description, price, category, size, condition, brand, color, origin } = req.body;
+        const { title, description, price, category, size, condition, brand, color, origin, images_urls: imagesRaw } = req.body;
         
         if (!title || !price) {
             return res.status(400).json({ success: false, error: 'Título y precio son requeridos' });
         }
         
+        // Las imágenes ya fueron subidas a Cloudinary desde el frontend.
+        // El frontend envía las URLs como JSON.stringify(array), hay que parsearlas.
         let imageUrls = [];
-        
-        if (req.files && req.files.length > 0) {
-            for (const file of req.files) {
-const result = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-        {
-            folder: `reshop-products/${req.user.id}`,
-            transformation: [
-                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                { fetch_format: 'webp' },
-                { 
-                    overlay: 'reshop-public/assets/reshop-logo',,
-                    gravity: 'south_east',
-                    x: 15,
-                    y: 15,
-                    width: 80,
-                    crop: 'scale',
-                    opacity: 85
-                }
-            ]
-        },
-        (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-        }
-    );
-    uploadStream.end(file.buffer);
-});
-                imageUrls.push(result.secure_url);
+        if (imagesRaw) {
+            try {
+                const parsed = typeof imagesRaw === 'string' ? JSON.parse(imagesRaw) : imagesRaw;
+                imageUrls = Array.isArray(parsed) ? parsed : [parsed];
+            } catch (e) {
+                console.error('❌ Error parseando images_urls:', e.message);
+                imageUrls = [];
             }
         }
+        console.log('✅ images_urls recibidas para nuevo producto:', imageUrls);
         
         const newProduct = {
             seller_id: req.user.id,
@@ -792,10 +773,10 @@ const result = await new Promise((resolve, reject) => {
 // ============================================================
 // ACTUALIZAR PRODUCTO - CON SOPORTE PARA CLOUDINARY + WATERMARK TEXTO
 // ============================================================
-app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async (req, res) => {
+app.put('/api/products/:id', authenticateToken, upload.none(), async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, price, category, size, condition, brand, color, origin } = req.body;
+        const { title, description, price, category, size, condition, brand, color, origin, images_urls: imagesRaw } = req.body;
         
         const { data: existing, error: findError } = await supabase
             .from('products')
@@ -811,37 +792,19 @@ app.put('/api/products/:id', authenticateToken, upload.array('images', 5), async
             return res.status(403).json({ success: false, error: 'No tienes permiso para editar este producto' });
         }
         
+        // Las imágenes ya fueron subidas a Cloudinary desde el frontend.
+        // Parsear el JSON string enviado por el frontend.
         let imageUrls = [];
-        if (req.files && req.files.length > 0) {
-            for (const file of req.files) {
-const result = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-        {
-            folder: `reshop-products/${req.user.id}`,
-            transformation: [
-                { width: 800, height: 800, crop: 'limit', quality: 'auto' },
-                { fetch_format: 'webp' },
-                { 
-                    overlay: 'reshop-public/assets/reshop-logo',,
-                    gravity: 'south_east',
-                    x: 15,
-                    y: 15,
-                    width: 80,
-                    crop: 'scale',
-                    opacity: 85
-                }
-            ]
-        },
-        (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-        }
-    );
-    uploadStream.end(file.buffer);
-});
-                imageUrls.push(result.secure_url);
+        if (imagesRaw) {
+            try {
+                const parsed = typeof imagesRaw === 'string' ? JSON.parse(imagesRaw) : imagesRaw;
+                imageUrls = Array.isArray(parsed) ? parsed : [parsed];
+            } catch (e) {
+                console.error('❌ Error parseando images_urls (PUT):', e.message);
+                imageUrls = [];
             }
         }
+        console.log('✅ images_urls recibidas para actualización:', imageUrls);
         
         const updateData = {
             title,
