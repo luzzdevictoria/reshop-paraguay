@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - ReShop Paraguay</title>
-	<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
-<link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
-<link rel="manifest" href="assets/icons/site.webmanifest">
-<meta name="msapplication-TileColor" content="#2A5C6E">
-<meta name="theme-color" content="#2A5C6E">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="assets/icons/site.webmanifest">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { 
@@ -126,6 +126,22 @@
             box-shadow: 0 10px 30px rgba(42, 92, 110, 0.3);
         }
         .btn-submit:active { transform: translateY(0); }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+        .forgot-password a {
+            color: #2A5C6E;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
         .register-link {
             text-align: center;
             margin-top: 20px;
@@ -164,21 +180,19 @@
             .form-container { padding: 25px 20px; }
         }
     </style>
-	<!-- OneSignal Push Notifications -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: "87f4597d-296a-467b-a778-10f48275d72a",
-            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
-            notifyButton: {
-                enable: false
-            },
-            allowLocalhostAsSecureOrigin: true
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true
+            });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
     <div class="container">
@@ -236,6 +250,11 @@
                     </button>
                 </div>
                 
+                <!-- 🔐 Link para recuperar contraseña -->
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordBtn">¿Olvidaste tu contraseña?</a>
+                </div>
+                
                 <button type="submit" class="btn-submit">Ingresar</button>
             </form>
             
@@ -254,6 +273,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         // ========================================
         // TOGGLE DE VISIBILIDAD DE CONTRASEÑA
@@ -263,23 +283,25 @@
         const iconEye = document.querySelector('.icon-eye');
         const iconEyeOff = document.querySelector('.icon-eye-off');
 
-        togglePassword.addEventListener('click', function() {
-            const isPassword = passwordInput.getAttribute('type') === 'password';
-            
-            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-            
-            if (isPassword) {
-                iconEye.style.display = 'none';
-                iconEyeOff.style.display = 'block';
-                togglePassword.setAttribute('aria-label', 'Ocultar contraseña');
-                togglePassword.setAttribute('title', 'Ocultar contraseña');
-            } else {
-                iconEye.style.display = 'block';
-                iconEyeOff.style.display = 'none';
-                togglePassword.setAttribute('aria-label', 'Mostrar contraseña');
-                togglePassword.setAttribute('title', 'Mostrar contraseña');
-            }
-        });
+        if (togglePassword) {
+            togglePassword.addEventListener('click', function() {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                
+                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                
+                if (isPassword) {
+                    iconEye.style.display = 'none';
+                    iconEyeOff.style.display = 'block';
+                    togglePassword.setAttribute('aria-label', 'Ocultar contraseña');
+                    togglePassword.setAttribute('title', 'Ocultar contraseña');
+                } else {
+                    iconEye.style.display = 'block';
+                    iconEyeOff.style.display = 'none';
+                    togglePassword.setAttribute('aria-label', 'Mostrar contraseña');
+                    togglePassword.setAttribute('title', 'Mostrar contraseña');
+                }
+            });
+        }
 
         // ========================================
         // LÓGICA DE LOGIN CON BACKEND
@@ -338,6 +360,54 @@
                 errorBox.classList.remove('show');
             });
         });
+
+        // ========================================
+        // RECUPERACIÓN DE CONTRASEÑA
+        // ========================================
+        const forgotBtn = document.getElementById('forgotPasswordBtn');
+        
+        if (forgotBtn) {
+            forgotBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const email = prompt('Ingresa tu correo electrónico para restablecer tu contraseña:');
+                
+                if (!email || email.trim() === '') {
+                    return;
+                }
+                
+                // Mostrar loading visual
+                const originalText = forgotBtn.textContent;
+                forgotBtn.textContent = 'Enviando...';
+                forgotBtn.style.opacity = '0.5';
+                forgotBtn.style.pointerEvents = 'none';
+                
+                try {
+                    // Obtener configuración de Supabase desde el endpoint
+                    const configRes = await fetch('/api/config');
+                    const config = await configRes.json();
+                    
+                    const supabase = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+                    
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: 'https://reshop-paraguay.vercel.app/update-password.html'
+                    });
+                    
+                    if (error) {
+                        alert('Error: ' + error.message);
+                    } else {
+                        alert('¡Revisa tu correo! Te enviamos un enlace para restablecer tu contraseña.');
+                    }
+                } catch (err) {
+                    console.error('Error en recuperación:', err);
+                    alert('Ocurrió un error. Por favor, intenta de nuevo más tarde.');
+                } finally {
+                    forgotBtn.textContent = originalText;
+                    forgotBtn.style.opacity = '1';
+                    forgotBtn.style.pointerEvents = 'auto';
+                }
+            });
+        }
     </script>
     
     <!-- Font Awesome -->
