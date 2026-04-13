@@ -2,14 +2,14 @@
 ================================================================================
 ARCHIVO: profile.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.3.0 - CON AVATAR DE USUARIO
+VERSION: 1.4.0 - CON AVATAR Y LOGO DE TIENDA
 CREADO: 2026-04-11
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Perfil de usuario. Permite ver y editar información personal,
              incluyendo número de cédula (document_id), dirección, datos de tienda
-             con geolocalización opcional, y avatar de perfil.
+             con geolocalización opcional, avatar de perfil y logo de tienda.
 ================================================================================
 HISTORIAL DE MODIFICACIONES:
 2026-04-11 - Creacion inicial del perfil de usuario
@@ -20,6 +20,8 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [FIX] Header con logo y navegación profesional
 2026-04-13 - [ADD] Sección de avatar con upload/delete
 2026-04-13 - [ADD] Estilos y funcionalidad JS para manejo de avatar
+2026-04-13 - [ADD] Sección de logo de tienda para vendedores
+2026-04-13 - [ADD] Upload de store_logo_url a Cloudinary
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -77,6 +79,34 @@ HISTORIAL DE MODIFICACIONES:
         .btn-danger:hover { background: #c44a33; }
         /* ========== END AVATAR STYLES ========== */
         
+        /* ========== STORE LOGO SECTION STYLES ========== */
+        .store-logo-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .store-logo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .store-logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .store-logo-preview i {
+            font-size: 2rem;
+            color: #999;
+        }
+        /* ========== END STORE LOGO STYLES ========== */
+        
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
@@ -88,6 +118,7 @@ HISTORIAL DE MODIFICACIONES:
         .btn-primary:hover { background: #1e4452; }
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
+        .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
         
         .message { padding: 15px; border-radius: 8px; margin-top: 20px; display: none; }
         .message.success { background: #d4edda; color: #155724; display: block; }
@@ -111,7 +142,7 @@ HISTORIAL DE MODIFICACIONES:
             .avatar-preview i { font-size: 2.5rem; }
         }
     </style>
-	<!-- OneSignal Push Notifications -->
+    <!-- OneSignal Push Notifications -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -139,8 +170,8 @@ HISTORIAL DE MODIFICACIONES:
         <div class="header-menu">
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
-			<a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
-			<a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
             <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
             <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
             <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
@@ -176,7 +207,7 @@ HISTORIAL DE MODIFICACIONES:
                     <button type="button" class="btn btn-secondary" id="uploadAvatarBtn">
                         <i class="fas fa-camera"></i> Subir foto
                     </button>
-                    	<button type="button" class="btn btn-secondary" id="removeAvatarBtn" style="display: none;">
+                    <button type="button" class="btn btn-secondary" id="removeAvatarBtn" style="display: none;">
                         <i class="fas fa-trash"></i> Eliminar
                     </button>
                 </div>
@@ -250,6 +281,22 @@ HISTORIAL DE MODIFICACIONES:
                             <span>Mostrar dirección pública en mi tienda</span>
                         </label>
                     </div>
+                    
+                    <!-- ========== NUEVO: Logo de la tienda ========== -->
+                    <div class="store-logo-section">
+                        <h4><i class="fas fa-image"></i> Logo de la tienda</h4>
+                        <div class="store-logo-preview" id="storeLogoPreview">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="uploadStoreLogoBtn">
+                            <i class="fas fa-upload"></i> Subir logo
+                        </button>
+                        <input type="file" id="storeLogoInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+                        <p class="avatar-hint" style="margin-top: 8px;">
+                            <i class="fas fa-info-circle"></i> Recomendado: 300x300px, JPG/PNG/WEBP (máx. 2MB)
+                        </p>
+                    </div>
+                    <!-- ========== FIN NUEVO ========== -->
                 </div>
                 
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar cambios</button>
@@ -441,6 +488,85 @@ HISTORIAL DE MODIFICACIONES:
         
         // ========== FIN FUNCIONES DE AVATAR ==========
         
+        // ========== FUNCIONES PARA LOGO DE TIENDA ==========
+        
+        /**
+         * Renderiza el logo de la tienda en el preview
+         * @param {string|null} logoUrl - URL del logo o null
+         */
+        function renderStoreLogo(logoUrl) {
+            const preview = document.getElementById('storeLogoPreview');
+            if (logoUrl) {
+                const urlWithCache = `${logoUrl}?t=${Date.now()}`;
+                preview.innerHTML = `<img src="${urlWithCache}" alt="Logo de tienda" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-store\\'></i>'">`;
+            } else {
+                preview.innerHTML = '<i class="fas fa-store"></i>';
+            }
+        }
+        
+        /**
+         * Sube el logo de la tienda a Cloudinary
+         * @param {File} file - Archivo de imagen
+         * @returns {Promise<string|null>} - URL del logo o null
+         */
+        async function uploadStoreLogo(file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showMessage('Formato no válido. Usa JPG, PNG o WEBP', 'error');
+                return null;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showMessage('El archivo es muy grande. Máximo 2MB', 'error');
+                return null;
+            }
+            
+            const formData = new FormData();
+            formData.append('store_logo', file);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/upload/store-logo`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await response.json();
+                if (data.success) {
+                    return data.store_logo_url;
+                } else {
+                    throw new Error(data.error || 'Error al subir el logo');
+                }
+            } catch (error) {
+                console.error('[Store Logo Upload]', error);
+                showMessage(error.message || 'Error al subir el logo', 'error');
+                return null;
+            }
+        }
+        
+        /**
+         * Maneja el upload del logo de tienda
+         * @param {File} file - Archivo de imagen
+         */
+        async function handleStoreLogoUpload(file) {
+            showMessage('Subiendo logo de tienda...', 'loading');
+            
+            const logoUrl = await uploadStoreLogo(file);
+            if (logoUrl) {
+                // Actualizar UI
+                renderStoreLogo(logoUrl);
+                
+                // Actualizar backend
+                await apiRequest('/auth/me', 'PUT', { store_logo_url: logoUrl }, token);
+                
+                // Actualizar currentUser
+                if (currentUser) currentUser.store_logo_url = logoUrl;
+                
+                showMessage('✅ Logo de tienda actualizado correctamente', 'success');
+            }
+        }
+        
+        // ========== FIN FUNCIONES LOGO TIENDA ==========
+        
         async function loadProfile() {
             try {
                 const response = await fetch(`${API_URL}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -470,11 +596,19 @@ HISTORIAL DE MODIFICACIONES:
                             document.getElementById('locationDisplay').innerHTML = `✅ <strong>Ubicación guardada:</strong><br>📍 ${currentUser.latitude}, ${currentUser.longitude}`;
                         }
                         if (currentUser.address_visible !== undefined) { document.getElementById('addressVisible').checked = currentUser.address_visible; }
+                        
+                        // ========== CARGAR LOGO DE TIENDA ==========
+                        if (currentUser.store_logo_url) {
+                            renderStoreLogo(currentUser.store_logo_url);
+                        } else {
+                            renderStoreLogo(null);
+                        }
+                        // ========== FIN CARGAR LOGO TIENDA ==========
                     }
                     
                     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
                     storedUser.full_name = currentUser.full_name;
-                    storedUser.avatar_url = currentUser.avatar_url; // Guardar avatar en localStorage
+                    storedUser.avatar_url = currentUser.avatar_url;
                     localStorage.setItem('user', JSON.stringify(storedUser));
                 } else { showMessage('Error al cargar perfil', 'error'); }
             } catch (error) { console.error('Error:', error); showMessage('Error de conexión', 'error'); }
@@ -503,6 +637,7 @@ HISTORIAL DE MODIFICACIONES:
                 const lng = document.getElementById('longitude').value;
                 if (lat && lng) { updateData.latitude = parseFloat(lat); updateData.longitude = parseFloat(lng); }
                 updateData.address_visible = document.getElementById('addressVisible').checked;
+                // No enviamos store_logo_url aquí porque se actualiza por separado
             }
             
             showMessage('Actualizando perfil...', 'loading');
@@ -527,7 +662,7 @@ HISTORIAL DE MODIFICACIONES:
             if (type !== 'loading') { setTimeout(() => { if (messageDiv.className === `message ${type}`) { messageDiv.className = 'message'; } }, 4000); }
         }
         
-        // ========== EVENT LISTENERS PARA AVATAR ==========
+        // ========== EVENT LISTENERS ==========
         document.addEventListener('DOMContentLoaded', () => {
             updateUserMenu(); 
             setupLogout(); 
@@ -544,7 +679,6 @@ HISTORIAL DE MODIFICACIONES:
                     const file = e.target.files[0];
                     if (file) {
                         handleAvatarUpload(file);
-                        // Reset input para permitir seleccionar el mismo archivo nuevamente
                         avatarInput.value = '';
                     }
                 });
@@ -555,6 +689,23 @@ HISTORIAL DE MODIFICACIONES:
             if (removeBtn) {
                 removeBtn.addEventListener('click', handleAvatarDelete);
             }
+            
+            // ========== Store logo upload button ==========
+            const storeLogoBtn = document.getElementById('uploadStoreLogoBtn');
+            const storeLogoInput = document.getElementById('storeLogoInput');
+            
+            if (storeLogoBtn && storeLogoInput) {
+                storeLogoBtn.addEventListener('click', () => storeLogoInput.click());
+                
+                storeLogoInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        handleStoreLogoUpload(file);
+                        storeLogoInput.value = '';
+                    }
+                });
+            }
+            // ========== FIN STORE LOGO ==========
         });
         // ========== FIN EVENT LISTENERS ==========
     </script>
