@@ -879,32 +879,42 @@ app.get('/api/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
-        const { data: user, error } = await supabase
+        // ✅ FIX #1: usar supabaseAdmin para bypasear RLS
+        const { data: user, error } = await supabaseAdmin
             .from('users')
-            .select('id, email, full_name, store_name, store_logo_url, rating, total_sales, created_at, address_visible, latitude, longitude, is_active')
+            .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address, address_visible, latitude, longitude, is_active, created_at')
             .eq('id', id)
             .maybeSingle();
         
-        if (error || !user) {
-            console.error('❌ Error o usuario no encontrado:', error);
+        console.log(`🔍 GET /api/users/${id} → user:`, user ? 'encontrado' : 'null', '| error:', error?.message || 'ninguno');
+        
+        if (error) {
+            console.error('❌ Supabase error:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+        
+        if (!user) {
             return res.status(404).json({ success: false, error: 'Vendedor no encontrado' });
         }
         
+        if (!user.is_active) {
+            return res.status(404).json({ success: false, error: 'Vendedor no disponible' });
+        }
+        
         // Contar productos activos del vendedor
-        const { count: productsCount, error: countError } = await supabase
+        const { count: productsCount } = await supabaseAdmin
             .from('products')
             .select('*', { count: 'exact', head: true })
             .eq('seller_id', id)
             .eq('status', 'active');
         
-        if (countError) {
-            console.error('❌ Error contando productos:', countError);
-        }
-        
+        // ✅ FIX #2 y #3: devolver como "user" con products_count dentro
         res.json({
             success: true,
-            seller: user,
-            products_count: productsCount || 0
+            user: {
+                ...user,
+                products_count: productsCount || 0
+            }
         });
     } catch (error) {
         console.error('❌ Error en /api/users/:id:', error.message);
