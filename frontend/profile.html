@@ -439,9 +439,10 @@ HISTORIAL DE MODIFICACIONES:
                     await apiRequest('/auth/me', 'PUT', { avatar_url: result.avatar_url }, token);
                     
                     // Actualizar localStorage
-                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                    storedUser.avatar_url = result.avatar_url;
-                    localStorage.setItem('user', JSON.stringify(storedUser));
+                    const cachedUrl = `${result.avatar_url}?t=${Date.now()}`;
+					const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+					storedUser.avatar_url = cachedUrl;
+					localStorage.setItem('user', JSON.stringify(storedUser));
                     
                     showMessage('✅ Avatar actualizado correctamente', 'success');
                 } else {

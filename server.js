@@ -663,7 +663,6 @@ app.get('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Obtener el producto
         const { data: product, error } = await supabase
             .from('products')
             .select('*')
@@ -671,12 +670,11 @@ app.get('/api/products/:id', async (req, res) => {
             .single();
 
         if (error) throw error;
-        
         if (!product) {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         
-        // Obtener los datos del vendedor (consulta separada)
+        // Consulta separada al vendedor
         const { data: seller, error: sellerError } = await supabase
             .from('users')
             .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address_visible')
@@ -687,23 +685,25 @@ app.get('/api/products/:id', async (req, res) => {
             product.seller = seller;
         }
         
-        // Incrementar vistas en segundo plano
         const currentViews = product.views || 0;
+        
+        // Incrementar vistas en segundo plano
         supabase
             .from('products')
             .update({ views: currentViews + 1, updated_at: new Date().toISOString() })
             .eq('id', id)
-            .then(({ error: updateError }) => {
-                if (updateError) console.error('❌ Error actualizando vistas:', updateError);
-            });
+            .then(() => {});
         
-        res.json({ success: true, product: { ...product, views: currentViews + 1 } });
+        return res.json({ 
+            success: true, 
+            product: { ...product, seller: product.seller || null, views: currentViews + 1 } 
+        });
+
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('[GET_PRODUCT_BY_ID]', error);
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
-
 // ============================================================
 // CREAR PRODUCTO (autenticado) - CON SOPORTE PARA CLOUDINARY + WATERMARK TEXTO
 // ============================================================
