@@ -272,12 +272,12 @@ HISTORIAL DE MODIFICACIONES:
                 <label>Filtrar por estado:</label>
                 <select id="orderStatusFilter">
                     <option value="todos">Todas las √≥rdenes</option>
-                    <option value="pending_payment">‚è≥ Pendiente pago</option>
-                    <option value="paid">‚úÖ Pagado</option>
+                    <option value="pending_payment">‚è?Pendiente pago</option>
+                    <option value="paid">‚ú?Pagado</option>
                     <option value="processing">üì¶ Procesando</option>
                     <option value="shipped">üöö Enviado</option>
                     <option value="delivered">üè† Entregado</option>
-                    <option value="cancelled">‚ùå Cancelado</option>
+                    <option value="cancelled">‚ù?Cancelado</option>
                 </select>
                 <button class="btn btn-info" onclick="loadOrders()"><i class="fas fa-search"></i> Buscar</button>
             </div>
@@ -297,12 +297,12 @@ HISTORIAL DE MODIFICACIONES:
                 <div class="form-group">
                     <label>Estado</label>
                     <select id="orderStatus" required>
-                        <option value="pending_payment">‚è≥ Pendiente pago</option>
-                        <option value="paid">‚úÖ Pagado</option>
+                        <option value="pending_payment">‚è?Pendiente pago</option>
+                        <option value="paid">‚ú?Pagado</option>
                         <option value="processing">üì¶ Procesando</option>
                         <option value="shipped">üöö Enviado</option>
                         <option value="delivered">üè† Entregado</option>
-                        <option value="cancelled">‚ùå Cancelado</option>
+                        <option value="cancelled">‚ù?Cancelado</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -312,7 +312,7 @@ HISTORIAL DE MODIFICACIONES:
                 <div id="modalMessage" class="message"></div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
-                    <button type="button" class="btn btn-danger" onclick="closeOrderModal()"><i class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn-cancel" onclick="closeOrderModal()"><i class="fas fa-times"></i> Cancelar</button>
                 </div>
             </form>
         </div>
@@ -409,11 +409,11 @@ HISTORIAL DE MODIFICACIONES:
                         html += `<tr>
                             <td>${product.id}</td>
                             <td>${escapeHtml(product.title)}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(product.price)} ‚Ç≤</td>
+                            <td>${new Intl.NumberFormat('es-PY').format(product.price)} ‚Ç?/td>
                             <td><span class="badge">${product.status}</span></td>
                             <td>
                                 <button class="btn btn-warning" onclick="toggleProductStatus(${product.id}, '${product.status}')">Cambiar Estado</button>
-                                <button class="btn btn-danger" onclick="deleteProduct(${product.id})">Eliminar</button>
+                                <button class="btn-delete" onclick="deleteProduct(${product.id})">Eliminar</button>
                             </td>
                         </tr>`;
                     }
@@ -471,12 +471,12 @@ HISTORIAL DE MODIFICACIONES:
             for (const order of filteredOrders) {
                 const statusClass = `status-${order.order_status}`;
                 const statusText = {
-                    'pending_payment': '‚è≥ Pendiente pago',
-                    'paid': '‚úÖ Pagado',
+                    'pending_payment': '‚è?Pendiente pago',
+                    'paid': '‚ú?Pagado',
                     'processing': 'üì¶ Procesando',
                     'shipped': 'üöö Enviado',
                     'delivered': 'üè† Entregado',
-                    'cancelled': '‚ùå Cancelado'
+                    'cancelled': '‚ù?Cancelado'
                 }[order.order_status] || order.order_status;
                 
                 const paymentMethod = {
@@ -493,8 +493,8 @@ HISTORIAL DE MODIFICACIONES:
                     <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
                     <td>${escapeHtml(order.buyer?.email || '-')}</td>
                     <td>${escapeHtml(order.seller?.email || '-')}</td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ‚Ç≤</td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ‚Ç≤</td>
+                    <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} ‚Ç?/td>
+                    <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} ‚Ç?/td>
                     <td><span class="order-status ${statusClass}">${statusText}</span></td>
                     <td>${paymentMethod}</td>
                     <td><button class="btn btn-info" onclick="openOrderModal(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar</button></td>

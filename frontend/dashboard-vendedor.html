@@ -427,7 +427,7 @@ HISTORIAL DE MODIFICACIONES:
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Guardar
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
                 </div>
@@ -445,7 +445,7 @@ HISTORIAL DE MODIFICACIONES:
             <button class="btn btn-secondary" id="switchCameraBtn">
                 <i class="fas fa-sync-alt"></i> Cambiar cámara
             </button>
-            <button class="btn btn-danger" id="closeCameraBtn">
+            <button class="btn-cancel" id="closeCameraBtn">
                 <i class="fas fa-times"></i> Cancelar
             </button>
             <button class="btn btn-primary" id="capturePhotoBtn">
@@ -996,8 +996,8 @@ function capturePhoto() {
                                             <td><span style="text-transform: capitalize;">${p.category}</span></td>
                                             <td><span class="status-badge status-${p.status}">${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}</span></td>
                                             <td>
-                                                <button class="btn btn-secondary" onclick="editProduct(${p.id})" style="margin-right: 6px;"><i class="fas fa-edit"></i> Editar</button>
-                                                <button class="btn btn-danger" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button>
+                                                <button class="btn-edit" onclick="editProduct(${p.id})" style="margin-right: 6px;"><i class="fas fa-edit"></i> Editar</button>
+                                                <button class="btn-delete" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button>
                                             </td>
                                         </tr>
                                     `).join('')}
