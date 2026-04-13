@@ -1147,8 +1147,9 @@ function renderProduct(product) {
         'new_with_tags': 'Nuevo con etiqueta', 'new_without_tags': 'Nuevo sin etiqueta',
         'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable'
     }[product.condition] || product.condition;
-    const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
+    const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor sin nombre';
     const sellerRating = product.seller?.rating || 0;
+	const sellerStore = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
     const avgRating = product.rating || 0;
     
     // Obtener todas las imágenes (array)
@@ -1189,15 +1190,19 @@ function renderProduct(product) {
         <div class="product-info"><label><i class="fas fa-star"></i> Estado:</label><span class="badge">${conditionText}</span></div>
         <div class="product-info"><label><i class="fas fa-trademark"></i> Marca:</label><span>${product.brand || 'No especificada'}</span></div>
         <div class="product-info"><label><i class="fas fa-palette"></i> Color:</label><span>${product.color || 'No especificado'}</span></div>
-        <div class="product-info"><label><i class="fas fa-store"></i> Vendedor:</label><span>
-            ${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})
-            <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
-                <i class="fas fa-external-link-alt"></i> Ver tienda
-            </a>
-            <span class="quick-response-badge">
-                <i class="fas fa-bolt"></i> Responde rápido
-            </span>
-        </span></div>
+<div class="product-info">
+    <label><i class="fas fa-store"></i> Tienda:</label>
+    <span>
+        <strong>${escapeHtml(product.seller?.store_name || product.seller?.full_name || 'Vendedor')}</strong>
+        ${product.seller?.rating > 0 ? `⭐ ${product.seller.rating}` : ''}
+        <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
+            <i class="fas fa-external-link-alt"></i> Ver tienda
+        </a>
+        <span class="quick-response-badge">
+            <i class="fas fa-bolt"></i> Responde rápido
+        </span>
+    </span>
+</div>
         <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
         <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
         <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
