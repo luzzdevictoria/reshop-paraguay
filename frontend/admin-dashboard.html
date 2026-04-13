@@ -414,7 +414,7 @@ html += `<tr>
     <td><span class="badge">${product.status}</span></td>
     <td>
         <button class="btn btn-warning" onclick="toggleProductStatus(${product.id}, '${product.status}')">Cambiar Estado</button>
-        <button class="btn-delete" onclick="deleteProduct(${product.id})">Eliminar</button>
+        <button class="btn-delete btn-sm" onclick="deleteProduct(${product.id})">Eliminar</button>
     </td>
 </tr>`;
                     }
