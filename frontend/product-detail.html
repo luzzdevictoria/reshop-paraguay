@@ -2,13 +2,13 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.5.0 - OPTIMIZADO PARA MÓVIL + PWA
+VERSION: 2.6.0 - BOTÓN CONTACTAR VENDEDOR MEJORADO
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería interna.
-             OPTIMIZADO: Header hamburguesa, bottom nav y botón instalar app para móvil.
+             OPTIMIZADO: Header hamburguesa, bottom nav, botón instalar app y BOTÓN CONTACTAR VENDEDOR MEJORADO.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -28,7 +28,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
     <!-- CSS Principal -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
-    <!-- 🆕 CSS Móvil (hamburguesa, bottom nav, etc.) -->
+    <!-- CSS Móvil (hamburguesa, bottom nav, etc.) -->
     <link rel="stylesheet" href="css/mobile.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -116,11 +116,98 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         .btn-primary:hover { background: #1e4452; }
         .btn-secondary { background: #E8B86B; color: #333; }
         .btn-secondary:hover { background: #d4a050; }
-        .btn-message { background: #25D366; color: white; }
-        .btn-message:hover { background: #1da15b; }
         .btn-fav { background: #E8B86B; color: #333; }
         .btn-fav:hover { background: #d4a050; }
         .btn-fav.active { background: #D95A41; color: white; }
+        
+        /* 🆕 BOTÓN CONTACTAR VENDEDOR MEJORADO - MARKETING PSICOLÓGICO */
+        .btn-contact-seller {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #E8B86B, #d4a050);
+            color: #2A5C6E;
+            border: none;
+            border-radius: 60px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-width: 160px;
+        }
+
+        .btn-contact-seller::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-contact-seller:hover::before {
+            left: 100%;
+        }
+
+        .btn-contact-seller:hover {
+            background: linear-gradient(135deg, #d4a050, #c49540);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(232, 184, 107, 0.4);
+        }
+
+        .btn-contact-seller:active {
+            transform: translateY(0);
+        }
+
+        .btn-contact-seller i {
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .btn-contact-seller:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Efecto de pulso inicial para llamar la atención */
+        .btn-contact-seller.pulse {
+            animation: pulse-attention 1.5s ease-in-out 2;
+        }
+
+        @keyframes pulse-attention {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            50% {
+                transform: scale(1.02);
+                box-shadow: 0 4px 16px rgba(232, 184, 107, 0.6);
+            }
+        }
+
+        /* Badge de "Respuesta rápida" */
+        .quick-response-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(42, 92, 110, 0.1);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            color: #2A5C6E;
+            margin-left: 12px;
+        }
+
+        .quick-response-badge i {
+            font-size: 0.6rem;
+            color: #28a745;
+        }
         
         .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: #666; }
         .error { text-align: center; padding: 50px; font-size: 1.2rem; color: #D95A41; }
@@ -152,112 +239,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         .modal-message-footer input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .modal-message-footer button { background: #2A5C6E; color: white; border: none; border-radius: 8px; padding: 10px 20px; cursor: pointer; }
         
-        /* 🆕 Botón Contactar vendedor - Estilo ReShop (Mensajería Interna) */
-        .btn-message-reshop {
-            --bg-color: #f0f7fa;
-            --bg-hover-color: #e3f0f5;
-            --text-color: #2A5C6E;
-            --border-color: #2A5C6E;
-            --online-status: #28a745;
-            --font-size: 14px;
-            --btn-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .button-message-reshop {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font: 500 var(--font-size) 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            border: 1.5px solid var(--border-color);
-            border-radius: 48px;
-            cursor: pointer;
-            padding: 8px 16px 8px 8px;
-            width: fit-content;
-            min-width: 140px;
-            height: 44px;
-            overflow: hidden;
-            position: relative;
-            transition: var(--btn-transition);
-            gap: 8px;
-        }
-
-        .button-message-reshop:hover {
-            background-color: var(--bg-hover-color);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(42, 92, 110, 0.15);
-        }
-
-        .button-message-reshop:active {
-            transform: scale(0.98);
-        }
-
-        .button-message-reshop .avatar-container {
-            width: 32px;
-            height: 32px;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .button-message-reshop .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2A5C6E, #E8B86B);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.9rem;
-        }
-
-        .button-message-reshop .status-dot {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            background-color: var(--online-status);
-            border-radius: 50%;
-            border: 2px solid white;
-            animation: pulse-status 2s ease-in-out infinite;
-        }
-
-        .button-message-reshop .button-text {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.2;
-        }
-
-        .button-message-reshop .button-label {
-            font-size: 0.7rem;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .button-message-reshop .button-title {
-            font-weight: 700;
-            color: #2A5C6E;
-            font-size: 0.85rem;
-        }
-
-        .button-message-reshop i {
-            color: #2A5C6E;
-            font-size: 1rem;
-            transition: transform 0.2s;
-            margin-left: auto;
-        }
-
-        .button-message-reshop:hover i {
-            transform: translateX(2px);
-        }
-
-        @keyframes pulse-status {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
-
         /* Loader Three Body */
         .loader-container {
             display: flex;
@@ -362,8 +343,9 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             .product-price { font-size: 1.3rem; }
             .product-info label { width: 100px; }
             .review-header { flex-direction: column; align-items: flex-start; gap: 5px; }
-            .product-actions { flex-direction: column; }
+            .product-actions { flex-direction: column; align-items: stretch; }
             .product-actions .btn { width: 100%; margin-right: 0; margin-bottom: 8px; }
+            .btn-contact-seller { width: 100%; justify-content: center; }
             .message-item { max-width: 90%; }
         }
     </style>
@@ -434,7 +416,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         </div>
     </div>
     
-    <!-- 🆕 Botón de instalación PWA -->
+    <!-- Botón de instalación PWA -->
     <button id="installAppBtn" class="install-pwa-btn" style="display: none;">
         <i class="fas fa-download"></i>
         <div class="install-texts">
@@ -627,45 +609,147 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         }
         
         // ============================================================
-        // MENSAJERÍA
+        // MENSAJERÍA MEJORADA
         // ============================================================
+        
+        // Función principal para contactar vendedor
         async function startConversation(sellerId, sellerName) {
             const token = localStorage.getItem('token');
+            
             if (!token) {
-                alert('Inicia sesión para contactar al vendedor');
-                window.location.href = 'login.html';
+                showLoginModal();
                 return;
             }
             
-            document.getElementById('modalVendorName').textContent = sellerName;
+            if (!currentProduct || !currentProduct.seller_id) {
+                showToast('Error: No se pudo identificar al vendedor', 'error');
+                return;
+            }
+            
+            // Mostrar loader en el botón
+            const btn = document.getElementById('contactSellerBtn');
+            if (btn) {
+                const originalContent = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Conectando...';
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/conversations`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            seller_id: currentProduct.seller_id
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentConversationId = data.conversation.id;
+                        openMessageModal(sellerName);
+                        // Marcar que ya contactó para no mostrar pulso nuevamente
+                        localStorage.setItem('hasContactedVendor', 'true');
+                    } else {
+                        showToast(data.error || 'Error al iniciar conversación', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Error de conexión', 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
+            }
+        }
+        
+        // Abrir modal de mensajería
+        function openMessageModal(sellerName) {
+            document.getElementById('modalVendorName').innerHTML = `
+                <i class="fas fa-store"></i> ${escapeHtml(sellerName)}
+                <span style="font-size: 0.7rem; opacity: 0.8;"> (Responde rápido)</span>
+            `;
             document.getElementById('messageModal').classList.add('is-open');
             document.getElementById('messageInput').value = '';
+            document.getElementById('messageInput').focus();
             
-            try {
-                const response = await fetch(`${API_URL}/api/conversations`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        seller_id: sellerId
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    currentConversationId = data.conversation.id;
-                    loadMessages();
-                    if (messagePollingInterval) clearInterval(messagePollingInterval);
-                    messagePollingInterval = setInterval(() => loadMessages(), 5000);
-                } else {
-                    alert('Error al iniciar conversación: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión');
+            loadMessages();
+            
+            if (messagePollingInterval) clearInterval(messagePollingInterval);
+            messagePollingInterval = setInterval(() => loadMessages(), 5000);
+        }
+        
+        // Mostrar modal de login elegante
+        function showLoginModal() {
+            let loginModal = document.getElementById('loginModal');
+            if (!loginModal) {
+                loginModal = document.createElement('div');
+                loginModal.id = 'loginModal';
+                loginModal.className = 'modal-message';
+                loginModal.innerHTML = `
+                    <div class="modal-message-content" style="max-width: 320px; text-align: center;">
+                        <div class="modal-message-header" style="background: #2A5C6E;">
+                            <h3><i class="fas fa-lock"></i> Iniciar Sesión</h3>
+                            <button class="close" onclick="closeLoginModal()">&times;</button>
+                        </div>
+                        <div class="modal-message-body" style="text-align: center; padding: 30px;">
+                            <i class="fas fa-comment-dots" style="font-size: 3rem; color: #2A5C6E; margin-bottom: 15px;"></i>
+                            <p style="margin-bottom: 20px;">Para contactar al vendedor, primero inicia sesión en tu cuenta.</p>
+                            <a href="login.html" class="btn btn-primary" style="display: inline-block; width: 100%; text-decoration: none;">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            </a>
+                            <a href="register.html" style="display: block; margin-top: 12px; color: #2A5C6E; font-size: 0.9rem;">
+                                ¿No tienes cuenta? Regístrate
+                            </a>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(loginModal);
             }
+            loginModal.classList.add('is-open');
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) modal.classList.remove('is-open');
+        }
+        
+        // Toast notification
+        function showToast(message, type = 'info') {
+            let toast = document.getElementById('customToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'customToast';
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(20px);
+                    background: ${type === 'error' ? '#D95A41' : '#2A5C6E'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 50px;
+                    font-size: 0.85rem;
+                    z-index: 2000;
+                    opacity: 0;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    white-space: nowrap;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(20px)';
+            }, 3000);
         }
         
         async function loadMessages() {
@@ -756,12 +840,26 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     renderProduct(data.product); 
                     loadReviews();
                     setTimeout(() => checkFavorite(), 100);
+                    // Agregar efecto de pulso al botón si nunca contactó
+                    setTimeout(() => addPulseEffect(), 500);
                 } else { 
                     container.innerHTML = '<div class="error"><i class="fas fa-search"></i> Producto no encontrado</div>'; 
                 }
             } catch (error) { 
                 console.error('Error:', error); 
                 container.innerHTML = `<div class="error"><i class="fas fa-wifi"></i> Error al cargar el producto: ${error.message}</div>`; 
+            }
+        }
+        
+        // Agregar efecto de pulso al botón
+        function addPulseEffect() {
+            const btn = document.getElementById('contactSellerBtn');
+            const hasContacted = localStorage.getItem('hasContactedVendor');
+            if (btn && !hasContacted) {
+                btn.classList.add('pulse');
+                setTimeout(() => {
+                    btn.classList.remove('pulse');
+                }, 3000);
             }
         }
         
@@ -795,32 +893,27 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
                         <i class="fas fa-external-link-alt"></i> Ver tienda
                     </a>
+                    <span class="quick-response-badge">
+                        <i class="fas fa-bolt"></i> Responde rápido
+                    </span>
                 </span></div>
                 <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
                 <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
                 <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
-                <div class="product-actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
+                <div class="product-actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; align-items: center;">
                     <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
                         <i class="fas fa-cart-plus"></i> Agregar al Carrito
                     </button>
                     <button class="btn btn-secondary" onclick="buyNow(${product.id})">
                         <i class="fas fa-bolt"></i> Comprar Ahora
                     </button>
-                    <button class="button-message-reshop" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
-                        <div class="avatar-container">
-                            <div class="avatar">
-                                <i class="fas fa-comment-dots"></i>
-                            </div>
-                            <span class="status-dot"></span>
-                        </div>
-                        <div class="button-text">
-                            <span class="button-label">Preguntar al</span>
-                            <span class="button-title">Vendedor</span>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    <button class="btn btn-fav" id="favBtn" onclick="toggleFavorite()">
+                    <button class="btn-fav" id="favBtn" onclick="toggleFavorite()">
                         <i class="far fa-heart"></i> Favorito
+                    </button>
+                    <button class="btn-contact-seller" id="contactSellerBtn" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>Consultar al vendedor</span>
+                        <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
                 <div id="message" class="message"></div>
@@ -1105,6 +1198,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMessageModal();
+                closeLoginModal();
             }
         });
     </script>
