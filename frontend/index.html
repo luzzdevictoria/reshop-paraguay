@@ -2,22 +2,32 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.1.0 (Mobile-First + Three Body Loader)
+VERSION: 2.2.0 (Mobile-First + Three Body Loader + PWA Install Button)
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-12
+ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
              filtros deslizables, bottom nav y tarjetas táctiles.
-             Incluye loader Three Body y botón Buscar cerca de mí.
+             Incluye loader Three Body, botón Buscar cerca de mí y
+             🆕 botón para instalar la app como PWA.
 ================================================================================
 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ReShop Paraguay - Ropa de Segunda Mano</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2A5C6E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ReShop">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
@@ -42,7 +52,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; transition: opacity 0.2s; }
         .header a:hover { opacity: 0.8; }
         .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .logo-img { height: 85px; width: auto; border-radius: 16px; background-color: white; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); object-fit: contain; transition: transform 0.2s; }px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); object-fit: contain; }
+        .logo-img { height: 85px; width: auto; border-radius: 16px; background-color: white; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); object-fit: contain; transition: transform 0.2s; }
         .header-title h1 { margin: 0; font-size: 1.8rem; }
         .header-title h1 i { margin-right: 8px; color: var(--secondary); }
         .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
@@ -95,6 +105,40 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         .loading i { font-size: 2rem; display: block; margin-bottom: 12px; color: var(--primary); }
 
         .footer { background: var(--primary); color: white; text-align: center; padding: 20px; margin-top: 40px; font-size: 0.8rem; }
+
+        /* 🆕 Botón de instalación PWA */
+        .install-pwa-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .install-pwa-btn:hover {
+            background: #1e4452;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .install-pwa-btn {
+                bottom: 70px;
+                right: 12px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
 
         @media (max-width: 1024px) {
             .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
@@ -352,6 +396,11 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
         </div>
     </div>
 
+    <!-- 🆕 Botón de instalación PWA -->
+    <button id="installPwaBtn" class="install-pwa-btn">
+        <i class="fas fa-download"></i> Instalar App
+    </button>
+
     <div class="footer">
         <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
@@ -605,6 +654,28 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                 `;
             }).join('');
         }
+
+        // 🆕 PWA Installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('installPwaBtn');
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('✅ Usuario instaló la app ReShop');
+                }
+                deferredPrompt = null;
+                document.getElementById('installPwaBtn').style.display = 'none';
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             updateUserMenu();
