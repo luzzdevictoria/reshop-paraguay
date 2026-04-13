@@ -2,15 +2,16 @@
 ================================================================================
 ARCHIVO: index.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.3.0 (Mobile-First + Three Body Loader + PWA + Avatar Usuario)
+VERSION: 2.3.1 (Mobile-First + Three Body Loader + PWA + Avatar Usuario + Mi Perfil)
 CREADO: 2026-04-09
-ACTUALIZADO: 2026-04-13
+ACTUALIZADO: 2026-04-14
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
              filtros deslizables, bottom nav y tarjetas táctiles.
              Incluye loader Three Body, botón Buscar cerca de mí,
-             botón para instalar la app como PWA y avatar de usuario.
+             botón para instalar la app como PWA, avatar de usuario
+             y enlace "Mi Perfil" para todos los usuarios autenticados.
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -334,7 +335,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             <a href="my-orders.html"><i class="fas fa-history"></i> Pedidos</a>
             <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
             <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
-			<a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="profile.html" id="profileLink" style="display: none;"><i class="fas fa-user-circle"></i> Mi Perfil</a>
             <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
             <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
             <span id="authLinks">
@@ -471,6 +472,7 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             const userAvatar = document.getElementById('userAvatar');
             const dashboardLink = document.getElementById('dashboardLink');
             const adminLink = document.getElementById('adminLink');
+            const profileLink = document.getElementById('profileLink'); // ✅ AGREGAR: Enlace Mi Perfil
 
             if (token && user) {
                 authLinks.style.display = 'none';
@@ -489,6 +491,9 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
                     }
                 }
                 
+                // ✅ Mostrar Mi Perfil para TODOS los usuarios autenticados
+                if (profileLink) profileLink.style.display = 'inline';
+                
                 // Mostrar enlaces según rol
                 if (dashboardLink && (user.role === 'seller' || user.role === 'admin')) {
                     dashboardLink.style.display = 'inline';
@@ -499,6 +504,8 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             } else {
                 authLinks.style.display = 'inline';
                 userMenu.style.display = 'none';
+                // ✅ Ocultar Mi Perfil cuando no hay sesión
+                if (profileLink) profileLink.style.display = 'none';
                 if (dashboardLink) dashboardLink.style.display = 'none';
                 if (adminLink) adminLink.style.display = 'none';
             }
