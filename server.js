@@ -35,11 +35,11 @@ HISTORIAL DE MODIFICACIONES:
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
+const { supabase, supabaseAdmin } = require('./database');
 //const { removeBackground } = require('@imgly/background-removal-node');
 
 dotenv.config();
@@ -120,20 +120,6 @@ const upload = multer({
         else cb(new Error('Tipo de archivo no permitido'), false);
     }
 });
-
-// ============================================================
-// INICIALIZAR SUPABASE
-// ============================================================
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-);
-
-const supabaseAdmin = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 const uuidv4 = () => crypto.randomUUID();

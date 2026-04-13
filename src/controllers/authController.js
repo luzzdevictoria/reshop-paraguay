@@ -30,7 +30,7 @@ HISTORIAL DE MODIFICACIONES:
 */
 
 const jwt = require('jsonwebtoken');
-const { createClient } = require('@supabase/supabase-js');
+const { supabase, supabaseAdmin } = require('../../database');
 
 // Inicializar Supabase
 const supabase = createClient(

@@ -8,7 +8,7 @@ const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { authenticateToken } = require('../middleware/auth');
-const { supabaseAdmin } = require('../../database');
+const { supabaseAdmin } = require('../../database');  // ← Cliente Supabase centralizado
 
 // Configurar Cloudinary
 cloudinary.config({

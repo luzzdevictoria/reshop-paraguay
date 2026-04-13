@@ -23,13 +23,8 @@ HISTORIAL DE MODIFICACIONES:
 
 const express = require('express');
 const router = express.Router();
-const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const { supabase } = require('../../database');  // ← Cliente Supabase centralizado
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reshop-secret-key-2026';
 
