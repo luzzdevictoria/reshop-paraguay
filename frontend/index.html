@@ -750,13 +750,27 @@ DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    updateUserMenu();
+    setupLogout();
+    setupFilters();
+    setupNearMeButton();
+    loadProducts();
+    
+    // ✅ AGREGAR: Re-ejecutar cuando el usuario regresa a esta pestaña
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
             updateUserMenu();
-            setupLogout();
-            setupFilters();
-            setupNearMeButton();
-            loadProducts();
-        });
+        }
+    });
+    
+    // ✅ AGREGAR: Re-ejecutar si otra página actualiza localStorage
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'user') {
+            updateUserMenu();
+        }
+    });
+});
     </script>
 
     <script src="js/mobile.js"></script>
