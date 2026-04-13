@@ -1,9 +1,12 @@
 /**
  * ARCHIVO: frontend/js/mobile.js
  * PROYECTO: ReShop Paraguay
- * VERSION: 1.2.1
- * ACTUALIZADO: 2026-04-13
+ * VERSION: 1.2.2
+ * ACTUALIZADO: 2026-04-14
  * AUTOR: Pedro José Pirovani
+ *
+ * CHANGELOG v1.2.2:
+ * [+] Agregar enlace "Mi Perfil" en menú móvil para todos los usuarios autenticados
  *
  * CHANGELOG v1.2.1:
  * [+] Agregar eslogan "Shopping Virtual de Ropa de Segunda Mano" en header móvil
@@ -315,6 +318,7 @@
                 <a href="my-orders.html" class="mobile-menu-drawer__link ${page==='my-orders.html'?'active':''}"><i class="fas fa-history"></i> Mis Pedidos</a>
                 <a href="messages.html" class="mobile-menu-drawer__link ${page==='messages.html'?'active':''}"><i class="fas fa-comment-dots"></i> Mensajes</a>
                 <a href="help.html" class="mobile-menu-drawer__link ${page==='help.html'?'active':''}"><i class="fas fa-circle-question"></i> Ayuda</a>
+                <a href="profile.html" class="mobile-menu-drawer__link ${page==='profile.html'?'active':''}"><i class="fas fa-user-circle"></i> Mi Perfil</a>
                 ${roleLinks}
                 ${authSection}
             </div>`;
