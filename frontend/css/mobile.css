@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: css/mobile.css
 PROYECTO: ReShop Paraguay
-VERSION: 1.2.1
+VERSION: 1.3.0
 CREADO: 2026-04-11
 ACTUALIZADO: 2026-04-13
 AUTOR: Pedro José Pirovani
@@ -10,6 +10,7 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
              Hamburger menu, filtros deslizables, bottom navigation,
              tarjetas táctiles y tablas adaptadas a pantallas pequeñas.
              [v1.2.1] + Eslogan en header móvil para pantallas ≤480px
+             [v1.3.0] + Botón de instalación PWA (Progressive Web App)
 ================================================================================
 */
 
@@ -212,16 +213,16 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
 /* 🆕 Mostrar eslogan SOLO en pantallas muy pequeñas (≤480px) */
 @media (max-width: 480px) {
     .mobile-header {
-        height: 70px; /* ← +10px para acomodar el eslogan */
+        height: 70px;
         padding-bottom: 6px;
     }
     
     .mobile-header .mobile-slogan {
-        display: block; /* ← Ahora se muestra solo en móviles pequeños */
+        display: block;
     }
     
     .mobile-header__logo img {
-        height: 42px; /* ← Logo ligeramente más pequeño */
+        height: 42px;
         padding: 4px 8px;
     }
     
@@ -229,7 +230,6 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         font-size: 1rem;
     }
     
-    /* Espacio para que el contenido no choque con el eslogan */
     .main-content,
     .container {
         padding-top: 18px !important;
@@ -1405,4 +1405,93 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
         font-size: 0.65rem;
         color: #E8B86B;
     }
+}
+
+/* ============================================================
+   🆕 BOTÓN DE INSTALACIÓN PWA (PROGRESSIVE WEB APP)
+   ============================================================ */
+.install-pwa-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2A5C6E, #1e4452);
+    color: white;
+    border: none;
+    border-radius: 60px;
+    padding: 14px 24px;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    width: auto;
+    min-width: 260px;
+    backdrop-filter: blur(4px);
+    background-color: rgba(42, 92, 110, 0.95);
+    border: 1px solid rgba(232, 184, 107, 0.5);
+}
+
+.install-pwa-btn:hover {
+    transform: translateX(-50%) scale(1.02);
+    background: linear-gradient(135deg, #1e4452, #2A5C6E);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.install-pwa-btn:active {
+    transform: translateX(-50%) scale(0.98);
+}
+
+.install-pwa-btn i {
+    font-size: 1.4rem;
+    color: var(--secondary, #E8B86B);
+}
+
+.install-pwa-btn .install-texts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+}
+
+.install-pwa-btn .install-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+
+.install-pwa-btn .install-subtitle {
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+/* Posición ajustada si hay bottom nav */
+@media (max-width: 768px) {
+    .install-pwa-btn {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+        padding: 12px 20px;
+        min-width: 240px;
+    }
+    
+    .install-pwa-btn i {
+        font-size: 1.2rem;
+    }
+    
+    .install-pwa-btn .install-title {
+        font-size: 0.85rem;
+    }
+    
+    .install-pwa-btn .install-subtitle {
+        font-size: 0.65rem;
+    }
+}
+
+/* Cuando está instalada la app, se oculta */
+.install-pwa-btn.hidden {
+    display: none !important;
 }
