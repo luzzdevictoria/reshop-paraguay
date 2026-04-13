@@ -1,19 +1,31 @@
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/$1"
-    }
-  ]
-}
+{ 
+  "version": 2, 
+  "builds": [ 
+    { 
+      "src": "server.js", 
+      "use": "@vercel/node" 
+    }, 
+    { 
+      "src": "frontend/**", 
+      "use": "@vercel/static" 
+    }, 
+    { 
+      "src": "OneSignalSDKWorker.js", 
+      "use": "@vercel/static" 
+    } 
+  ], 
+  "routes": [ 
+    { 
+      "src": "/api/(.*)", 
+      "dest": "/server.js" 
+    }, 
+    { 
+      "src": "/OneSignalSDKWorker.js", 
+      "dest": "/OneSignalSDKWorker.js" 
+    }, 
+    { 
+      "src": "/(.*)", 
+      "dest": "/frontend/$1" 
+    } 
+  ] 
+} 
