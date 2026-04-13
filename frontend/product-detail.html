@@ -1205,7 +1205,7 @@ function renderProduct(product) {
             <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
                 <i class="fas fa-cart-plus"></i> Agregar al Carrito
             </button>
-            <button class="btn btn-secondary" onclick="buyNow(${product.id})">
+            <button class="btn-secondary" onclick="buyNow(${product.id})">
                 <i class="fas fa-bolt"></i> Comprar Ahora
             </button>
             <input type="checkbox" id="favoriteCheckbox" class="fav-checkbox" onchange="toggleFavoriteModern()">

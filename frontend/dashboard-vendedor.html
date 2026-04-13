@@ -65,18 +65,7 @@ HISTORIAL DE MODIFICACIONES:
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .panel-header h2 { color: var(--primary); font-size: 1.3rem; }
 
-        /* Buttons */
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #1e4452; }
-        .btn-danger { background: var(--accent); color: white; }
-        .btn-danger:hover { background: #c04a33; }
-        .btn-secondary { background: var(--secondary); color: #333; }
-        .btn-secondary:hover { background: #d4a050; }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-        .btn-outline:hover { background: var(--bg); }
-        .btn i { margin-right: 0; }
-        
+       
         /* Botón de eliminar fondo - COMENTADO por límite Vercel */
         /* .btn-magic { ... } */
 
@@ -995,10 +984,16 @@ function capturePhoto() {
                                             <td style="color: var(--accent); font-weight: 700;">${new Intl.NumberFormat('es-PY').format(p.price)} Gs</td>
                                             <td><span style="text-transform: capitalize;">${p.category}</span></td>
                                             <td><span class="status-badge status-${p.status}">${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}</span></td>
-                                            <td>
-                                                <button class="btn-edit" onclick="editProduct(${p.id})" style="margin-right: 6px;"><i class="fas fa-edit"></i> Editar</button>
-                                                <button class="btn-delete" onclick="deleteProduct(${p.id})"><i class="fas fa-trash-alt"></i> Eliminar</button>
-                                            </td>
+<td>
+    <div class="btn-group">
+        <button class="btn-edit btn-sm" onclick="editProduct(${p.id})">
+            <i class="fas fa-edit"></i> Editar
+        </button>
+        <button class="btn-delete btn-sm" onclick="deleteProduct(${p.id})">
+            <i class="fas fa-trash-alt"></i> Eliminar
+        </button>
+    </div>
+</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>

@@ -1,286 +1,472 @@
-/* Botones */
-.btn {
-    padding: 10px 20px;
+/* ============================================================
+   SISTEMA DE BOTONES — ReShop Paraguay
+   Agregar a: frontend/css/components.css
+   ============================================================
+   Paleta:
+     --primary:   #2A5C6E
+     --secondary: #E8B86B
+     --accent:    #D95A41
+     --green:     #28a745
+     --gray:      #6c757d
+   ============================================================ */
+
+
+/* ============================================================
+   BASE COMPARTIDA
+   Aplica a todas las variantes. No requiere agregar .btn también.
+   ============================================================ */
+
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-edit,
+.btn-delete,
+.btn-cancel,
+.btn-save,
+.btn-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     border: none;
-    border-radius: 8px;
+    border-radius: 40px;              /* Bordes bien redondeados */
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    vertical-align: middle;
 }
 
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-edit,
+.btn-delete,
+.btn-cancel,
+.btn-save,
+.btn-toggle {
+    padding: 10px 24px;              /* Tamaño normal */
+}
+
+.btn-primary i,
+.btn-secondary i,
+.btn-outline i,
+.btn-edit i,
+.btn-delete i,
+.btn-cancel i,
+.btn-save i,
+.btn-toggle i {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+
+/* ============================================================
+   ESTADO DESHABILITADO
+   ============================================================ */
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-outline:disabled,
+.btn-edit:disabled,
+.btn-delete:disabled,
+.btn-cancel:disabled,
+.btn-save:disabled,
+.btn-toggle:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   VARIANTES
+   ============================================================ */
+
+/* — btn-primary: Acción principal (azul institucional) — */
 .btn-primary {
-    background-color: var(--primary);
-    color: var(--white);
+    background: linear-gradient(135deg, #2A5C6E, #1e4452);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(42, 92, 110, 0.25);
 }
 
 .btn-primary:hover {
-    background-color: #1e4452;
+    background: linear-gradient(135deg, #1e4452, #142f38);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(42, 92, 110, 0.38);
 }
 
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(42, 92, 110, 0.25);
+}
+
+/* — btn-secondary: Acción secundaria (dorado) — */
 .btn-secondary {
-    background-color: var(--secondary);
-    color: var(--text-dark);
+    background: linear-gradient(135deg, #E8B86B, #d4a050);
+    color: #333333;
+    box-shadow: 0 3px 10px rgba(232, 184, 107, 0.25);
 }
 
 .btn-secondary:hover {
-    background-color: #d4a050;
+    background: linear-gradient(135deg, #d4a050, #c49540);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(232, 184, 107, 0.38);
 }
 
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
+/* — btn-outline: Contorno (sin fondo) — */
 .btn-outline {
-    background-color: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dark);
+    background: transparent;
+    color: #2A5C6E;
+    border: 1.5px solid #2A5C6E;
+    box-shadow: none;
 }
 
 .btn-outline:hover {
-    background-color: var(--background);
+    background: #2A5C6E;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(42, 92, 110, 0.25);
 }
 
-/* Product Card */
-.product-card {
-    background-color: var(--white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
+.btn-outline:active {
+    transform: translateY(0);
 }
 
-.product-card:hover {
-    transform: translateY(-4px);
-}
-
-.product-card__image {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    background-color: var(--background);
-}
-
-.product-card__content {
-    padding: 15px;
-}
-
-.product-card__title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-dark);
-}
-
-.product-card__price {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--accent);
-    margin-bottom: 8px;
-}
-
-.product-card__seller {
-    font-size: 0.8rem;
-    color: var(--text-light);
-    margin-bottom: 8px;
-}
-
-.product-card__condition {
-    display: inline-block;
-    padding: 2px 8px;
-    background-color: var(--secondary);
-    border-radius: 4px;
-    font-size: 0.7rem;
-    color: var(--text-dark);
-}
-
-.product-card__button {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* ============================================
-   BOTONES DE ACCIÓN ESPECÍFICOS (Eliminar, Editar, etc.)
-   ============================================ */
-
-/* Botón EDITAR */
+/* — btn-edit: Editar (dorado) — */
 .btn-edit {
     background: linear-gradient(135deg, #E8B86B, #d4a050);
-    color: var(--text-dark);
-    border: none;
-    border-radius: 40px;
-    padding: 10px 24px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(232, 184, 107, 0.3);
+    color: #333333;
+    box-shadow: 0 3px 10px rgba(232, 184, 107, 0.25);
 }
 
 .btn-edit:hover {
     background: linear-gradient(135deg, #d4a050, #c49540);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(232, 184, 107, 0.4);
+    box-shadow: 0 5px 14px rgba(232, 184, 107, 0.38);
 }
 
 .btn-edit:active {
     transform: translateY(0);
 }
 
-/* Botón ELIMINAR */
+/* — btn-delete: Eliminar (rojo/accent) — */
 .btn-delete {
     background: linear-gradient(135deg, #D95A41, #c04a33);
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 10px 24px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(217, 90, 65, 0.3);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(217, 90, 65, 0.25);
 }
 
 .btn-delete:hover {
     background: linear-gradient(135deg, #c04a33, #a03a28);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(217, 90, 65, 0.4);
+    box-shadow: 0 5px 14px rgba(217, 90, 65, 0.38);
 }
 
 .btn-delete:active {
     transform: translateY(0);
 }
 
-/* Botón ELIMINAR con estilo neumórfico (como tu .del) */
-.btn-delete-neuromorphic {
-    position: relative;
-    width: 120px;
-    height: 44px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-delete-neuromorphic div {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: none;
-    box-shadow: 4px 4px 6px 0 rgba(255,255,255,.5),
-                -4px -4px 6px 0 rgba(116, 125, 136, .5), 
-                inset -4px -4px 6px 0 rgba(255,255,255,.2),
-                inset 4px 4px 6px 0 rgba(0, 0, 0, .4);
-    border-radius: 30px;
-    color: var(--accent);
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: .4s;
-}
-
-.btn-delete-neuromorphic:hover div {
-    letter-spacing: 2px;
-    color: white;
-    background: var(--accent);
-}
-
-/* Botón ACTIVAR/DESACTIVAR (para admin) */
-.btn-toggle {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.btn-toggle:hover {
-    background-color: #1e4452;
-    transform: translateY(-2px);
-}
-
-/* Botón CANCELAR */
-/* Botón CANCELAR - Estilo moderno */
+/* — btn-cancel: Cancelar (gris neutro) — */
 .btn-cancel {
     background: linear-gradient(135deg, #6c757d, #5a6268);
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 10px 24px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(108, 117, 125, 0.2);
 }
 
 .btn-cancel:hover {
     background: linear-gradient(135deg, #5a6268, #4e555b);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+    box-shadow: 0 5px 14px rgba(108, 117, 125, 0.3);
 }
 
 .btn-cancel:active {
     transform: translateY(0);
 }
 
-/* Botón GUARDAR */
-/* Botón GUARDAR - Estilo moderno */
+/* — btn-save: Guardar / Confirmar (verde) — */
 .btn-save {
     background: linear-gradient(135deg, #28a745, #218838);
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 10px 24px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.25);
 }
 
 .btn-save:hover {
-    background: linear-gradient(135deg, #218838, #1e7e34);
+    background: linear-gradient(135deg, #218838, #1a6e2c);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    box-shadow: 0 5px 14px rgba(40, 167, 69, 0.38);
 }
 
 .btn-save:active {
     transform: translateY(0);
 }
 
-/* Tamaños de botones */
+/* — btn-toggle: Activar/Desactivar (primary) — */
+.btn-toggle {
+    background: #2A5C6E;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(42, 92, 110, 0.2);
+}
+
+.btn-toggle:hover {
+    background: #1e4452;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(42, 92, 110, 0.3);
+}
+
+.btn-toggle:active {
+    transform: translateY(0);
+}
+
+
+/* ============================================================
+   MODIFICADORES DE TAMAÑO
+   Se combinan con cualquier variante: class="btn-edit btn-sm"
+   ============================================================ */
+
+/* Pequeño */
 .btn-sm {
-    padding: 5px 12px;
-    font-size: 0.75rem;
+    padding: 6px 16px !important;
+    font-size: 0.75rem !important;
+    gap: 6px !important;
 }
 
+.btn-sm i {
+    font-size: 0.8rem !important;
+}
+
+/* Grande */
 .btn-lg {
-    padding: 12px 24px;
-    font-size: 1rem;
+    padding: 14px 32px !important;
+    font-size: 1rem !important;
 }
 
-/* Botones con iconos */
-.btn-edit i,
-.btn-delete i,
-.btn-toggle i,
-.btn-cancel i,
-.btn-save i {
+.btn-lg i {
+    font-size: 1rem !important;
+}
+
+
+/* ============================================================
+   MODIFICADOR SOLO ICONO
+   class="btn-delete btn-icon"
+   ============================================================ */
+
+.btn-icon {
+    border-radius: 50% !important;
+    padding: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    flex-shrink: 0;
+}
+
+.btn-icon.btn-sm {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.btn-icon.btn-lg {
+    width: 48px !important;
+    height: 48px !important;
+}
+
+.btn-icon i {
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+}
+
+
+/* ============================================================
+   MODIFICADOR ANCHO COMPLETO
+   class="btn-primary btn-block"
+   ============================================================ */
+
+.btn-block {
+    width: 100%;
+}
+
+
+/* ============================================================
+   GRUPO DE BOTONES (acciones juntas)
+   <div class="btn-group">...</div>
+   ============================================================ */
+
+.btn-group {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-group.btn-group--right {
+    justify-content: flex-end;
+}
+
+.btn-group.btn-group--center {
+    justify-content: center;
+}
+
+/* En móvil: columna */
+@media (max-width: 480px) {
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-group .btn-primary,
+    .btn-group .btn-secondary,
+    .btn-group .btn-edit,
+    .btn-group .btn-delete,
+    .btn-group .btn-cancel,
+    .btn-group .btn-save,
+    .btn-group .btn-toggle {
+        width: 100%;
+    }
+
+    /* Los btn-icon nunca ocupan ancho completo */
+    .btn-group .btn-icon {
+        width: 40px !important;
+        align-self: center;
+    }
+}
+
+
+/* ============================================================
+   BADGES DE ESTADO (tarjetas de producto / órdenes)
+   ============================================================ */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+}
+
+.status-active  { background: #d4edda; color: #155724; }
+.status-inactive{ background: #f8d7da; color: #721c24; }
+.status-sold    { background: #fff3cd; color: #856404; }
+.status-paid    { background: #cce5ff; color: #004085; }
+.status-shipped { background: #d1ecf1; color: #0c5460; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-cancelled{ background: #f8d7da; color: #721c24; }
+.status-delivered{ background: #d4edda; color: #155724; }
+
+
+/* ============================================================
+   TARJETAS DE PRODUCTO — mejora visual
+   Centralizar en components.css en lugar de styles en línea
+   ============================================================ */
+
+.product-card {
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+}
+
+.product-card:active {
+    transform: translateY(-2px);
+}
+
+.product-card__image,
+.product-card__img-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #f0f0f0;
+    position: relative;
+}
+
+.product-card__image img,
+.product-card__img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+}
+
+.product-card:hover .product-card__image img,
+.product-card:hover .product-card__img-wrapper img {
+    transform: scale(1.04);
+}
+
+.product-card__content {
+    padding: 14px;
+}
+
+.product-card__title {
     font-size: 0.9rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 6px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-card__price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #D95A41;
+    margin-bottom: 6px;
+}
+
+.product-card__seller {
+    font-size: 0.75rem;
+    color: #666666;
+    margin-bottom: 6px;
+}
+
+.product-card__condition {
+    display: inline-block;
+    padding: 3px 9px;
+    background: #E8B86B;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #5a3d0e;
+}
+
+.product-card__button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2A5C6E;
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.product-card__button:hover {
+    background: #1e4452;
 }
