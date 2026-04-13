@@ -879,23 +879,37 @@ app.get('/api/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
+        console.log('🔍 Buscando usuario con ID:', id);
+        
+        // Usar maybeSingle para evitar error si no existe
         const { data: user, error } = await supabase
             .from('users')
             .select('id, email, full_name, store_name, avatar_url, rating, created_at, bio, address_visible, latitude, longitude')
             .eq('id', id)
-            .single();
+            .maybeSingle();
         
         if (error) {
-            console.error('❌ Error al obtener usuario:', error);
+            console.error('❌ Error en consulta:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+        
+        if (!user) {
+            console.error('❌ Usuario no encontrado con ID:', id);
             return res.status(404).json({ success: false, error: 'Vendedor no encontrado' });
         }
         
-        // Contar productos del vendedor
+        // Contar productos activos del vendedor
         const { count: productsCount, error: countError } = await supabase
             .from('products')
             .select('*', { count: 'exact', head: true })
             .eq('seller_id', id)
             .eq('status', 'active');
+        
+        if (countError) {
+            console.error('❌ Error contando productos:', countError);
+        }
+        
+        console.log('✅ Usuario encontrado:', user.email);
         
         res.json({
             success: true,
