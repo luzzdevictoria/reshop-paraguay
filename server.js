@@ -873,6 +873,42 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
 });
 
 // ============================================================
+// ENDPOINT: OBTENER DATOS DE UN VENDEDOR POR ID
+// ============================================================
+app.get('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('id, email, full_name, store_name, avatar_url, rating, created_at, bio, address_visible, latitude, longitude')
+            .eq('id', id)
+            .single();
+        
+        if (error) {
+            console.error('❌ Error al obtener usuario:', error);
+            return res.status(404).json({ success: false, error: 'Vendedor no encontrado' });
+        }
+        
+        // Contar productos del vendedor
+        const { count: productsCount, error: countError } = await supabase
+            .from('products')
+            .select('*', { count: 'exact', head: true })
+            .eq('seller_id', id)
+            .eq('status', 'active');
+        
+        res.json({
+            success: true,
+            seller: user,
+            products_count: productsCount || 0
+        });
+    } catch (error) {
+        console.error('❌ Error en /api/users/:id:', error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================================
 // ENDPOINTS DE RESEÑAS
 // ============================================================
 
