@@ -656,31 +656,17 @@ app.get('/api/favorites/check/:productId', authenticateToken, async (req, res) =
 });
 
 // ============================================================
-// RUTA DE PRODUCTO POR ID (CON CONTADOR DE VISTAS + DATOS DEL VENDEDOR)
+// RUTA DE PRODUCTO POR ID (CON CONTADOR DE VISTAS)
 // ============================================================
 
 app.get('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Obtener el producto actual con los datos del vendedor (JOIN)
+        // Obtener el producto
         const { data: product, error } = await supabase
             .from('products')
-            .select(`
-                *,
-                seller:seller_id (
-                    id,
-                    email,
-                    full_name,
-                    store_name,
-                    store_description,
-                    store_logo_url,
-                    rating,
-                    total_sales,
-                    city,
-                    address_visible
-                )
-            `)
+            .select('*')
             .eq('id', id)
             .single();
 
@@ -690,23 +676,27 @@ app.get('/api/products/:id', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Producto no encontrado' });
         }
         
-        // 🆕 INCREMENTAR CONTADOR DE VISTAS (sin bloquear la respuesta)
-        const currentViews = product.views || 0;
+        // Obtener los datos del vendedor
+        const { data: seller, error: sellerError } = await supabase
+            .from('users')
+            .select('id, email, full_name, store_name, store_description, store_logo_url, rating, total_sales, city, address_visible')
+            .eq('id', product.seller_id)
+            .single();
         
-        // Actualizar vistas en segundo plano (no esperar a que termine)
+        if (!sellerError && seller) {
+            product.seller = seller;
+        }
+        
+        // Incrementar vistas
+        const currentViews = product.views || 0;
         supabase
             .from('products')
             .update({ views: currentViews + 1, updated_at: new Date().toISOString() })
             .eq('id', id)
             .then(({ error: updateError }) => {
-                if (updateError) {
-                    console.error('❌ Error actualizando vistas:', updateError);
-                } else {
-                    console.log(`👁️ Vistas incrementadas para producto ${id}: ${currentViews + 1}`);
-                }
+                if (updateError) console.error('❌ Error actualizando vistas:', updateError);
             });
         
-        // Devolver el producto con las vistas actuales (no esperamos la actualización)
         res.json({ success: true, product: { ...product, views: currentViews + 1 } });
     } catch (error) {
         console.error('Error:', error);
