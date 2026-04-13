@@ -2,7 +2,7 @@
 ================================================================================
 ARCHIVO: seller-store.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 1.1.0
+VERSION: 1.2.0
 CREADO: 2026-04-11
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
@@ -17,6 +17,7 @@ HISTORIAL DE MODIFICACIONES:
 2026-04-11 - [ADD] Boton para contactar por WhatsApp
 2026-04-13 - [FIX] Reemplazar WhatsApp por mensajería interna con botón rediseñado
 2026-04-13 - [ADD] Estilos del botón con colores ReShop
+2026-04-13 - [IMPROVE] Botón contactar vendedor - versión simplificada con icono de sobre
 ================================================================================
 -->
 <!DOCTYPE html>
@@ -89,129 +90,53 @@ HISTORIAL DE MODIFICACIONES:
         .price { color: #D95A41; font-size: 1.4rem; font-weight: bold; margin: 8px 0; }
         .badge { display: inline-block; background: #E8B86B; color: #333; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; margin-top: 5px; }
         
-        /* 🆕 Botón Contactar vendedor - Estilo ReShop (Mensajería Interna) */
-        .btn-message-reshop {
-            --bg-color: #f0f7fa;
-            --bg-hover-color: #e3f0f5;
-            --text-color: #2A5C6E;
-            --border-color: #2A5C6E;
-            --online-status: #28a745;
-            --font-size: 14px;
-            --btn-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .button-message-reshop {
+        /* 🆕 BOTÓN CONTACTAR VENDEDOR - VERSIÓN SIMPLE */
+        .btn-contact-seller {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font: 500 var(--font-size) 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--bg-color);
-            border: 1.5px solid var(--border-color);
-            border-radius: 48px;
-            cursor: pointer;
-            padding: 8px 16px 8px 8px;
-            width: fit-content;
-            min-width: 160px;
-            height: 44px;
-            overflow: hidden;
-            position: relative;
-            transition: var(--btn-transition);
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .button-message-reshop:hover {
-            background-color: var(--bg-hover-color);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(42, 92, 110, 0.15);
-        }
-
-        .button-message-reshop:active {
-            transform: scale(0.98);
-        }
-
-        .button-message-reshop .avatar-container {
-            width: 32px;
-            height: 32px;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .button-message-reshop .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2A5C6E, #E8B86B);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #2A5C6E, #1e4452);
             color: white;
-            font-size: 0.9rem;
-        }
-
-        .button-message-reshop .status-dot {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
-            background-color: var(--online-status);
-            border-radius: 50%;
-            border: 2px solid white;
-            animation: pulse-status 2s ease-in-out infinite;
-        }
-
-        .button-message-reshop .button-text {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.2;
-        }
-
-        .button-message-reshop .button-label {
-            font-size: 0.7rem;
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-
-        .button-message-reshop .button-title {
-            font-weight: 700;
-            color: #2A5C6E;
-            font-size: 0.85rem;
-        }
-
-        .button-message-reshop i {
-            color: #2A5C6E;
+            border: none;
+            border-radius: 60px;
+            padding: 12px 24px;
             font-size: 1rem;
-            transition: transform 0.2s;
-            margin-left: auto;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(42, 92, 110, 0.3);
         }
 
-        .button-message-reshop:hover i {
-            transform: translateX(2px);
+        .btn-contact-seller:hover {
+            background: linear-gradient(135deg, #1e4452, #0f2d38);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(42, 92, 110, 0.4);
         }
 
-        @keyframes pulse-status {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
+        .btn-contact-seller:active {
+            transform: translateY(0);
         }
 
-        /* Responsive móvil */
+        .btn-contact-seller svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-contact-seller svg:last-child {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Versión móvil */
         @media (max-width: 768px) {
-            .button-message-reshop {
-                padding: 6px 12px 6px 6px;
-                min-width: 140px;
-                height: 40px;
+            .btn-contact-seller {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                gap: 8px;
             }
-            .button-message-reshop .avatar-container {
-                width: 28px;
-                height: 28px;
-            }
-            .button-message-reshop .button-title {
-                font-size: 0.75rem;
-            }
-            .button-message-reshop .button-label {
-                font-size: 0.6rem;
+            .btn-contact-seller svg {
+                width: 18px;
+                height: 18px;
             }
         }
         
@@ -419,18 +344,14 @@ HISTORIAL DE MODIFICACIONES:
                 </div>
                 <div class="seller-description">${escapeHtml(seller.store_description || 'Bienvenido a mi tienda. ¡Encontrá ropa de segunda mano de calidad!')}</div>
                 <div class="seller-contact">
-                    <button class="button-message-reshop" onclick="startConversationWithSeller('${seller.id}', '${sellerName}')">
-                        <div class="avatar-container">
-                            <div class="avatar">
-                                <i class="fas fa-comment-dots"></i>
-                            </div>
-                            <span class="status-dot"></span>
-                        </div>
-                        <div class="button-text">
-                            <span class="button-label">Enviar mensaje a</span>
-                            <span class="button-title">${sellerName}</span>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
+                    <button class="btn-contact-seller" onclick="startConversationWithSeller('${seller.id}', '${escapeHtml(sellerName)}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Contactar vendedor
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
                 ${mapHtml}
