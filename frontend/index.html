@@ -21,33 +21,70 @@ html
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ReShop Paraguay - Ropa de Segunda Mano</title>
-    
-    <!-- PWA Manifest -->
+
+    <!-- ============================================================
+         SEO
+    ============================================================ -->
+    <meta name="description" content="Shopping virtual de ropa de segunda mano en Paraguay. Comprá y vendé ropa de calidad a precios accesibles. Moda sustentable y económica.">
+    <meta name="keywords" content="ropa segunda mano Paraguay, ropa usada, moda económica, thrift store Paraguay, ReShop">
+    <meta name="author" content="ReShop Paraguay">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://reshop-paraguay.vercel.app/">
+
+    <!-- ============================================================
+         OPEN GRAPH — WhatsApp, Facebook, Telegram, LinkedIn
+         CRÍTICO: og:image debe estar ANTES de og:title según spec de OGP.
+    ============================================================ -->
+    <meta property="og:image"            content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta property="og:image:secure_url" content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta property="og:image:type"       content="image/png">
+    <meta property="og:image:width"      content="1200">
+    <meta property="og:image:height"     content="630">
+    <meta property="og:image:alt"        content="ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano">
+    <meta property="og:type"             content="website">
+    <meta property="og:url"              content="https://reshop-paraguay.vercel.app/">
+    <meta property="og:site_name"        content="ReShop Paraguay">
+    <meta property="og:title"            content="ReShop Paraguay - Ropa de Segunda Mano">
+    <meta property="og:description"      content="Shopping virtual de ropa de segunda mano en Paraguay. Comprá y vendé ropa de calidad a precios accesibles.">
+    <meta property="og:locale"           content="es_PY">
+
+    <!-- ============================================================
+         TWITTER CARD — Twitter/X
+    ============================================================ -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="ReShop Paraguay - Ropa de Segunda Mano">
+    <meta name="twitter:description" content="Shopping virtual de ropa de segunda mano en Paraguay. Moda sustentable y económica.">
+    <meta name="twitter:image"       content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta name="twitter:image:alt"   content="ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano">
+
+    <!-- ============================================================
+         PWA
+    ============================================================ -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2A5C6E">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ReShop">
-    <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
-    
-    <!-- Open Graph / WhatsApp -->
-    <meta property="og:title" content="ReShop Paraguay - Ropa de Segunda Mano" />
-    <meta property="og:description" content="Shopping virtual de ropa de segunda mano en Paraguay. Calidad y estilo a precios accesibles." />
-    <meta property="og:image" content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="https://reshop-paraguay.vercel.app/" />
-    <meta property="og:type" content="website" />
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 
-    <!-- Twitter Card (opcional) -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="ReShop Paraguay - Ropa de Segunda Mano" />
-    <meta name="twitter:description" content="Shopping virtual de ropa de segunda mano en Paraguay." />
-    <meta name="twitter:image" content="https://reshop-paraguay.vercel.app/assets/images/og-image.png" />
-    
+    <!-- ============================================================
+         FAVICON
+    ============================================================ -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+
+    <!-- ============================================================
+         CSS — en este orden: externo → layout → componentes → mobile
+    ============================================================ -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/mobile.css">
+
+    <!-- ============================================================
+         ESTILOS INTERNOS — Variables, layout, componentes, loaders
+    ============================================================ -->
     <style>
         :root {
             --primary: #2A5C6E;
@@ -316,6 +353,10 @@ html
             50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
         }
     </style>
+
+    <!-- ============================================================
+         ONESIGNAL — defer para no bloquear render
+    ============================================================ -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
         window.OneSignalDeferred = window.OneSignalDeferred || [];
