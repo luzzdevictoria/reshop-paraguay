@@ -591,7 +591,7 @@ app.get('/api/products/seller/:sellerId', async (req, res) => {
 });
 
 // ============================================================
-// ENDPOINTS DE FAVORITOS
+// ENDPOINTS DE FAVORITOS (CORREGIDO)
 // ============================================================
 
 app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
@@ -602,14 +602,16 @@ app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
             return res.status(400).json({ success: false, error: 'Producto requerido' });
         }
         
-        const { data: existing } = await supabase
+        // Verificar si existe - usando maybeSingle y seleccionando columnas que existen
+        const { data: existing, error: findError } = await supabase
             .from('favorites')
-            .select('id')
+            .select('user_id, product_id')  // ← usar columnas que existen
             .eq('user_id', req.user.id)
             .eq('product_id', product_id)
-            .single();
+            .maybeSingle();  // ← usar maybeSingle en lugar de single
         
         if (existing) {
+            // Eliminar
             const { error } = await supabase
                 .from('favorites')
                 .delete()
@@ -619,9 +621,13 @@ app.post('/api/favorites/toggle', authenticateToken, async (req, res) => {
             if (error) throw error;
             res.json({ success: true, action: 'removed', message: 'Eliminado de favoritos' });
         } else {
+            // Insertar (sin id, solo las columnas que existen)
             const { error } = await supabase
                 .from('favorites')
-                .insert({ user_id: req.user.id, product_id: product_id });
+                .insert({ 
+                    user_id: req.user.id, 
+                    product_id: product_id
+                });
             
             if (error) throw error;
             res.json({ success: true, action: 'added', message: 'Agregado a favoritos' });
@@ -659,10 +665,10 @@ app.get('/api/favorites/check/:productId', authenticateToken, async (req, res) =
         
         const { data: favorite, error } = await supabase
             .from('favorites')
-            .select('id')
+            .select('user_id, product_id')
             .eq('user_id', req.user.id)
             .eq('product_id', productId)
-            .single();
+            .maybeSingle();
         
         if (error && error.code !== 'PGRST116') throw error;
         
