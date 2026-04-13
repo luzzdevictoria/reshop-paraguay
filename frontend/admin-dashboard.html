@@ -216,6 +216,74 @@ HISTORIAL DE MODIFICACIONES:
             .tab-btn { padding: 8px 12px; font-size: 0.85rem; }
             .container { padding: 12px; }
         }
+		/* ============================================================
+   VISTA DE TARJETAS PARA USUARIOS EN MÓVIL
+   ============================================================ */
+@media (min-width: 769px) {
+    .users-table-desktop {
+        display: block;
+    }
+    .users-card-view {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .users-table-desktop {
+        display: none;
+    }
+    
+    .users-card-view {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .user-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .user-card__field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .user-card__field:last-child {
+        border-bottom: none;
+    }
+    
+    .user-card__label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    
+    .user-card__value {
+        color: #333;
+        font-size: 0.85rem;
+        word-break: break-word;
+        text-align: right;
+    }
+    
+    .user-card__actions {
+        margin-top: 12px;
+        padding-top: 8px;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
     </style>
     <!-- OneSignal Push Notifications -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -368,35 +436,95 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
         
-        async function loadUsers() {
-            const container = document.getElementById('usuariosTab');
-            try {
-                const response = await fetch(`${API_URL}/api/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const data = await response.json();
-                
-                if (data.success && data.users && data.users.length > 0) {
-                    let html = '<div style="overflow-x:auto;"></table><thead><tr><th>Email</th><th>Nombre</th><th>Rol</th><th>Tienda</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
-                    for (const user of data.users) {
-                        const roleClass = user.role === 'seller' ? 'badge-seller' : (user.role === 'admin' ? 'badge-admin' : 'badge-buyer');
-                        const statusText = user.is_active ? 'Activo' : 'Inactivo';
-                        html += `<tr>
-                            <td>${escapeHtml(user.email)}</td>
-                            <td>${escapeHtml(user.full_name)}</td>
-                            <td><span class="badge ${roleClass}">${user.role}</span></td>
-                            <td>${escapeHtml(user.store_name || '-')}</td>
-                            <td>${statusText}</td>
-                            <td><button class="btn btn-warning" onclick="toggleUserStatus('${user.id}')">${user.is_active ? 'Desactivar' : 'Activar'}</button></td>
-                        </tr>`;
-                    }
-                    html += '</tbody></table></div>';
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay usuarios registrados</p></div>';
+async function loadUsers() {
+    const container = document.getElementById('usuariosTab');
+    try {
+        const response = await fetch(`${API_URL}/api/admin/users`, { 
+            headers: { 'Authorization': `Bearer ${token}` } 
+        });
+        const data = await response.json();
+        
+        if (data.success && data.users && data.users.length > 0) {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // ========== VISTA DE TARJETAS PARA MÓVIL ==========
+                let html = '<div class="users-card-view">';
+                for (const user of data.users) {
+                    const roleClass = user.role === 'seller' ? 'badge-seller' : (user.role === 'admin' ? 'badge-admin' : 'badge-buyer');
+                    const roleText = user.role === 'seller' ? '🏪 Vendedor' : (user.role === 'admin' ? '👑 Admin' : '🛍️ Comprador');
+                    const statusText = user.is_active ? '✅ Activo' : '❌ Inactivo';
+                    const statusColor = user.is_active ? '#28a745' : '#D95A41';
+                    
+                    html += `
+                        <div class="user-card">
+                            <div class="user-card__field">
+                                <span class="user-card__label">Email</span>
+                                <span class="user-card__value">${escapeHtml(user.email)}</span>
+                            </div>
+                            <div class="user-card__field">
+                                <span class="user-card__label">Nombre</span>
+                                <span class="user-card__value">${escapeHtml(user.full_name)}</span>
+                            </div>
+                            <div class="user-card__field">
+                                <span class="user-card__label">Rol</span>
+                                <span class="user-card__value"><span class="badge ${roleClass}">${roleText}</span></span>
+                            </div>
+                            ${user.store_name ? `
+                            <div class="user-card__field">
+                                <span class="user-card__label">Tienda</span>
+                                <span class="user-card__value">${escapeHtml(user.store_name)}</span>
+                            </div>
+                            ` : ''}
+                            <div class="user-card__field">
+                                <span class="user-card__label">Estado</span>
+                                <span class="user-card__value" style="color: ${statusColor};">${statusText}</span>
+                            </div>
+                            <div class="user-card__actions">
+                                <button class="btn-toggle btn-sm" onclick="toggleUserStatus('${user.id}')">
+                                    ${user.is_active ? 'Desactivar' : 'Activar'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
-            } catch (error) {
-                container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+                html += '</div>';
+                container.innerHTML = html;
+            } else {
+                // ========== VISTA DE TABLA PARA DESKTOP ==========
+                let html = '<div class="users-table-desktop" style="overflow-x:auto;"><table class="users-table"><thead><tr>';
+                html += '<th>Email</th><th>Nombre</th><th>Rol</th><th>Tienda</th><th>Estado</th><th>Acciones</th>';
+                html += '</tr></thead><tbody>';
+                for (const user of data.users) {
+                    const roleClass = user.role === 'seller' ? 'badge-seller' : (user.role === 'admin' ? 'badge-admin' : 'badge-buyer');
+                    const statusText = user.is_active ? 'Activo' : 'Inactivo';
+                    html += `<tr>
+                        <td>${escapeHtml(user.email)}</td>
+                        <td>${escapeHtml(user.full_name)}</td>
+                        <td><span class="badge ${roleClass}">${user.role}</span></td>
+                        <td>${escapeHtml(user.store_name || '-')}</td>
+                        <td>${statusText}</td>
+                        <td><button class="btn-toggle btn-sm" onclick="toggleUserStatus('${user.id}')">${user.is_active ? 'Desactivar' : 'Activar'}</button></td>
+                    </tr>`;
+                }
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
             }
+        } else {
+            container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay usuarios registrados</p></div>';
         }
+    } catch (error) {
+        container.innerHTML = `<div class="loading">Error: ${error.message}</div>`;
+    }
+}
+
+// Agregar event listener para recargar al cambiar tamaño
+window.addEventListener('resize', () => {
+    const activeTab = document.querySelector('.tab-content.active');
+    if (activeTab && activeTab.id === 'usuariosTab') {
+        loadUsers();
+    }
+});
         
         async function loadProducts() {
             const container = document.getElementById('productosTab');
