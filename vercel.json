@@ -6,11 +6,15 @@
       "use": "@vercel/node"
     },
     {
-      "src": "frontend/**",
+      "src": "frontend/**/*.css",
       "use": "@vercel/static"
     },
     {
-      "src": "OneSignalSDKWorker.js",
+      "src": "frontend/**/*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/assets/**",
       "use": "@vercel/static"
     }
   ],
@@ -20,12 +24,16 @@
       "dest": "/server.js"
     },
     {
-      "src": "/OneSignalSDKWorker.js",
-      "dest": "/OneSignalSDKWorker.js"
+      "src": "/frontend/(.*)",
+      "dest": "/frontend/$1"
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|webp|json|ico))",
+      "dest": "/frontend/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"
+      "dest": "/$1"
     }
   ]
 }
