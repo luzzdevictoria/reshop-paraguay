@@ -279,7 +279,7 @@ const result = await new Promise((resolve, reject) => {
                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                 { fetch_format: 'webp' },
                 { 
-                    overlay: 'reshop-logo',
+                    overlay: 'reshop-public/assets/reshop-logo',,
                     gravity: 'south_east',
                     x: 15,
                     y: 15,
@@ -737,7 +737,7 @@ const result = await new Promise((resolve, reject) => {
                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                 { fetch_format: 'webp' },
                 { 
-                    overlay: 'reshop-logo',
+                    overlay: 'reshop-public/assets/reshop-logo',,
                     gravity: 'south_east',
                     x: 15,
                     y: 15,
@@ -822,7 +822,7 @@ const result = await new Promise((resolve, reject) => {
                 { width: 800, height: 800, crop: 'limit', quality: 'auto' },
                 { fetch_format: 'webp' },
                 { 
-                    overlay: 'reshop-logo',
+                    overlay: 'reshop-public/assets/reshop-logo',,
                     gravity: 'south_east',
                     x: 15,
                     y: 15,
