@@ -406,16 +406,16 @@ HISTORIAL DE MODIFICACIONES:
                 if (data.success && data.products && data.products.length > 0) {
                     let html = '<div style="overflow-x:auto;"><table><thead><tr><th>ID</th><th>Título</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>';
                     for (const product of data.products) {
-                        html += `<tr>
-                            <td>${product.id}</td>
-                            <td>${escapeHtml(product.title)}</td>
-                            <td>${new Intl.NumberFormat('es-PY').format(product.price)} �?/td>
-                            <td><span class="badge">${product.status}</span></td>
-                            <td>
-                                <button class="btn btn-warning" onclick="toggleProductStatus(${product.id}, '${product.status}')">Cambiar Estado</button>
-                                <button class="btn-delete" onclick="deleteProduct(${product.id})">Eliminar</button>
-                            </td>
-                        </tr>`;
+html += `<tr>
+    <td>${product.id}</td>
+    <td>${escapeHtml(product.title)}</td>
+    <td>${new Intl.NumberFormat('es-PY', { style: 'currency', currency: 'PYG', minimumFractionDigits: 0 }).format(product.price)}</td>
+    <td><span class="badge">${product.status}</span></td>
+    <td>
+        <button class="btn btn-warning" onclick="toggleProductStatus(${product.id}, '${product.status}')">Cambiar Estado</button>
+        <button class="btn-delete" onclick="deleteProduct(${product.id})">Eliminar</button>
+    </td>
+</tr>`;
                     }
                     html += '</tbody></table></div>';
                     container.innerHTML = html;
@@ -450,60 +450,73 @@ HISTORIAL DE MODIFICACIONES:
             }
         }
         
-        function renderOrders(orders) {
-            const container = document.getElementById('ordenesContainer');
-            const filter = document.getElementById('orderStatusFilter').value;
-            
-            let filteredOrders = orders;
-            if (filter !== 'todos') {
-                filteredOrders = orders.filter(o => o.order_status === filter);
-            }
-            
-            if (filteredOrders.length === 0) {
-                container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay órdenes con ese estado</p></div>';
-                return;
-            }
-            
-            let html = '<div style="overflow-x:auto;"><table><thead><tr>';
-            html += '<th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Vendedor</th><th>Total</th><th>Comisión</th><th>Estado</th><th>Pago</th><th>Acciones</th>';
-            html += '</tr></thead><tbody>';
-            
-            for (const order of filteredOrders) {
-                const statusClass = `status-${order.order_status}`;
-                const statusText = {
-                    'pending_payment': '�?Pendiente pago',
-                    'paid': '�?Pagado',
-                    'processing': '📦 Procesando',
-                    'shipped': '🚚 Enviado',
-                    'delivered': '🏠 Entregado',
-                    'cancelled': '�?Cancelado'
-                }[order.order_status] || order.order_status;
-                
-                const paymentMethod = {
-                    'transferencia': '🏦 Transferencia',
-                    'qr': '📲 QR',
-                    'efectivo_contraentrega': '💵 Efectivo',
-                    'efectivo': '💵 Efectivo',
-                    'tigo_money': '📱 Tigo Money',
-                    'ueno': '📲 QR UENO'
-                }[order.payment_method] || order.payment_method || '-';
-                
-                html += `<tr>
-                    <td>${order.order_number}</td>
-                    <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
-                    <td>${escapeHtml(order.buyer?.email || '-')}</td>
-                    <td>${escapeHtml(order.seller?.email || '-')}</td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.total_amount)} �?/td>
-                    <td>${new Intl.NumberFormat('es-PY').format(order.platform_fee || 0)} �?/td>
-                    <td><span class="order-status ${statusClass}">${statusText}</span></td>
-                    <td>${paymentMethod}</td>
-                    <td><button class="btn btn-info" onclick="openOrderModal(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar</button></td>
-                </tr>`;
-            }
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
+function renderOrders(orders) {
+    const container = document.getElementById('ordenesContainer');
+    const filter = document.getElementById('orderStatusFilter').value;
+    
+    let filteredOrders = orders;
+    if (filter !== 'todos') {
+        filteredOrders = orders.filter(o => o.order_status === filter);
+    }
+    
+    if (filteredOrders.length === 0) {
+        container.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay órdenes con ese estado</p></div>';
+        return;
+    }
+    
+    let html = '<div style="overflow-x:auto;"><table><thead><tr>';
+    html += '<th>N° Orden</th><th>Fecha</th><th>Comprador</th><th>Vendedor</th><th>Total</th><th>Comisión</th><th>Estado</th><th>Pago</th><th>Acciones</th>';
+    html += '</thead><tbody>';
+    
+    for (const order of filteredOrders) {
+        const statusClass = `status-${order.order_status}`;
+        const statusText = {
+            'pending_payment': '⏳ Pendiente pago',
+            'paid': '✅ Pagado',
+            'processing': '📦 Procesando',
+            'shipped': '🚚 Enviado',
+            'delivered': '🏠 Entregado',
+            'cancelled': '❌ Cancelado'
+        }[order.order_status] || order.order_status;
+        
+        const paymentMethod = {
+            'transferencia': '🏦 Transferencia',
+            'qr': '📲 QR',
+            'efectivo_contraentrega': '💵 Efectivo',
+            'efectivo': '💵 Efectivo',
+            'tigo_money': '📱 Tigo Money',
+            'ueno': '📲 QR UENO'
+        }[order.payment_method] || order.payment_method || '-';
+        
+        // ✅ CORREGIDO: usando format de moneda correcto
+        const totalFormatted = new Intl.NumberFormat('es-PY', {
+            style: 'currency',
+            currency: 'PYG',
+            minimumFractionDigits: 0
+        }).format(order.total_amount);
+        
+        const feeFormatted = new Intl.NumberFormat('es-PY', {
+            style: 'currency',
+            currency: 'PYG',
+            minimumFractionDigits: 0
+        }).format(order.platform_fee || 0);
+        
+        html += `<tr>
+            <td>${order.order_number}</td>
+            <td>${new Date(order.created_at).toLocaleDateString('es-PY')}</td>
+            <td>${escapeHtml(order.buyer?.email || '-')}</td>
+            <td>${escapeHtml(order.seller?.email || '-')}</td>
+            <td>${totalFormatted}</td>
+            <td>${feeFormatted}</td>
+            <td><span class="order-status ${statusClass}">${statusText}</span></td>
+            <td>${paymentMethod}</td>
+            <td><button class="btn btn-info" onclick="openOrderModal(${order.id}, '${order.order_status}')"><i class="fas fa-edit"></i> Actualizar</button></td>
+        </tr>`;
+    }
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
         
         document.getElementById('orderStatusFilter').addEventListener('change', () => {
             renderOrders(allOrders);
