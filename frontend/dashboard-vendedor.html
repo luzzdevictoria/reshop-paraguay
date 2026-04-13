@@ -985,14 +985,14 @@ function capturePhoto() {
                                             <td><span style="text-transform: capitalize;">${p.category}</span></td>
                                             <td><span class="status-badge status-${p.status}">${p.status === 'active' ? '✅ Activo' : p.status === 'sold' ? '🏷️ Vendido' : '⏸️ Inactivo'}</span></td>
 <td>
-    <div class="btn-group">
-        <button class="btn-edit btn-sm" onclick="editProduct(${p.id})">
-            <i class="fas fa-edit"></i> Editar
-        </button>
-        <button class="btn-delete btn-sm" onclick="deleteProduct(${p.id})">
-            <i class="fas fa-trash-alt"></i> Eliminar
-        </button>
-    </div>
+<div style="display: flex; gap: 8px;">
+    <button class="btn btn-secondary" onclick="editProduct(${p.id})" style="padding: 6px 12px; font-size: 0.8rem;">
+        <i class="fas fa-edit"></i> Editar
+    </button>
+    <button class="btn btn-danger" onclick="deleteProduct(${p.id})" style="padding: 6px 12px; font-size: 0.8rem;">
+        <i class="fas fa-trash-alt"></i> Eliminar
+    </button>
+</div>
 </td>
                                         </tr>
                                     `).join('')}
