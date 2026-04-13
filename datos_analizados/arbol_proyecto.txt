@@ -2,7 +2,7 @@
    ARBOL DE ARCHIVOS - RESHOP PARAGUAY
 ============================================================
 
-Fecha: lun 13/04/2026 10:06:57,22
+Fecha: lun 13/04/2026 19:58:23,25
 Propietaria: Luciana Noelia Da Silva
 Desarrollador: Pedro Jose Pirovani
 
@@ -27,6 +27,7 @@ C:.
 ¦   README.md
 ¦   server.js
 ¦   server.js.backup
+¦   temp_server.txt
 ¦   vercel.json
 ¦   verificar_estructura.bat
 ¦   
@@ -61,6 +62,7 @@ C:.
 ¦   ¦   register.html
 ¦   ¦   seller-store.html
 ¦   ¦   sw.js
+¦   ¦   update-password.html
 ¦   ¦   
 ¦   +---assets
 ¦   ¦   +---icons
@@ -85,6 +87,7 @@ C:.
 ¦   ¦   +---images
 ¦   ¦           favicon.ico
 ¦   ¦           Logo.png
+¦   ¦           og-image-v2.png
 ¦   ¦           
 ¦   +---css
 ¦   ¦       components.css
