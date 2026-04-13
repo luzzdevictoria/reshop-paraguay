@@ -1468,6 +1468,16 @@ app.get('/api/messages/unread/count', authenticateToken, async (req, res) => {
 });
 
 // ============================================================
+// CONFIGURACIÓN PÚBLICA PARA EL FRONTEND
+// ============================================================
+app.get('/api/config', (req, res) => {
+    res.json({
+        supabaseUrl: process.env.SUPABASE_URL,
+        supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+    });
+});
+
+// ============================================================
 // RUTAS DE AUTENTICACIÓN
 // ============================================================
 
@@ -1537,4 +1547,4 @@ app.listen(PORT, () => {
     console.log('');
 });
 
-module.exports = app;"// force-redeploy $(date)" 
+module.exports = app;
