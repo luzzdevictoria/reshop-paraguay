@@ -199,264 +199,264 @@ DESCRIPCION: Página de mensajes para compradores.
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
 
-    <script>
-        const API_URL = 'https://reshop-backend.vercel.app';
-        let currentConversationId = null;
-        let currentReceiverId = null;
-        let currentSellerName = '';
-        let messagePollingInterval = null;
-        let allConversations = [];
+<script>
+    const API_URL = 'https://reshop-backend.vercel.app';
+    let currentConversationId = null;
+    let currentReceiverId = null;
+    let currentSellerName = '';
+    let messagePollingInterval = null;
+    let allConversations = [];
 
-        // ============================================================
-        // AUTENTICACIÓN
-        // ============================================================
-        function updateUserMenu() {
-            const token = localStorage.getItem('token');
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            const authLinks = document.getElementById('authLinks');
-            const userMenu = document.getElementById('userMenu');
-            const userName = document.getElementById('userName');
-            const messagesLink = document.getElementById('messagesLink');
+    // ============================================================
+    // AUTENTICACIÓN
+    // ============================================================
+    function updateUserMenu() {
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const authLinks = document.getElementById('authLinks');
+        const userMenu = document.getElementById('userMenu');
+        const userName = document.getElementById('userName');
+        const messagesLink = document.getElementById('messagesLink');
 
-            if (token && user) {
-                authLinks.style.display = 'none';
-                userMenu.style.display = 'inline-block';
-                userName.innerHTML = user.full_name || user.email;
-                if (messagesLink) messagesLink.style.display = 'inline';
-                loadUnreadCount();
-                setInterval(() => loadUnreadCount(), 30000);
-                return user;
+        if (token && user) {
+            authLinks.style.display = 'none';
+            userMenu.style.display = 'inline-block';
+            userName.innerHTML = user.full_name || user.email;
+            if (messagesLink) messagesLink.style.display = 'inline';
+            loadUnreadCount();
+            setInterval(() => loadUnreadCount(), 30000);
+            return user;
+        } else {
+            authLinks.style.display = 'inline';
+            userMenu.style.display = 'none';
+            if (messagesLink) messagesLink.style.display = 'none';
+            window.location.href = 'login.html?redirect=messages.html';
+            return null;
+        }
+    }
+
+    async function loadUnreadCount() {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const response = await fetch(API_URL + '/api/messages/unread/count', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            if (data.success && data.unread_count > 0) {
+                const badge = document.getElementById('unreadBadge');
+                badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                badge.style.display = 'inline';
             } else {
-                authLinks.style.display = 'inline';
-                userMenu.style.display = 'none';
-                if (messagesLink) messagesLink.style.display = 'none';
-                window.location.href = 'login.html?redirect=messages.html';
-                return null;
+                const badge = document.getElementById('unreadBadge');
+                if (badge) badge.style.display = 'none';
             }
+        } catch (error) {
+            console.error('Error cargando mensajes no leídos:', error);
         }
+    }
 
-        async function loadUnreadCount() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try {
-                const response = await fetch(`${API_URL}/api/messages/unread/count`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (data.success && data.unread_count > 0) {
-                    const badge = document.getElementById('unreadBadge');
-                    badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
-                    badge.style.display = 'inline';
-                } else {
-                    document.getElementById('unreadBadge').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error cargando mensajes no leídos:', error);
+    function setupLogout() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('reshop_cart');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'index.html';
+            });
+        }
+    }
+
+    // ============================================================
+    // CONVERSACIONES
+    // ============================================================
+    async function loadConversations() {
+        var container = document.getElementById('conversationsContainer');
+        container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando conversaciones...</div>';
+        
+        var token = localStorage.getItem('token');
+        if (!token) return;
+        
+        try {
+            var response = await fetch(API_URL + '/api/conversations', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            var data = await response.json();
+            
+            if (data.success && data.conversations && data.conversations.length > 0) {
+                allConversations = data.conversations;
+                renderConversations(allConversations);
+            } else {
+                container.innerHTML = '<div class="empty-messages">' +
+                    '<i class="fas fa-inbox"></i>' +
+                    '<p>No tienes conversaciones aún.</p>' +
+                    '<p>Cuando contactes a un vendedor, aparecerá aquí.</p>' +
+                    '<a href="index.html" class="btn btn-primary"><i class="fas fa-store"></i> Explorar productos</a>' +
+                    '</div>';
             }
+        } catch (error) {
+            console.error('Error cargando conversaciones:', error);
+            container.innerHTML = '<div class="loading" style="color: var(--accent);"><i class="fas fa-exclamation-triangle"></i><br>Error: ' + error.message + '</div>';
         }
+    }
 
-        function setupLogout() {
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.removeItem('reshop_cart');
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    window.location.href = 'index.html';
-                });
-            }
-        }
-
-        // ============================================================
-        // CONVERSACIONES
-        // ============================================================
-        async function loadConversations() {
-            const container = document.getElementById('conversationsContainer');
-            container.innerHTML = '<div class="loader-container">
-    <div class="three-body three-body-accent"></div>
-    <p>Cargando conversaciones...</p>
-</div>';
+    function renderConversations(conversations) {
+        var container = document.getElementById('conversationsContainer');
+        var html = '<div class="conversations-list">';
+        
+        for (var i = 0; i < conversations.length; i++) {
+            var conv = conversations[i];
+            var sellerName = (conv.seller && (conv.seller.store_name || conv.seller.full_name || conv.seller.email)) || 'Vendedor';
+            var productTitle = (conv.product && conv.product.title) || 'Producto';
+            var lastMessage = conv.last_message || 'Sin mensajes';
+            var timeAgo = new Date(conv.last_message_at).toLocaleString();
+            var isUnread = conv.unread_count > 0;
             
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/conversations`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                
-                if (data.success && data.conversations && data.conversations.length > 0) {
-                    allConversations = data.conversations;
-                    renderConversations(allConversations);
-                } else {
-                    container.innerHTML = `
-                        <div class="empty-messages">
-                            <i class="fas fa-inbox"></i>
-                            <p>No tienes conversaciones aún.</p>
-                            <p>Cuando contactes a un vendedor, aparecerá aquí.</p>
-                            <a href="index.html" class="btn btn-primary"><i class="fas fa-store"></i> Explorar productos</a>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error cargando conversaciones:', error);
-                container.innerHTML = `<div class="loading" style="color: var(--accent);"><i class="fas fa-exclamation-triangle"></i><br>Error: ${error.message}</div>`;
-            }
+            html += '<div class="conversation-card ' + (isUnread ? 'unread' : '') + '" onclick="openConversation(\'' + conv.id + '\', \'' + escapeHtml(sellerName) + '\', \'' + conv.seller_id + '\')">' +
+                '<div class="conversation-header">' +
+                    '<span class="conversation-seller"><i class="fas fa-store"></i> ' + escapeHtml(sellerName) + '</span>' +
+                    '<span class="conversation-time">' + timeAgo + '</span>' +
+                '</div>' +
+                '<div class="conversation-product"><i class="fas fa-tag"></i> ' + escapeHtml(productTitle) + '</div>' +
+                '<div class="conversation-last-message">' + escapeHtml(lastMessage.substring(0, 100)) + '</div>' +
+                (isUnread ? '<div class="unread-badge-conv">' + conv.unread_count + ' nuevos</div>' : '') +
+            '</div>';
         }
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
 
-        function renderConversations(conversations) {
-            const container = document.getElementById('conversationsContainer');
-            let html = '<div class="conversations-list">';
-            
-            for (const conv of conversations) {
-                const sellerName = conv.seller?.store_name || conv.seller?.full_name || conv.seller?.email || 'Vendedor';
-                const productTitle = conv.product?.title || 'Producto';
-                const lastMessage = conv.last_message || 'Sin mensajes';
-                const timeAgo = new Date(conv.last_message_at).toLocaleString();
-                const isUnread = conv.unread_count > 0;
-                
-                html += `
-                    <div class="conversation-card ${isUnread ? 'unread' : ''}" onclick="openConversation('${conv.id}', '${sellerName}', '${conv.seller_id}')">
-                        <div class="conversation-header">
-                            <span class="conversation-seller"><i class="fas fa-store"></i> ${escapeHtml(sellerName)}</span>
-                            <span class="conversation-time">${timeAgo}</span>
-                        </div>
-                        <div class="conversation-product"><i class="fas fa-tag"></i> ${escapeHtml(productTitle)}</div>
-                        <div class="conversation-last-message">${escapeHtml(lastMessage.substring(0, 100))}</div>
-                        ${isUnread ? `<div class="unread-badge-conv">${conv.unread_count} nuevos</div>` : ''}
-                    </div>
-                `;
-            }
-            
-            html += '</div>';
-            container.innerHTML = html;
-        }
+    // ============================================================
+    // MODAL DE CHAT
+    // ============================================================
+    window.openConversation = async function(conversationId, sellerName, sellerId) {
+        currentConversationId = conversationId;
+        currentReceiverId = sellerId;
+        currentSellerName = sellerName;
+        document.getElementById('modalSellerName').textContent = sellerName;
+        document.getElementById('messageModal').classList.add('is-open');
+        document.getElementById('messageInput').value = '';
+        
+        await loadMessages();
+        
+        if (messagePollingInterval) clearInterval(messagePollingInterval);
+        messagePollingInterval = setInterval(function() { loadMessages(); }, 5000);
+    };
 
-        // ============================================================
-        // MODAL DE CHAT
-        // ============================================================
-        async function openConversation(conversationId, sellerName, sellerId) {
-            currentConversationId = conversationId;
-            currentReceiverId = sellerId;
-            currentSellerName = sellerName;
-            document.getElementById('modalSellerName').textContent = sellerName;
-            document.getElementById('messageModal').classList.add('is-open');
-            document.getElementById('messageInput').value = '';
-            
-            await loadMessages();
-            
-            if (messagePollingInterval) clearInterval(messagePollingInterval);
-            messagePollingInterval = setInterval(() => loadMessages(), 5000);
-        }
-
-        async function loadMessages() {
-            if (!currentConversationId) return;
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/api/messages/${currentConversationId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (data.success && data.messages) {
-                    renderMessages(data.messages);
-                    // Recargar conversaciones para actualizar badge
-                    loadConversations();
-                    loadUnreadCount();
-                }
-            } catch (error) {
-                console.error('Error cargando mensajes:', error);
-            }
-        }
-
-        function renderMessages(messages) {
-            const container = document.getElementById('messageList');
-            const userId = JSON.parse(localStorage.getItem('user'))?.id;
-            container.innerHTML = messages.map(msg => `
-                <div class="message-item ${msg.sender_id === userId ? 'sent' : 'received'}">
-                    <div class="message-text">${escapeHtml(msg.message)}</div>
-                    <div class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
-                </div>
-            `).join('');
-            const body = document.getElementById('modalMessageBody');
-            body.scrollTop = body.scrollHeight;
-        }
-
-        async function sendBuyerMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_URL}/api/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        conversation_id: currentConversationId,
-                        receiver_id: currentReceiverId,
-                        message: message
-                    })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    input.value = '';
-                    await loadMessages();
-                } else {
-                    alert('Error al enviar mensaje: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión');
-            }
-        }
-
-        function closeMessageModal() {
-            document.getElementById('messageModal').classList.remove('is-open');
-            if (messagePollingInterval) {
-                clearInterval(messagePollingInterval);
-                messagePollingInterval = null;
-            }
-            currentConversationId = null;
-            currentReceiverId = null;
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = updateUserMenu();
-            if (user) {
-                setupLogout();
+    async function loadMessages() {
+        if (!currentConversationId) return;
+        var token = localStorage.getItem('token');
+        if (!token) return;
+        
+        try {
+            var response = await fetch(API_URL + '/api/messages/' + currentConversationId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            var data = await response.json();
+            if (data.success && data.messages) {
+                renderMessages(data.messages);
                 loadConversations();
+                loadUnreadCount();
             }
-        });
+        } catch (error) {
+            console.error('Error cargando mensajes:', error);
+        }
+    }
 
-        // Cerrar modal con Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeMessageModal();
+    function renderMessages(messages) {
+        var container = document.getElementById('messageList');
+        var user = JSON.parse(localStorage.getItem('user') || 'null');
+        var userId = user ? user.id : null;
+        var html = '';
+        
+        for (var i = 0; i < messages.length; i++) {
+            var msg = messages[i];
+            html += '<div class="message-item ' + (msg.sender_id === userId ? 'sent' : 'received') + '">' +
+                '<div class="message-text">' + escapeHtml(msg.message) + '</div>' +
+                '<div class="message-time">' + new Date(msg.created_at).toLocaleTimeString() + '</div>' +
+            '</div>';
+        }
+        
+        container.innerHTML = html;
+        var body = document.getElementById('modalMessageBody');
+        body.scrollTop = body.scrollHeight;
+    }
+
+    window.sendBuyerMessage = async function() {
+        var input = document.getElementById('messageInput');
+        var message = input.value.trim();
+        if (!message) return;
+        
+        var token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        try {
+            var response = await fetch(API_URL + '/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    conversation_id: currentConversationId,
+                    receiver_id: currentReceiverId,
+                    message: message
+                })
+            });
+            var data = await response.json();
+            if (data.success) {
+                input.value = '';
+                await loadMessages();
+            } else {
+                alert('Error al enviar mensaje: ' + data.error);
             }
-        });
-    </script>
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error de conexión');
+        }
+    };
+
+    window.closeMessageModal = function() {
+        document.getElementById('messageModal').classList.remove('is-open');
+        if (messagePollingInterval) {
+            clearInterval(messagePollingInterval);
+            messagePollingInterval = null;
+        }
+        currentConversationId = null;
+        currentReceiverId = null;
+    };
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================================
+    // INICIALIZACIÓN
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        var user = updateUserMenu();
+        if (user) {
+            setupLogout();
+            loadConversations();
+        }
+    });
+
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMessageModal();
+        }
+    });
+</script>
 
     <!-- JS Móvil -->
     <script src="js/mobile.js"></script>
