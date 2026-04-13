@@ -546,7 +546,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // ============================================================
-// ENDPOINT: PRODUCTOS POR VENDEDOR (con datos del vendedor)
+// ENDPOINT: PRODUCTOS POR VENDEDOR (versión simple sin JOIN)
 // ============================================================
 app.get('/api/products/seller/:sellerId', async (req, res) => {
     try {
@@ -554,19 +554,12 @@ app.get('/api/products/seller/:sellerId', async (req, res) => {
         const { origin } = req.query;
         
         console.log(`📦 Buscando productos del vendedor: ${sellerId}`);
+        console.log(`🔍 Filtro origen: ${origin || 'ninguno'}`);
         
+        // Construir consulta base (sin JOIN para evitar errores)
         let query = supabase
             .from('products')
-            .select(`
-                *,
-                seller:seller_id (
-                    id,
-                    email,
-                    full_name,
-                    store_name,
-                    avatar_url
-                )
-            `)
+            .select('*')  // ← Solo productos, sin JOIN
             .eq('seller_id', sellerId)
             .eq('status', 'active');
         
@@ -579,7 +572,10 @@ app.get('/api/products/seller/:sellerId', async (req, res) => {
         
         const { data: products, error } = await query;
 
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Error en consulta:', error);
+            throw error;
+        }
         
         console.log(`✅ Encontrados ${products?.length || 0} productos`);
         
