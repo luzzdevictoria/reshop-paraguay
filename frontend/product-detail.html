@@ -959,70 +959,81 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             }
         }
         
-        function renderProduct(product) {
-            const container = document.getElementById('productDetail');
-            const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
-            const conditionText = { 
-                'new_with_tags': 'Nuevo con etiqueta', 'new_without_tags': 'Nuevo sin etiqueta',
-                'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable'
-            }[product.condition] || product.condition;
-            const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
-            const sellerRating = product.seller?.rating || 0;
-            const avgRating = product.rating || 0;
-            
-            container.innerHTML = `
-                <h1 class="product-title"><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h1>
-                <div class="rating-container">
-                    <div class="stars">${renderStars(avgRating, '1.2rem')}</div>
-                    <span class="rating-value">${avgRating.toFixed(1)}</span>
-                    <span class="rating-count">(${product.reviews_count || 0} reseñas)</span>
+function renderProduct(product) {
+    const container = document.getElementById('productDetail');
+    const priceFormatted = new Intl.NumberFormat('es-PY').format(product.price);
+    const conditionText = { 
+        'new_with_tags': 'Nuevo con etiqueta', 'new_without_tags': 'Nuevo sin etiqueta',
+        'very_good': 'Muy bueno', 'good': 'Bueno', 'acceptable': 'Aceptable'
+    }[product.condition] || product.condition;
+    const sellerName = product.seller?.store_name || product.seller?.full_name || 'Vendedor';
+    const sellerRating = product.seller?.rating || 0;
+    const avgRating = product.rating || 0;
+    
+    // Obtener la primera imagen
+    const productImage = (product.images_urls && product.images_urls[0]) 
+        ? product.images_urls[0] 
+        : 'https://placehold.co/600x600/f0f0f0/999?text=Sin+imagen';
+    
+    container.innerHTML = `
+        <!-- Imagen del producto -->
+        <div class="product-image-container" style="text-align: center; margin-bottom: 20px;">
+            <img src="${productImage}" alt="${escapeHtml(product.title)}" 
+                 style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+                 onerror="this.src='https://placehold.co/600x600/f0f0f0/999?text=Sin+imagen'">
+        </div>
+        
+        <h1 class="product-title"><i class="fas fa-tag"></i> ${escapeHtml(product.title)}</h1>
+        <div class="rating-container">
+            <div class="stars">${renderStars(avgRating, '1.2rem')}</div>
+            <span class="rating-value">${avgRating.toFixed(1)}</span>
+            <span class="rating-count">(${product.reviews_count || 0} reseñas)</span>
+        </div>
+        <div class="product-price">${priceFormatted} ₲</div>
+        <div class="product-info"><label><i class="fas fa-align-left"></i> Descripción:</label><span>${escapeHtml(product.description || 'Sin descripción')}</span></div>
+        <div class="product-info"><label><i class="fas fa-tshirt"></i> Categoría:</label><span>${product.category}</span></div>
+        <div class="product-info"><label><i class="fas fa-ruler"></i> Talla:</label><span>${product.size || 'Talla única'}</span></div>
+        <div class="product-info"><label><i class="fas fa-star"></i> Estado:</label><span class="badge">${conditionText}</span></div>
+        <div class="product-info"><label><i class="fas fa-trademark"></i> Marca:</label><span>${product.brand || 'No especificada'}</span></div>
+        <div class="product-info"><label><i class="fas fa-palette"></i> Color:</label><span>${product.color || 'No especificado'}</span></div>
+        <div class="product-info"><label><i class="fas fa-store"></i> Vendedor:</label><span>
+            ${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})
+            <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
+                <i class="fas fa-external-link-alt"></i> Ver tienda
+            </a>
+            <span class="quick-response-badge">
+                <i class="fas fa-bolt"></i> Responde rápido
+            </span>
+        </span></div>
+        <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
+        <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
+        <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
+        <div class="product-actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; align-items: center;">
+            <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
+                <i class="fas fa-cart-plus"></i> Agregar al Carrito
+            </button>
+            <button class="btn btn-secondary" onclick="buyNow(${product.id})">
+                <i class="fas fa-bolt"></i> Comprar Ahora
+            </button>
+            <input type="checkbox" id="favoriteCheckbox" class="fav-checkbox" onchange="toggleFavoriteModern()">
+            <label for="favoriteCheckbox" class="fav-label" id="favLabel">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <div class="fav-action">
+                    <span class="option-1">Agregar a favoritos</span>
+                    <span class="option-2">¡En favoritos! ❤️</span>
                 </div>
-                <div class="product-price">${priceFormatted} ₲</div>
-                <div class="product-info"><label><i class="fas fa-align-left"></i> Descripción:</label><span>${escapeHtml(product.description || 'Sin descripción')}</span></div>
-                <div class="product-info"><label><i class="fas fa-tshirt"></i> Categoría:</label><span>${product.category}</span></div>
-                <div class="product-info"><label><i class="fas fa-ruler"></i> Talla:</label><span>${product.size || 'Talla única'}</span></div>
-                <div class="product-info"><label><i class="fas fa-star"></i> Estado:</label><span class="badge">${conditionText}</span></div>
-                <div class="product-info"><label><i class="fas fa-trademark"></i> Marca:</label><span>${product.brand || 'No especificada'}</span></div>
-                <div class="product-info"><label><i class="fas fa-palette"></i> Color:</label><span>${product.color || 'No especificado'}</span></div>
-                <div class="product-info"><label><i class="fas fa-store"></i> Vendedor:</label><span>
-                    ${escapeHtml(sellerName)} ${'⭐'.repeat(Math.floor(sellerRating))} (${sellerRating})
-                    <a href="seller-store.html?id=${product.seller_id}" style="color: #2A5C6E; margin-left: 10px; font-size: 0.8rem;">
-                        <i class="fas fa-external-link-alt"></i> Ver tienda
-                    </a>
-                    <span class="quick-response-badge">
-                        <i class="fas fa-bolt"></i> Responde rápido
-                    </span>
-                </span></div>
-                <div class="product-info"><label><i class="fas fa-calendar-alt"></i> Publicado:</label><span>${new Date(product.created_at).toLocaleDateString('es-PY')}</span></div>
-                <div class="product-info"><label><i class="fas fa-eye"></i> Vistas:</label><span>${product.views || 0}</span></div>
-                <div class="quantity-selector"><label><i class="fas fa-calculator"></i> Cantidad:</label><input type="number" id="quantity" min="1" max="10" value="1"></div>
-                <div class="product-actions" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; align-items: center;">
-                    <button class="btn btn-primary" onclick="addToCart(${product.id}, '${escapeHtml(product.title)}', ${product.price})">
-                        <i class="fas fa-cart-plus"></i> Agregar al Carrito
-                    </button>
-                    <button class="btn btn-secondary" onclick="buyNow(${product.id})">
-                        <i class="fas fa-bolt"></i> Comprar Ahora
-                    </button>
-                    <!-- 🆕 BOTÓN FAVORITO MODERNO -->
-                    <input type="checkbox" id="favoriteCheckbox" class="fav-checkbox" onchange="toggleFavoriteModern()">
-                    <label for="favoriteCheckbox" class="fav-label" id="favLabel">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                        <div class="fav-action">
-                            <span class="option-1">Agregar a favoritos</span>
-                            <span class="option-2">¡En favoritos! ❤️</span>
-                        </div>
-                    </label>
-                    <button class="btn-contact-seller" id="contactSellerBtn" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
-                        <i class="fas fa-comment-dots"></i>
-                        <span>Consultar al vendedor</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div id="message" class="message"></div>
-            `;
-        }
+            </label>
+            <button class="btn-contact-seller" id="contactSellerBtn" onclick="startConversation('${product.seller_id}', '${escapeHtml(sellerName)}')">
+                <i class="fas fa-comment-dots"></i>
+                <span>Consultar al vendedor</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <div id="message" class="message"></div>
+    `;
+}
         
         // ============================================================
         // RESEÑAS
