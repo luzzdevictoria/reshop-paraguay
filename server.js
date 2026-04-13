@@ -656,17 +656,31 @@ app.get('/api/favorites/check/:productId', authenticateToken, async (req, res) =
 });
 
 // ============================================================
-// RUTA DE PRODUCTO POR ID (CON CONTADOR DE VISTAS)
+// RUTA DE PRODUCTO POR ID (CON CONTADOR DE VISTAS + DATOS DEL VENDEDOR)
 // ============================================================
 
 app.get('/api/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Obtener el producto actual
+        // Obtener el producto actual con los datos del vendedor (JOIN)
         const { data: product, error } = await supabase
             .from('products')
-            .select('*')
+            .select(`
+                *,
+                seller:seller_id (
+                    id,
+                    email,
+                    full_name,
+                    store_name,
+                    store_description,
+                    store_logo_url,
+                    rating,
+                    total_sales,
+                    city,
+                    address_visible
+                )
+            `)
             .eq('id', id)
             .single();
 
