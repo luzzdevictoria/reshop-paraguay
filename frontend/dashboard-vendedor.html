@@ -860,7 +860,8 @@ HISTORIAL DE MODIFICACIONES:
         // ============================================================
         // CAPTURAR FOTO - Versión simplificada (sin eliminación de fondo)
         // ============================================================
-        function capturePhoto() {
+function capturePhoto() {
+            console.log('📸 Iniciando capturePhoto');
             const video = document.getElementById('cameraVideo');
             const canvas = document.getElementById('cameraCanvas');
             const context = canvas.getContext('2d');
@@ -870,6 +871,8 @@ HISTORIAL DE MODIFICACIONES:
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             canvas.toBlob(async (blob) => {
+                console.log('📸 Blob creado, tamaño:', blob.size, 'bytes');
+                
                 if (uploadedImageUrls.length >= 5) {
                     alert('Máximo 5 imágenes por producto');
                     stopCamera();
@@ -887,24 +890,42 @@ HISTORIAL DE MODIFICACIONES:
                 
                 // Subir imagen original a Cloudinary
                 const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                console.log('📤 Subiendo archivo a Cloudinary...', file.name, file.size);
                 const url = await uploadImageToCloudinary(file);
+                console.log('📥 URL recibida de Cloudinary:', url);
                 
                 if (url) {
                     uploadedImageUrls.push(url);
+                    console.log('✅ URL agregada al array. Total imágenes:', uploadedImageUrls.length);
+                    console.log('📦 uploadedImageUrls actual:', uploadedImageUrls);
+                    
+                    // Guardar en localStorage como respaldo
+                    localStorage.setItem('temp_uploaded_images', JSON.stringify(uploadedImageUrls));
+                    
                     if (previewItem) {
                         previewItem.setAttribute('data-url', url);
                         previewItem.classList.remove('processing');
                         const img = previewItem.querySelector('img');
-                        if (img) img.src = url;
+                        if (img) {
+                            img.src = url;
+                            console.log('🖼️ Preview actualizado con URL de Cloudinary');
+                        }
                     }
+                    
+                    // Mostrar mensaje de éxito temporal
+                    showToastMessage('✅ Imagen subida correctamente', 'success');
                 } else {
+                    console.error('❌ URL es null o vacía, falló la subida');
                     if (previewItem) {
                         previewItem.remove();
                     }
-                    showToastMessage('Error al subir imagen', 'error');
+                    showToastMessage('Error al subir imagen a Cloudinary', 'error');
                 }
                 
+                // Cerrar cámara después de todo el proceso
+                console.log('📸 Cerrando cámara...');
                 stopCamera();
+                
             }, 'image/jpeg', 0.9);
         }
 
@@ -1098,6 +1119,16 @@ HISTORIAL DE MODIFICACIONES:
 
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+			
+			// Recuperar imágenes de localStorage si uploadedImageUrls está vacío
+if (uploadedImageUrls.length === 0) {
+    const saved = localStorage.getItem('temp_uploaded_images');
+    if (saved) {
+        uploadedImageUrls = JSON.parse(saved);
+        console.log('📦 Imágenes recuperadas de localStorage:', uploadedImageUrls);
+    }
+}
+			
             const productId = document.getElementById('productId').value;
             const msgDiv = document.getElementById('modalMessage');
             msgDiv.className = 'message loading';
