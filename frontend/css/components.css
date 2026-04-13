@@ -27,9 +27,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     border: none;
-    border-radius: 40px;              /* Bordes bien redondeados */
+    border-radius: 60px;              /* Bordes mas redondeados */
     cursor: pointer;
     font-family: inherit;
     font-size: 0.85rem;
@@ -48,7 +48,7 @@
 .btn-cancel,
 .btn-save,
 .btn-toggle {
-    padding: 10px 24px;              /* Tamaño normal */
+    padding: 12px 28px;              /* Tamaño normal */
 }
 
 .btn-primary i,
@@ -235,9 +235,9 @@
 
 /* Pequeño */
 .btn-sm {
-    padding: 6px 16px !important;
-    font-size: 0.75rem !important;
-    gap: 6px !important;
+    padding: 8px 20px !important;
+    font-size: 0.8rem !important;
+    gap: 8px !important;
 }
 
 .btn-sm i {
