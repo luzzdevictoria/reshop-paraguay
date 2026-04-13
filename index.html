@@ -1,0 +1,835 @@
+<!--
+================================================================================
+ARCHIVO: index.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 2.3.1 (Mobile-First + Three Body Loader + PWA + Avatar Usuario + Mi Perfil)
+CREADO: 2026-04-09
+ACTUALIZADO: 2026-04-14
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Página principal. Responsive mobile-first con hamburguesa,
+             filtros deslizables, bottom nav y tarjetas táctiles.
+             Incluye loader Three Body, botón Buscar cerca de mí,
+             botón para instalar la app como PWA, avatar de usuario
+             y enlace "Mi Perfil" para todos los usuarios autenticados.
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ReShop Paraguay - Ropa de Segunda Mano</title>
+
+    <!-- ============================================================
+         SEO
+    ============================================================ -->
+    <meta name="description" content="Shopping virtual de ropa de segunda mano en Paraguay. Comprá y vendé ropa de calidad a precios accesibles. Moda sustentable y económica.">
+    <meta name="keywords" content="ropa segunda mano Paraguay, ropa usada, moda económica, thrift store Paraguay, ReShop">
+    <meta name="author" content="ReShop Paraguay">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://reshop-paraguay.vercel.app/">
+
+    <!-- ============================================================
+         OPEN GRAPH — WhatsApp, Facebook, Telegram, LinkedIn
+         CRÍTICO: og:image debe estar ANTES de og:title según spec de OGP.
+    ============================================================ -->
+    <meta property="og:image"            content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta property="og:image:secure_url" content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta property="og:image:type"       content="image/png">
+    <meta property="og:image:width"      content="1200">
+    <meta property="og:image:height"     content="630">
+    <meta property="og:image:alt"        content="ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano">
+    <meta property="og:type"             content="website">
+    <meta property="og:url"              content="https://reshop-paraguay.vercel.app/">
+    <meta property="og:site_name"        content="ReShop Paraguay">
+    <meta property="og:title"            content="ReShop Paraguay - Ropa de Segunda Mano">
+    <meta property="og:description"      content="Shopping virtual de ropa de segunda mano en Paraguay. Comprá y vendé ropa de calidad a precios accesibles.">
+    <meta property="og:locale"           content="es_PY">
+
+    <!-- ============================================================
+         TWITTER CARD — Twitter/X
+    ============================================================ -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="ReShop Paraguay - Ropa de Segunda Mano">
+    <meta name="twitter:description" content="Shopping virtual de ropa de segunda mano en Paraguay. Moda sustentable y económica.">
+    <meta name="twitter:image"       content="https://reshop-paraguay.vercel.app/assets/images/og-image-v2.png">
+    <meta name="twitter:image:alt"   content="ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano">
+
+    <!-- ============================================================
+         PWA
+    ============================================================ -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2A5C6E">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ReShop">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+
+    <!-- ============================================================
+         FAVICON
+    ============================================================ -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+
+    <!-- ============================================================
+         CSS — en este orden: externo → layout → componentes → mobile
+    ============================================================ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <!-- ============================================================
+         ESTILOS INTERNOS — Variables, layout, componentes, loaders
+    ============================================================ -->
+    <style>
+        :root {
+            --primary: #2A5C6E;
+            --secondary: #E8B86B;
+            --accent: #D95A41;
+            --background: #F9F8F6;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --white: #FFFFFF;
+            --border: #E0E0E0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--background); }
+
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; font-size: 0.95rem; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
+        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .logo-img { height: 85px; width: auto; border-radius: 16px; background-color: white; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); object-fit: contain; transition: transform 0.2s; }
+        .header-title h1 { margin: 0; font-size: 1.8rem; }
+        .header-title h1 i { margin-right: 8px; color: var(--secondary); }
+        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; align-items: center; }
+        .user-menu { display: inline-flex; align-items: center; gap: 8px; margin-left: 10px; }
+        .user-avatar { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            overflow: hidden; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            background: var(--secondary);
+            flex-shrink: 0;
+        }
+        .user-avatar img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block; 
+        }
+        .user-avatar .initials {
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            color: var(--text-dark);
+        }
+        .user-name { 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            max-width: 120px; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+        }
+        .logout-btn { 
+            background: none; 
+            border: none; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            margin-left: 8px; 
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255,255,255,0.15); }
+        .header__search { display: flex; gap: 10px; max-width: 400px; margin: 12px auto 0; }
+        .header__search input { flex: 1; padding: 8px 14px; border-radius: 8px; border: none; font-size: 0.9rem; }
+        .header__search button { background: var(--secondary); border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.9rem; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .layout { display: flex; gap: 24px; }
+
+        .sidebar { width: 240px; flex-shrink: 0; background: white; border-radius: 12px; padding: 20px; box-shadow: var(--shadow); align-self: flex-start; position: sticky; top: 20px; }
+        .sidebar h3 { color: var(--primary); margin-bottom: 16px; font-size: 1rem; }
+        .filter-group { margin-bottom: 16px; }
+        .filter-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.4px; }
+        .filter-select, .filter-input { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+        .filter-select:focus, .filter-input:focus { outline: none; border-color: var(--primary); }
+        .sidebar .btn { width: 100%; margin-bottom: 8px; padding: 9px; font-size: 0.85rem; }
+
+        .products-grid-wrapper { flex: 1; }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.13); }
+        .product-card__img-wrapper { width: 100%; height: 220px; overflow: hidden; background: #f0f0f0; }
+        .product-card__img-wrapper img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s; }
+        .product-card:hover .product-card__img-wrapper img { transform: scale(1.04); }
+        .product-card__content { padding: 14px; }
+        .product-card__title { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; line-height: 1.3; }
+        .product-card__price { font-size: 1.15rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+        .product-card__seller { font-size: 0.77rem; color: var(--text-light); margin-bottom: 6px; }
+        .product-card__condition { display: inline-block; padding: 2px 8px; background: var(--secondary); border-radius: 4px; font-size: 0.7rem; color: var(--text-dark); }
+        .product-card__button { width: 100%; margin-top: 10px; padding: 10px; border: none; border-radius: 8px; background: var(--primary); color: white; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .product-card__button:hover { background: #1e4452; }
+
+        .btn { padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1e4452; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-dark); }
+        .btn-outline:hover { background: var(--background); }
+        .btn-secondary { background: var(--secondary); color: var(--text-dark); }
+        .btn-secondary:hover { background: #d4a55a; }
+
+        .loading, .error { text-align: center; padding: 60px 20px; font-size: 1rem; color: var(--text-light); }
+        .error { color: var(--accent); }
+        .loading i { font-size: 2rem; display: block; margin-bottom: 12px; color: var(--primary); }
+
+        .footer { background: var(--primary); color: white; text-align: center; padding: 20px; margin-top: 40px; font-size: 0.8rem; }
+
+        /* 🆕 Botón de instalación PWA */
+        .install-pwa-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .install-pwa-btn:hover {
+            background: #1e4452;
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .install-pwa-btn {
+                bottom: 70px;
+                right: 12px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .user-name { max-width: 80px; font-size: 0.85rem; }
+            .user-avatar { width: 24px; height: 24px; }
+            .user-avatar .initials { font-size: 0.7rem; }
+        }
+
+        /* Loader Three Body */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: var(--primary, #2A5C6E);
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        .three-body.three-body-secondary {
+            --uib-color: var(--secondary, #E8B86B);
+        }
+
+        .three-body.three-body-accent {
+            --uib-color: var(--accent, #D95A41);
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
+    </style>
+
+    <!-- ============================================================
+         ONESIGNAL — defer para no bloquear render
+    ============================================================ -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
+            </div>
+        </div>
+
+        <div class="header__search">
+            <input type="text" id="searchInput" placeholder="Buscar productos...">
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+        </div>
+
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="my-orders.html"><i class="fas fa-history"></i> Pedidos</a>
+            <a href="messages.html"><i class="fas fa-envelope"></i> Mensajes</a>
+            <a href="help.html"><i class="fas fa-question-circle"></i> Ayuda</a>
+            <a href="profile.html" id="profileLink" style="display: none;"><i class="fas fa-user-circle"></i> Mi Perfil</a>
+            <a href="dashboard-vendedor.html" id="dashboardLink" style="display: none;"><i class="fas fa-chart-line"></i> Mi Panel</a>
+            <a href="admin-dashboard.html" id="adminLink" style="display: none;"><i class="fas fa-crown"></i> Admin</a>
+            <span id="authLinks">
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+            </span>
+            <span id="userMenu" style="display: none;" class="user-menu">
+                <span id="userAvatar" class="user-avatar"></span>
+                <span class="user-name" id="userName"></span>
+                <button id="logoutBtn" class="logout-btn" title="Cerrar Sesión"><i class="fas fa-sign-out-alt"></i></button>
+            </span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="layout">
+
+            <aside class="sidebar">
+                <h3><i class="fas fa-sliders-h"></i> Filtros</h3>
+                <div class="filter-group">
+                    <label>Categoría</label>
+                    <select class="filter-select" id="filterCategory">
+                        <option value="">Todas</option>
+                        <option value="pantalones">Pantalones</option>
+                        <option value="camisas">Camisas</option>
+                        <option value="vestidos">Vestidos</option>
+                        <option value="chaquetas">Chaquetas</option>
+                        <option value="calzado">Calzado</option>
+                        <option value="accesorios">Accesorios</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Talla</label>
+                    <select class="filter-select" id="filterSize">
+                        <option value="">Todas</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Estado</label>
+                    <select class="filter-select" id="filterCondition">
+                        <option value="">Cualquier estado</option>
+                        <option value="new_with_tags">Nuevo con etiqueta</option>
+                        <option value="new_without_tags">Nuevo sin etiqueta</option>
+                        <option value="very_good">Muy bueno</option>
+                        <option value="good">Bueno</option>
+                        <option value="acceptable">Aceptable</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-globe-americas"></i> Origen</label>
+                    <select class="filter-select" id="filterOrigin">
+                        <option value="">Todos los orígenes</option>
+                        <option value="PAR">🇵🇾 Paraguay</option>
+                        <option value="ARG">🇦🇷 Argentina</option>
+                        <option value="BRA">🇧🇷 Brasil</option>
+                        <option value="USA">🇺🇸 Estados Unidos</option>
+                        <option value="CHN">🇨🇳 China</option>
+                        <option value="EUR">🇪🇺 Europa</option>
+                        <option value="JPN">🇯🇵 Japón</option>
+                        <option value="MEX">🇲🇽 México</option>
+                        <option value="URY">🇺🇾 Uruguay</option>
+                        <option value="CHL">🇨🇱 Chile</option>
+                        <option value="BOL">🇧🇴 Bolivia</option>
+                        <option value="PER">🇵🇪 Perú</option>
+                        <option value="COL">🇨🇴 Colombia</option>
+                        <option value="VEN">🇻🇪 Venezuela</option>
+                        <option value="ECU">🇪🇨 Ecuador</option>
+                        <option value="OTH">🌎 Otro</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Precio mín. (Gs)</label>
+                    <input type="number" class="filter-input" id="filterMinPrice" placeholder="0">
+                </div>
+                <div class="filter-group">
+                    <label>Precio máx. (Gs)</label>
+                    <input type="number" class="filter-input" id="filterMaxPrice" placeholder="999999">
+                </div>
+                <button class="btn btn-primary" id="applyFilters"><i class="fas fa-check"></i> Aplicar</button>
+                <button class="btn btn-outline" id="clearFilters"><i class="fas fa-undo"></i> Limpiar</button>
+            </aside>
+
+            <div class="near-me-button-wrapper" style="margin-bottom: 20px;">
+                <button class="btn-secondary" id="nearMeBtn" style="width: 100%;">
+                    <i class="fas fa-location-dot"></i> Buscar cerca de mí
+                </button>
+            </div>
+
+            <div class="products-grid-wrapper">
+                <div id="productsGrid" class="products-grid">
+                    <div class="loader-container">
+                        <div class="three-body"></div>
+                        <p>Cargando productos...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 🆕 Botón de instalación PWA -->
+    <button id="installPwaBtn" class="install-pwa-btn">
+        <i class="fas fa-download"></i> Instalar App
+    </button>
+
+    <div class="footer">
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay — Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva &nbsp;|&nbsp; <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+    </div>
+
+    <script>
+        const API_URL = 'https://reshop-backend.vercel.app';
+
+        let currentFilters = {
+            page: 1, limit: 20,
+            category: '', size: '', condition: '', origin: '',
+            min_price: '', max_price: '', search: ''
+        };
+
+        function updateUserMenu() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const authLinks = document.getElementById('authLinks');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+            const userAvatar = document.getElementById('userAvatar');
+            const dashboardLink = document.getElementById('dashboardLink');
+            const adminLink = document.getElementById('adminLink');
+            const profileLink = document.getElementById('profileLink'); // ✅ AGREGAR: Enlace Mi Perfil
+
+            if (token && user) {
+                authLinks.style.display = 'none';
+                userMenu.style.display = 'inline-flex';
+                
+                // Nombre del usuario
+                userName.textContent = user.full_name || user.email;
+                
+                // Avatar: imagen o iniciales
+                if (userAvatar) {
+                    if (user.avatar_url) {
+                        userAvatar.innerHTML = `<img src="${user.avatar_url}" alt="Avatar" onerror="this.parentElement.innerHTML='<div class=\\'initials\\'>${(user.full_name || user.email)[0].toUpperCase()}</div>'">`;
+                    } else {
+                        const initials = (user.full_name || user.email || '?')[0].toUpperCase();
+                        userAvatar.innerHTML = `<div class="initials">${initials}</div>`;
+                    }
+                }
+                
+                // ✅ Mostrar Mi Perfil para TODOS los usuarios autenticados
+                if (profileLink) profileLink.style.display = 'inline';
+                
+                // Mostrar enlaces según rol
+                if (dashboardLink && (user.role === 'seller' || user.role === 'admin')) {
+                    dashboardLink.style.display = 'inline';
+                }
+                if (adminLink && user.role === 'admin') {
+                    adminLink.style.display = 'inline';
+                }
+            } else {
+                authLinks.style.display = 'inline';
+                userMenu.style.display = 'none';
+                // ✅ Ocultar Mi Perfil cuando no hay sesión
+                if (profileLink) profileLink.style.display = 'none';
+                if (dashboardLink) dashboardLink.style.display = 'none';
+                if (adminLink) adminLink.style.display = 'none';
+            }
+        }
+
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+
+        async function loadProducts() {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+            grid.innerHTML = '<div class="loader-container"><div class="three-body"></div><p>Cargando productos...</p></div>';
+            try {
+                const params = new URLSearchParams();
+                Object.entries(currentFilters).forEach(([k, v]) => { if (v) params.append(k, v); });
+                const res = await fetch(`${API_URL}/api/products?${params}`);
+                const data = await res.json();
+
+                if (data.success && data.products?.length > 0) {
+                    grid.innerHTML = data.products.map(p => {
+                        const img = p.images_urls?.[0] || 'https://placehold.co/400x400/f0f0f0/999?text=Sin+foto';
+                        const priceStr = new Intl.NumberFormat('es-PY').format(p.price);
+                        const condMap = {
+                            new_with_tags: 'Nuevo c/ etiqueta', new_without_tags: 'Nuevo s/ etiqueta',
+                            very_good: 'Muy bueno', good: 'Bueno', acceptable: 'Aceptable'
+                        };
+                        const cond = condMap[p.condition] || p.condition || 'Buen estado';
+                        const seller = p.seller?.store_name || p.seller?.full_name || 'Vendedor';
+                        return `
+                            <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+                                <div class="product-card__img-wrapper">
+                                    <img src="${img}" alt="${esc(p.title)}" loading="lazy" onerror="this.src='https://placehold.co/400x400/f0f0f0/999?text=Sin+foto'">
+                                </div>
+                                <div class="product-card__content">
+                                    <h3 class="product-card__title">${esc(p.title)}</h3>
+                                    <p class="product-card__price">${priceStr} Gs</p>
+                                    <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(seller)}</p>
+                                    <p class="product-card__origin" style="font-size: 0.7rem; color: var(--text-light); margin: 4px 0;"><i class="fas fa-globe-americas"></i> ${getOriginFlag(p.origin)}</p>
+                                    <span class="product-card__condition">${cond}</span>
+                                    <button class="product-card__button" onclick="event.stopPropagation(); window.location.href='product-detail.html?id=${p.id}'">
+                                        <i class="fas fa-eye"></i> Ver producto
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    grid.innerHTML = '<div class="loader-container"><div class="three-body three-body-secondary"></div><p>No hay productos disponibles</p></div>';
+                }
+            } catch (err) {
+                grid.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i><br>Error al cargar: ${err.message}</div>`;
+            }
+        }
+
+        function esc(text) {
+            const d = document.createElement('div');
+            d.textContent = text || '';
+            return d.innerHTML;
+        }
+
+        function getOriginFlag(origin) {
+            const flags = {
+                'PAR': '🇵🇾 Paraguay', 'ARG': '🇦🇷 Argentina', 'BRA': '🇧🇷 Brasil',
+                'USA': '🇺🇸 USA', 'CHN': '🇨🇳 China', 'EUR': '🇪🇺 Europa',
+                'JPN': '🇯🇵 Japón', 'MEX': '🇲🇽 México', 'URY': '🇺🇾 Uruguay',
+                'CHL': '🇨🇱 Chile', 'BOL': '🇧🇴 Bolivia', 'PER': '🇵🇪 Perú',
+                'COL': '🇨🇴 Colombia', 'VEN': '🇻🇪 Venezuela', 'ECU': '🇪🇨 Ecuador',
+                'OTH': '🌎 Otro'
+            };
+            return flags[origin] || (origin ? `🌍 ${origin}` : '🌍 No especificado');
+        }
+
+        function setupFilters() {
+            const applyBtn = document.getElementById('applyFilters');
+            const clearBtn = document.getElementById('clearFilters');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchInput = document.getElementById('searchInput');
+
+            applyBtn?.addEventListener('click', () => {
+                currentFilters.category = document.getElementById('filterCategory').value;
+                currentFilters.size = document.getElementById('filterSize').value;
+                currentFilters.condition = document.getElementById('filterCondition').value;
+                currentFilters.origin = document.getElementById('filterOrigin').value;
+                currentFilters.min_price = document.getElementById('filterMinPrice').value;
+                currentFilters.max_price = document.getElementById('filterMaxPrice').value;
+                currentFilters.page = 1;
+                loadProducts();
+            });
+
+            clearBtn?.addEventListener('click', () => {
+                ['filterCategory','filterSize','filterCondition','filterOrigin','filterMinPrice','filterMaxPrice','searchInput'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                currentFilters = { page:1, limit:20, category:'', size:'', condition:'', origin:'', min_price:'', max_price:'', search:'' };
+                loadProducts();
+            });
+
+            searchBtn?.addEventListener('click', () => {
+                currentFilters.search = searchInput?.value.trim() || '';
+                currentFilters.page = 1;
+                loadProducts();
+            });
+
+            searchInput?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { currentFilters.search = searchInput.value.trim(); currentFilters.page = 1; loadProducts(); }
+            });
+        }
+
+        function setupNearMeButton() {
+            const nearMeBtn = document.getElementById('nearMeBtn');
+            if (!nearMeBtn) return;
+            
+            let active = false;
+            
+            nearMeBtn.addEventListener('click', async () => {
+                if (active) {
+                    active = false;
+                    nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                    nearMeBtn.classList.remove('is-active');
+                    nearMeBtn.style.background = '#E8B86B';
+                    nearMeBtn.style.color = '#333';
+                    loadProducts();
+                    return;
+                }
+                
+                if (!navigator.geolocation) {
+                    alert('Tu navegador no soporta geolocalización');
+                    return;
+                }
+                
+                nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Obteniendo ubicación...';
+                nearMeBtn.disabled = true;
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        nearMeBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Buscando productos cercanos...';
+                        
+                        try {
+                            const res = await fetch(`${API_URL}/api/products?limit=200`);
+                            const data = await res.json();
+                            
+                            if (data.success && data.products) {
+                                const nearby = data.products.filter(p => {
+                                    const lat = p.seller?.latitude;
+                                    const lng = p.seller?.longitude;
+                                    if (!lat || !lng) return false;
+                                    const dist = Math.sqrt(Math.pow(lat - latitude, 2) + Math.pow(lng - longitude, 2)) * 111;
+                                    return dist <= 10;
+                                });
+                                
+                                if (nearby.length > 0) {
+                                    active = true;
+                                    nearMeBtn.innerHTML = `<i class="fas fa-location-dot"></i> Cerca (${nearby.length}) ✕`;
+                                    nearMeBtn.classList.add('is-active');
+                                    nearMeBtn.style.background = '#28a745';
+                                    nearMeBtn.style.color = 'white';
+                                    renderNearbyProducts(nearby);
+                                } else {
+                                    nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                                    alert('No hay productos cerca de tu ubicación');
+                                }
+                            }
+                            nearMeBtn.disabled = false;
+                        } catch (err) {
+                            nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                            nearMeBtn.disabled = false;
+                            alert('Error al buscar productos');
+                        }
+                    },
+                    (err) => {
+                        nearMeBtn.innerHTML = '<i class="fas fa-location-dot"></i> Buscar cerca de mí';
+                        nearMeBtn.disabled = false;
+                        alert('No se pudo obtener tu ubicación');
+                    }
+                );
+            });
+        }
+        
+        function renderNearbyProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = products.map(p => {
+                const img = p.images_urls?.[0] || 'https://placehold.co/400x400/f0f0f0/999?text=Sin+foto';
+                const priceStr = new Intl.NumberFormat('es-PY').format(p.price);
+                const condMap = {
+                    new_with_tags: 'Nuevo c/ etiqueta', new_without_tags: 'Nuevo s/ etiqueta',
+                    very_good: 'Muy bueno', good: 'Bueno', acceptable: 'Aceptable'
+                };
+                const cond = condMap[p.condition] || p.condition || 'Buen estado';
+                const seller = p.seller?.store_name || p.seller?.full_name || 'Vendedor';
+                return `
+                    <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
+                        <div class="product-card__img-wrapper">
+                            <img src="${img}" alt="${esc(p.title)}" loading="lazy" onerror="this.src='https://placehold.co/400x400/f0f0f0/999?text=Sin+foto'">
+                        </div>
+                        <div class="product-card__content">
+                            <h3 class="product-card__title">${esc(p.title)}</h3>
+                            <p class="product-card__price">${priceStr} Gs</p>
+                            <p class="product-card__seller"><i class="fas fa-store"></i> ${esc(seller)}</p>
+                            <p class="product-card__origin" style="font-size: 0.7rem; color: var(--text-light); margin: 4px 0;"><i class="fas fa-globe-americas"></i> ${getOriginFlag(p.origin)}</p>
+                            <span class="product-card__condition">${cond}</span>
+                            <button class="product-card__button" onclick="event.stopPropagation(); window.location.href='product-detail.html?id=${p.id}'">
+                                <i class="fas fa-eye"></i> Ver producto
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 🆕 PWA Installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('installPwaBtn');
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        document.getElementById('installPwaBtn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('✅ Usuario instaló la app ReShop');
+                }
+                deferredPrompt = null;
+                document.getElementById('installPwaBtn').style.display = 'none';
+            }
+        });
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateUserMenu();
+    setupLogout();
+    setupFilters();
+    setupNearMeButton();
+    loadProducts();
+    
+    // ✅ AGREGAR: Re-ejecutar cuando el usuario regresa a esta pestaña
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            updateUserMenu();
+        }
+    });
+    
+    // ✅ AGREGAR: Re-ejecutar si otra página actualiza localStorage
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'user') {
+            updateUserMenu();
+        }
+    });
+});
+    </script>
+
+    <script src="js/mobile.js"></script>
+
+</body>
+</html>

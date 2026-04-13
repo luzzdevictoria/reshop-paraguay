@@ -1,0 +1,449 @@
+<!--
+================================================================================
+ARCHIVO: my-orders.html
+PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
+VERSION: 1.1.0
+CREADO: 2026-04-10
+ACTUALIZADO: 2026-04-13
+RESPONSABLE: Pedro José Pirovani
+PROPIETARIA: Luciana Noelia Da Silva
+DESCRIPCION: Historial de pedidos del comprador. Muestra todas las ordenes
+             realizadas por el usuario con sus estados y detalles.
+================================================================================
+HISTORIAL DE MODIFICACIONES:
+2026-04-10 - Creacion inicial del historial de pedidos
+2026-04-10 - Implementacion de carga de ordenes desde API
+2026-04-10 - Diseño responsive con estados de orden (pendiente, pagado, enviado, entregado)
+2026-04-10 - Integracion con autenticacion de usuario
+2026-04-13 - [FIX] Agregar mobile.css y mobile.js para navegación móvil
+2026-04-13 - [FIX] Agregar estilos del loader Three Body
+================================================================================
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Mis Pedidos - ReShop Paraguay</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="msapplication-TileColor" content="#2A5C6E">
+    <meta name="theme-color" content="#2A5C6E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        
+        /* Header */
+        .header { background: #2A5C6E; color: white; padding: 20px; text-align: center; }
+        .header a { color: white; text-decoration: none; margin: 0 10px; transition: opacity 0.2s; }
+        .header a:hover { opacity: 0.8; }
+        .header i { margin-right: 6px; }
+        
+        /* Logo y titulo */
+        .header-top { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .logo-img { height: 85px; width: auto; border-radius: 16px; background-color: white; padding: 8px 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); object-fit: contain; transition: transform 0.2s; }
+        .logo-img:hover { transform: scale(1.02); }
+        .header-title h1 { margin: 0; font-size: 1.8rem; letter-spacing: -0.5px; }
+        .header-title h1 i { margin-right: 8px; color: #E8B86B; }
+        .header-title p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        
+        /* Menu */
+        .header-menu { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .user-menu { display: inline-block; margin-left: 15px; }
+        .logout-btn { background: none; border: none; color: white; cursor: pointer; font-size: 0.95rem; margin-left: 10px; }
+        
+        /* Contenedor principal */
+        .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+        
+        /* Lista de pedidos */
+        .orders-list { display: flex; flex-direction: column; gap: 20px; }
+        .order-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+        .order-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+        
+        /* Cabecera de la orden */
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
+        .order-number { font-weight: bold; color: #2A5C6E; font-size: 1.1rem; }
+        .order-number i { margin-right: 6px; }
+        .order-date { font-size: 0.8rem; color: #888; }
+        .order-date i { margin-right: 4px; }
+        
+        /* Estados */
+        .order-status { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-pending { background: #ffc107; color: #333; }
+        .status-paid { background: #28a745; color: white; }
+        .status-shipped { background: #17a2b8; color: white; }
+        .status-delivered { background: #6c757d; color: white; }
+        .status-cancelled { background: #dc3545; color: white; }
+        
+        /* Items de la orden */
+        .order-items { margin-top: 15px; }
+        .order-items-title { font-weight: bold; margin-bottom: 10px; color: #555; }
+        .order-items-title i { margin-right: 6px; color: #E8B86B; }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .order-item:last-child { border-bottom: none; }
+        .item-name { color: #333; }
+        .item-name i { margin-right: 6px; color: #2A5C6E; }
+        .item-price { color: #D95A41; font-weight: 500; }
+        
+        /* Total */
+        .order-total { text-align: right; margin-top: 15px; padding-top: 10px; font-weight: bold; color: #D95A41; font-size: 1.2rem; border-top: 1px solid #eee; }
+        .order-total i { margin-right: 6px; }
+        
+        /* Metadatos */
+        .order-meta { font-size: 0.8rem; color: #666; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+        .order-meta i { margin-right: 4px; width: 16px; }
+        
+        /* 🆕 Loader Three Body - ReShop Theme */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .loader-container p {
+            margin-top: 16px;
+            color: #2A5C6E;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: #2A5C6E;
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        .three-body.three-body-secondary {
+            --uib-color: #E8B86B;
+        }
+
+        .three-body.three-body-accent {
+            --uib-color: #D95A41;
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
+
+        /* Estados de carga */
+        .empty { text-align: center; padding: 50px; color: #666; }
+        .error { text-align: center; padding: 50px; color: #D95A41; }
+        
+        /* Footer */
+        .footer { background: #2A5C6E; color: white; text-align: center; padding: 15px; margin-top: 30px; font-size: 0.8rem; }
+        .footer i { margin-right: 6px; }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .logo-img { height: 55px; }
+            .header-title h1 { font-size: 1.2rem; }
+            .header-title p { font-size: 0.7rem; }
+            .header a { font-size: 0.8rem; margin: 0 5px; }
+            .order-header { flex-direction: column; align-items: flex-start; }
+            .order-item { flex-direction: column; gap: 5px; }
+            .item-price { text-align: right; }
+        }
+    </style>
+    <!-- 🆕 CSS Móvil -->
+    <link rel="stylesheet" href="css/mobile.css">
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: {
+                    enable: false
+                },
+                allowLocalhostAsSecureOrigin: true
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+                <p><i class="fas fa-store"></i> Shopping Virtual de Ropa de Segunda Mano</p>
+            </div>
+        </div>
+        <div class="header-menu">
+            <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+            <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
+            <a href="my-orders.html"><i class="fas fa-history"></i> Mis Pedidos</a>
+            <span id="authLinks">
+                <a href="login.html"><i class="fas fa-key"></i> Iniciar Sesión</a>
+                <a href="register.html"><i class="fas fa-user-plus"></i> Registrarse</a>
+            </span>
+            <span id="userMenu" style="display: none;" class="user-menu">
+                <span><i class="fas fa-user-circle"></i> <span id="userName"></span></span>
+                <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2 style="color: #2A5C6E; margin-bottom: 20px;"><i class="fas fa-history"></i> Mis Pedidos</h2>
+        <div id="ordersContainer"><div class="loader-container">
+            <div class="three-body"></div>
+            <p>Cargando tus pedidos...</p>
+        </div></div>
+    </div>
+    
+    <div class="footer">
+        <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
+    </div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACION
+        // ============================================================
+        const API_URL = 'https://reshop-backend.vercel.app';
+        const token = localStorage.getItem('token');
+        
+        // Verificar autenticacion
+        if (!token) {
+            window.location.href = 'login.html?redirect=my-orders.html';
+        }
+        
+        // ============================================================
+        // FUNCIONES DE AUTENTICACION
+        // ============================================================
+        function updateUserMenu() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const authLinks = document.getElementById('authLinks');
+            const userMenu = document.getElementById('userMenu');
+            const userName = document.getElementById('userName');
+
+            if (token && user) {
+                authLinks.style.display = 'none';
+                userMenu.style.display = 'inline-block';
+                userName.innerHTML = user.full_name || user.email;
+            } else {
+                authLinks.style.display = 'inline';
+                userMenu.style.display = 'none';
+            }
+        }
+
+        function setupLogout() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.removeItem('reshop_cart');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+        
+        // ============================================================
+        // MAPA DE ESTADOS
+        // ============================================================
+        const statusConfig = {
+            'pending': { text: '⏳ Pendiente', class: 'status-pending' },
+            'paid': { text: '✅ Pagado', class: 'status-paid' },
+            'shipped': { text: '📦 Enviado', class: 'status-shipped' },
+            'delivered': { text: '🏠 Entregado', class: 'status-delivered' },
+            'cancelled': { text: '❌ Cancelado', class: 'status-cancelled' }
+        };
+        
+        // ============================================================
+        // FUNCIONES PRINCIPALES
+        // ============================================================
+        async function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/orders/my-orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.orders && data.orders.length > 0) {
+                    let html = '<div class="orders-list">';
+                    
+                    for (const order of data.orders) {
+                        const status = statusConfig[order.order_status] || { text: order.order_status, class: 'status-pending' };
+                        const statusClass = status.class;
+                        const statusText = status.text;
+                        
+                        html += `
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <div>
+                                        <div class="order-number"><i class="fas fa-receipt"></i> ${escapeHtml(order.order_number)}</div>
+                                        <div class="order-date"><i class="fas fa-calendar-alt"></i> ${new Date(order.created_at).toLocaleDateString('es-PY', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                    </div>
+                                    <span class="order-status ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="order-items">
+                                    <div class="order-items-title"><i class="fas fa-box"></i> Productos:</div>
+                        `;
+                        
+                        if (order.items && order.items.length > 0) {
+                            for (const item of order.items) {
+                                html += `
+                                    <div class="order-item">
+                                        <span class="item-name"><i class="fas fa-tag"></i> ${item.quantity}x ${escapeHtml(item.product?.title || 'Producto')}</span>
+                                        <span class="item-price">${new Intl.NumberFormat('es-PY').format(item.subtotal)} ₲</span>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        html += `
+                                </div>
+                                <div class="order-total">
+                                    <i class="fas fa-tag"></i> Total: ${new Intl.NumberFormat('es-PY').format(order.total_amount)} ₲
+                                </div>
+                                <div class="order-meta">
+                                    <i class="fas fa-credit-card"></i> Método de pago: ${formatPaymentMethod(order.payment_method)}
+                                    ${order.shipping_address ? `<br><i class="fas fa-map-marker-alt"></i> Entrega: ${escapeHtml(order.shipping_address)}` : ''}
+                                    ${order.shipping_tracking_number ? `<br><i class="fas fa-truck"></i> Tracking: ${escapeHtml(order.shipping_tracking_number)}` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                        <div class="empty">
+                            <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+                            <p>No tienes pedidos aún.</p>
+                            <a href="index.html" style="color: #2A5C6E; display: inline-block; margin-top: 10px;"><i class="fas fa-store"></i> Explorar productos →</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando pedidos:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-wifi"></i>
+                        <p>Error al cargar tus pedidos: ${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 20px; background: #2A5C6E; color: white; border: none; border-radius: 5px; cursor: pointer;"><i class="fas fa-sync-alt"></i> Reintentar</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function formatPaymentMethod(method) {
+            const methods = {
+                'transferencia': 'Transferencia Bancaria',
+                'tigo_money': 'Tigo Money',
+                'efectivo': 'Efectivo (Contraentrega)',
+                'ueno': 'QR UENO',
+                'pending': 'Pendiente'
+            };
+            return methods[method] || method || 'No especificado';
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================================
+        // INICIALIZACION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserMenu();
+            setupLogout();
+            loadOrders();
+        });
+    </script>
+
+    <!-- 🆕 JS Móvil (carga al final) -->
+    <script src="js/mobile.js"></script>
+</body>
+</html>
