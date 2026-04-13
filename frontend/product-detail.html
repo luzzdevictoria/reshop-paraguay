@@ -2,19 +2,20 @@
 ================================================================================
 ARCHIVO: product-detail.html
 PROYECTO: ReShop Paraguay - Shopping Virtual de Ropa de Segunda Mano
-VERSION: 2.4.0 - BOTÓN CONTACTAR VENDEDOR MEJORADO
+VERSION: 2.5.0 - OPTIMIZADO PARA MÓVIL + PWA
 CREADO: 2026-04-09
 ACTUALIZADO: 2026-04-13
 RESPONSABLE: Pedro José Pirovani
 PROPIETARIA: Luciana Noelia Da Silva
 DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con estrellas interactivas, favoritos y mensajería interna.
+             OPTIMIZADO: Header hamburguesa, bottom nav y botón instalar app para móvil.
 ================================================================================
 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Detalle del Producto - ReShop Paraguay</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="96x96" href="assets/icons/favicon-96x96.png">
@@ -24,6 +25,11 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
     <meta name="msapplication-TileColor" content="#2A5C6E">
     <meta name="theme-color" content="#2A5C6E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <!-- 🆕 CSS Móvil (hamburguesa, bottom nav, etc.) -->
+    <link rel="stylesheet" href="css/mobile.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
@@ -252,25 +258,105 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             50% { opacity: 0.6; transform: scale(1.1); }
         }
 
-        /* Responsive móvil */
-        @media (max-width: 768px) {
-            .button-message-reshop {
-                padding: 6px 12px 6px 6px;
-                min-width: 120px;
-                height: 40px;
-            }
-            .button-message-reshop .avatar-container {
-                width: 28px;
-                height: 28px;
-            }
-            .button-message-reshop .button-title {
-                font-size: 0.75rem;
-            }
-            .button-message-reshop .button-label {
-                font-size: 0.6rem;
-            }
+        /* Loader Three Body */
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
         }
-        
+
+        .loader-container p {
+            margin-top: 16px;
+            color: var(--primary, #2A5C6E);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .three-body {
+            --uib-size: 40px;
+            --uib-speed: 0.8s;
+            --uib-color: #2A5C6E;
+            position: relative;
+            display: inline-block;
+            height: var(--uib-size);
+            width: var(--uib-size);
+            animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+        }
+
+        .three-body__dot {
+            position: absolute;
+            height: 100%;
+            width: 30%;
+        }
+
+        .three-body__dot:after {
+            content: '';
+            position: absolute;
+            height: 0%;
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: var(--uib-color);
+            border-radius: 50%;
+        }
+
+        .three-body__dot:nth-child(1) {
+            bottom: 5%;
+            left: 0;
+            transform: rotate(60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(1)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite ease-in-out;
+            animation-delay: calc(var(--uib-speed) * -0.3);
+        }
+
+        .three-body__dot:nth-child(2) {
+            bottom: 5%;
+            right: 0;
+            transform: rotate(-60deg);
+            transform-origin: 50% 85%;
+        }
+
+        .three-body__dot:nth-child(2)::after {
+            bottom: 0;
+            left: 0;
+            animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+        }
+
+        .three-body__dot:nth-child(3) {
+            bottom: -5%;
+            left: 0;
+            transform: translateX(116.666%);
+        }
+
+        .three-body__dot:nth-child(3)::after {
+            top: 0;
+            left: 0;
+            animation: wobble2 var(--uib-speed) infinite ease-in-out;
+        }
+
+        @keyframes spin78236 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes wobble1 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+        }
+
+        @keyframes wobble2 {
+            0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+            50% { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+        }
+
+        /* Responsive móvil */
         @media (max-width: 600px) {
             .product-title { font-size: 1.3rem; }
             .product-price { font-size: 1.3rem; }
@@ -281,23 +367,22 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             .message-item { max-width: 90%; }
         }
     </style>
-	<!-- OneSignal Push Notifications -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-            appId: "87f4597d-296a-467b-a778-10f48275d72a",
-            safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
-            notifyButton: {
-                enable: false
-            },
-            allowLocalhostAsSecureOrigin: true
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "87f4597d-296a-467b-a778-10f48275d72a",
+                safari_web_id: "web.onesignal.auto.87f4597d-296a-467b-a778-10f48275d72a",
+                notifyButton: { enable: false },
+                allowLocalhostAsSecureOrigin: true
+            });
         });
-    });
-</script>
+    </script>
 </head>
 <body>
+    <!-- Header desktop (se oculta en móvil por mobile.css) -->
     <div class="header">
         <div class="header-top">
             <img src="assets/images/logo.png" alt="ReShop Paraguay" class="logo-img" onerror="this.style.display='none'">
@@ -310,7 +395,7 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
             <a href="cart.html"><i class="fas fa-shopping-bag"></i> Carrito</a>
             <a href="profile.html"><i class="fas fa-user-circle"></i> Mi Perfil</a>
-			<a href="help.html">Ayuda</a>
+            <a href="help.html">Ayuda</a>
             <a href="messages.html" id="messagesLink" style="display: none;">
                 <i class="fas fa-envelope"></i> Mensajes
                 <span id="unreadBadge" class="unread-badge">0</span>
@@ -328,11 +413,8 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
     
     <div class="container">
         <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
-        <div id="productDetail" class="product-detail"><div class="loader-container">
-    <div class="three-body"></div>
-    <p>Cargando detalle del producto...</p>
-</div></div>
-        <div id="reviewsSection" class="reviews-section"><div class="loading">Cargando reseñas...</div></div>
+        <div id="productDetail" class="product-detail"><div class="loader-container"><div class="three-body"></div><p>Cargando detalle del producto...</p></div></div>
+        <div id="reviewsSection" class="reviews-section"><div class="loader-container"><div class="three-body three-body-secondary"></div><p>Cargando reseñas...</p></div></div>
     </div>
     
     <!-- Modal de mensajería -->
@@ -352,10 +434,22 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         </div>
     </div>
     
+    <!-- 🆕 Botón de instalación PWA -->
+    <button id="installAppBtn" class="install-pwa-btn" style="display: none;">
+        <i class="fas fa-download"></i>
+        <div class="install-texts">
+            <span class="install-title">📱 Instalar ReShop App</span>
+            <span class="install-subtitle">Compra más rápido desde tu inicio</span>
+        </div>
+    </button>
+    
     <div class="footer">
         <p><i class="fas fa-copyright"></i> 2026 ReShop Paraguay - Todos los derechos reservados</p>
         <p><i class="fas fa-user-tie"></i> Propietaria: Luciana Noelia Da Silva | <i class="fas fa-code"></i> Desarrollador: Pedro Jose Pirovani</p>
     </div>
+
+    <!-- JS Móvil (hamburguesa, bottom nav, filtros) -->
+    <script src="js/mobile.js"></script>
 
     <script>
         const API_URL = 'https://reshop-backend.vercel.app';
@@ -366,6 +460,38 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
         let selectedRating = 0;
         let currentConversationId = null;
         let messagePollingInterval = null;
+        
+        // ============================================================
+        // PWA INSTALLATION
+        // ============================================================
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('installAppBtn');
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        document.getElementById('installAppBtn')?.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('✅ Usuario instaló la app ReShop');
+                }
+                deferredPrompt = null;
+                document.getElementById('installAppBtn').style.display = 'none';
+            }
+        });
+
+        function isMobilePWA() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        if (isMobilePWA() && window.navigator.standalone === true) {
+            document.getElementById('installAppBtn')?.remove();
+        }
         
         // ============================================================
         // AUTENTICACION
@@ -465,7 +591,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                 currentRating = rating;
             }
             
-            // Hover efecto (pintar hasta la estrella seleccionada)
             stars.forEach(star => {
                 star.addEventListener('mouseenter', () => {
                     const rating = parseInt(star.getAttribute('data-rating'));
@@ -481,7 +606,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                 });
             });
             
-            // Restaurar estrellas al salir del hover
             const container = document.getElementById('ratingStars');
             if (container) {
                 container.addEventListener('mouseleave', () => {
@@ -489,12 +613,10 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                 });
             }
             
-            // Click: seleccionar calificación
             stars.forEach(star => {
                 star.addEventListener('click', () => {
                     const rating = parseInt(star.getAttribute('data-rating'));
                     updateStars(rating);
-                    // Guardar rating seleccionado en el input hidden
                     const hiddenInput = document.getElementById('selectedRating');
                     if (hiddenInput) {
                         hiddenInput.value = rating;
@@ -520,7 +642,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             document.getElementById('messageInput').value = '';
             
             try {
-                // Crear o obtener conversación
                 const response = await fetch(`${API_URL}/api/conversations`, {
                     method: 'POST',
                     headers: {
@@ -536,7 +657,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                 if (data.success) {
                     currentConversationId = data.conversation.id;
                     loadMessages();
-                    // Iniciar polling cada 5 segundos
                     if (messagePollingInterval) clearInterval(messagePollingInterval);
                     messagePollingInterval = setInterval(() => loadMessages(), 5000);
                 } else {
@@ -574,7 +694,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
                     <div class="message-time">${new Date(msg.created_at).toLocaleTimeString()}</div>
                 </div>
             `).join('');
-            // Scroll al final
             const body = document.getElementById('modalMessageBody');
             body.scrollTop = body.scrollHeight;
         }
@@ -786,7 +905,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             if (!submitBtn) return;
             
             submitBtn.addEventListener('click', async () => {
-                // Obtener rating del input hidden
                 const ratingInput = document.getElementById('selectedRating');
                 const rating = parseInt(ratingInput?.value) || 0;
                 
@@ -984,7 +1102,6 @@ DESCRIPCION: Página de detalle de producto con reseñas, calificaciones con est
             loadProductDetail();
         });
         
-        // Cerrar modal con Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeMessageModal();
