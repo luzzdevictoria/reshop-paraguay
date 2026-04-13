@@ -535,22 +535,31 @@
         btn.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
     }
 
-    function init() {
-        if (!isMobile()) return;
-        document.querySelector('.header')?.style && (document.querySelector('.header').style.display='none');
-        buildMobileHeader();
-        buildMenuDrawer();
-        buildBottomNav();
+function init() {
+    if (!isMobile()) return;
+    
+    // Ocultar header desktop
+    const desktopHeader = document.querySelector('.header');
+    if (desktopHeader) desktopHeader.style.display = 'none';
+    
+    // ✅ Siempre se ejecutan (funciona en TODAS las páginas)
+    buildMobileHeader();
+    buildMenuDrawer();
+    buildBottomNav();
+    updateCartBadges();
+    buildScrollToTop();
+    addSwipeToClose(document.getElementById('menuDrawer'), 'menuOverlay', 'left');
+    
+    // ✅ Solo se ejecutan si existe grid de productos (opcional)
+    if (document.querySelector('#productsGrid, .products-grid')) {
         buildFiltersDrawer();
         buildMobileSearch();
-        updateCartBadges();
-        buildScrollToTop();
-        addSwipeToClose(document.getElementById('menuDrawer'),    'menuOverlay',    'left');
         addSwipeToClose(document.getElementById('filtersDrawer'), 'filtersOverlay', 'right');
-
-        const _set = localStorage.setItem.bind(localStorage);
-        localStorage.setItem = (k,v) => { _set(k,v); if(k==='reshop_cart') updateCartBadges(); };
     }
+    
+    const _set = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = (k, v) => { _set(k, v); if (k === 'reshop_cart') updateCartBadges(); };
+}
 
     document.readyState === 'loading'
         ? document.addEventListener('DOMContentLoaded', init)
