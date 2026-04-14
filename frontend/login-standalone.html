@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - ReShop Paraguay (Standalone)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2A5C6E;
+            --secondary: #E8B86B;
+            --accent: #D95A41;
+            --background: #F9F8F6;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --white: #FFFFFF;
+            --border: #E0E0E0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { 
+            background: var(--background); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 420px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 30px 25px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .header p { font-size: 0.9rem; opacity: 0.9; }
+        
+        .form-container { padding: 30px 25px; }
+        .form-title { 
+            text-align: center; 
+            color: var(--text-dark); 
+            margin-bottom: 25px; 
+            font-size: 1.3rem; 
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background: #1e4452; }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+        .forgot-password a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .forgot-password a:hover { text-decoration: underline; }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px 25px;
+            background: #f8f9fa;
+            color: #777;
+            font-size: 0.8rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: var(--accent);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tshirt"></i> ReShop Paraguay</h1>
+            <p>Shopping Virtual de Ropa de Segunda Mano</p>
+        </div>
+
+        <div class="form-container">
+            <h2 class="form-title">Iniciar Sesión</h2>
+            
+            <div id="errorBox" class="error-message"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña *</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required minlength="6">
+                </div>
+                
+                <div class="forgot-password">
+                    <a href="#" id="forgotPasswordBtn">¿Olvidaste tu contraseña?</a>
+                </div>
+                
+                <button type="submit" class="btn-submit">Ingresar</button>
+            </form>
+            
+            <p class="register-link">
+                ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 ReShop Paraguay - Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ============================================================
+        // CREDENCIALES HARDCODEADAS (NO depende de /api/config)
+        // ============================================================
+        const SUPABASE_URL = 'https://kgxlmpnngpabytnonkno.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtneGxtcG5uZ3BhYnl0bm9ua25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDY4OTMsImV4cCI6MjA5MTMyMjg5M30.drCAedCU-s-B0u1tMsAxAQ662rcxzB_1o72KqmEB8I0';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const API_URL = 'https://reshop-backend.vercel.app';
+        
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        const loginForm = document.getElementById('loginForm');
+        const errorBox = document.getElementById('errorBox');
+        
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorBox.classList.remove('show');
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const submitBtn = loginForm.querySelector('.btn-submit');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verificando...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = data.user.role === 'admin' ? 'admin-dashboard.html' : 'index.html';
+                } else {
+                    throw new Error(data.error || 'Credenciales inválidas');
+                }
+            } catch (error) {
+                errorBox.textContent = error.message;
+                errorBox.classList.add('show');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // ============================================================
+        // RECUPERACIÓN DE CONTRASEÑA (funciona sin backend)
+        // ============================================================
+        const forgotBtn = document.getElementById('forgotPasswordBtn');
+        
+        if (forgotBtn) {
+            forgotBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const email = prompt('Ingresa tu correo electrónico para restablecer tu contraseña:');
+                if (!email || email.trim() === '') return;
+                
+                const originalText = forgotBtn.textContent;
+                forgotBtn.textContent = 'Enviando...';
+                forgotBtn.style.opacity = '0.5';
+                forgotBtn.style.pointerEvents = 'none';
+                
+                try {
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: 'https://reshop-paraguay.vercel.app/update-password.html'
+                    });
+                    
+                    if (error) {
+                        alert('Error: ' + error.message);
+                    } else {
+                        alert('¡Revisa tu correo! Te enviamos un enlace para restablecer tu contraseña.');
+                    }
+                } catch (err) {
+                    console.error('Error en recuperación:', err);
+                    alert('Ocurrió un error. Por favor, intenta de nuevo más tarde.');
+                } finally {
+                    forgotBtn.textContent = originalText;
+                    forgotBtn.style.opacity = '1';
+                    forgotBtn.style.pointerEvents = 'auto';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
