@@ -314,28 +314,33 @@
         });
 
 // ========================================
-// RECUPERACIÓN DE CONTRASEÑA (con credenciales hardcodeadas)
+// RECUPERACIÓN DE CONTRASEÑA (hardcodeada)
 // ========================================
 const forgotBtn = document.getElementById('forgotPasswordBtn');
+
 if (forgotBtn) {
     forgotBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         
         const email = prompt('Ingresa tu correo electrónico para restablecer tu contraseña:');
-        if (!email || email.trim() === '') return;
         
-        // Credenciales hardcodeadas de Supabase
-        const supabaseUrl = 'https://kgxlmpnngpabytnonkno.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtneGxtcG5uZ3BhYnl0bm9ua25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDY4OTMsImV4cCI6MjA5MTMyMjg5M30.drCAedCU-s-B0u1tMsAxAQ662rcxzB_1o72KqmEB8I0';
+        if (!email || email.trim() === '') {
+            return;
+        }
         
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-        
+        // Mostrar loading visual
         const originalText = forgotBtn.textContent;
         forgotBtn.textContent = 'Enviando...';
         forgotBtn.style.opacity = '0.5';
         forgotBtn.style.pointerEvents = 'none';
         
         try {
+            // Credenciales hardcodeadas de Supabase
+            const supabaseUrl = 'https://kgxlmpnngpabytnonkno.supabase.co';
+            const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtneGxtcG5uZ3BhYnl0bm9ua25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NDY4OTMsImV4cCI6MjA5MTMyMjg5M30.drCAedCU-s-B0u1tMsAxAQ662rcxzB_1o72KqmEB8I0';
+            
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+            
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: 'https://reshop-paraguay.vercel.app/update-password.html'
             });
