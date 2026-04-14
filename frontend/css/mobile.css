@@ -1495,3 +1495,29 @@ DESCRIPCION: Estilos responsive para dispositivos móviles y tablets.
 .install-pwa-btn.hidden {
     display: none !important;
 }
+/* ============================================================
+   CORREGIR BOTONES DE ACCIÓN EN ADMIN MÓVIL
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Forzar que los botones de editar/eliminar sean rectangulares */
+    .btn-edit, 
+    .btn-delete, 
+    .btn-warning, 
+    .btn-danger,
+    button.btn-edit,
+    button.btn-delete,
+    .btn-icon.btn-edit,
+    .btn-icon.btn-delete {
+        border-radius: 8px !important;
+        width: auto !important;
+        min-width: 70px !important;
+        padding: 8px 16px !important;
+    }
+
+    /* Sacar el círculo de cualquier botón con clase btn-icon */
+    .btn-icon {
+        border-radius: 8px !important;
+        width: auto !important;
+        height: auto !important;
+    }
+}
